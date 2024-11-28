@@ -2,7 +2,7 @@ package go_m3u8_test
 
 import (
 	"github.com/stretchr/testify/assert"
-	m3u8 "go-m3u8"
+	m3u8 "gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8"
 	"testing"
 )
 
