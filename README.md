@@ -3,6 +3,7 @@
 # Troubleshooting
 
 Erros ao executar o comando `go get`:
+
 ```
         remote: 
         remote: ========================================================================
@@ -18,14 +19,19 @@ Erros ao executar o comando `go get`:
 ```
 
 Execute os comandos a seguir:
-1. Crie o token de acesso no perfil do gitlab. Siga a [documentação oficial](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+
+1. Crie o token de acesso no perfil do gitlab. Siga
+   a [documentação oficial](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
 
 2. Adiciona token de acesso no arquivo `.netrc`
+
 ```
 echo "machine gitlab.globoi.com login <USUARIO> password <ACCESS_TOKEN>" > ~/.netrc
 
 ```
+
 3. Agora será possível fazer download do repositório
+
 ```
 GOPRIVATE="*.globoi.com" go get "gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8"
 ```
