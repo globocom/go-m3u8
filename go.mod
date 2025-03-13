@@ -1,4 +1,4 @@
-module gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8
+module github.com/globocom/go-m3u8
 
 go 1.22.3
 
