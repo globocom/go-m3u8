@@ -3,8 +3,8 @@ package internal_test
 import (
 	"testing"
 
+	"github.com/globocom/go-m3u8/internal"
 	"github.com/stretchr/testify/assert"
-	"gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8/internal"
 )
 
 func TestDoublyLinkedListInsert(t *testing.T) {

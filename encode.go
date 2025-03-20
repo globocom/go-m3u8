@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8/internal"
+	"github.com/globocom/go-m3u8/internal"
 )
 
 type PlaylistEncoder interface {

@@ -3,9 +3,9 @@ package go_m3u8_test
 import (
 	"testing"
 
+	m3u8 "github.com/globocom/go-m3u8"
+	"github.com/globocom/go-m3u8/internal"
 	"github.com/stretchr/testify/assert"
-	m3u8 "gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8"
-	"gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8/internal"
 )
 
 func TestM3u8IdentifierEncoder(t *testing.T) {

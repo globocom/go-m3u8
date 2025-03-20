@@ -1,7 +1,7 @@
 package go_m3u8
 
 import (
-	"gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8/internal"
+	"github.com/globocom/go-m3u8/internal"
 )
 
 func (p *Playlist) VersionValue() string {

@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
+	m3u8 "github.com/globocom/go-m3u8"
+	"github.com/globocom/go-m3u8/internal"
 	"github.com/stretchr/testify/assert"
-	m3u8 "gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8"
-	"gitlab.globoi.com/webmedia/media-delivery-advertising/go-m3u8/internal"
 )
 
 func TestVersionValue(t *testing.T) {
