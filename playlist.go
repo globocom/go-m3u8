@@ -24,7 +24,7 @@ func (p *Playlist) MediaSequenceValue() string {
 	return node.Attrs["#EXT-X-MEDIA-SEQUENCE"]
 }
 
-func (p *Playlist) MediaSequence() (*internal.Node, bool) {
+func (p *Playlist) MediaSequenceTag() (*internal.Node, bool) {
 	return p.Find("MediaSequence")
 }
 

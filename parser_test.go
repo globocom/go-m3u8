@@ -4,6 +4,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/stretchr/testify/assert"
@@ -127,7 +128,37 @@ func TestExtInfParser(t *testing.T) {
 	p, err := setupPlaylist(playlist)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "4.8", p.CurrentSegment.Duration["Duration"])
+	assert.Equal(t, 4.8, p.CurrentSegment.Duration)
+}
+
+func TestExtInfParserObjects(t *testing.T) {
+	playlistLines := []string{
+		"#EXT-X-MEDIA-SEQUENCE:360948012",
+		"#EXT-X-PROGRAM-DATE-TIME:2025-01-01T12:34:56Z",
+		"#EXTINF:4.8, no desc",
+		"0.ts",
+		"#EXTINF:4.8, no desc",
+		"1.ts",
+	}
+
+	playlist := strings.Join(playlistLines, "\n")
+	p, err := setupPlaylist(playlist)
+
+	firstSegment := p.Segments()[0].Object.(*m3u8.Segment)
+	secondSegment := p.Segments()[1].Object.(*m3u8.Segment)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 9.6, p.DVR)
+	assert.Equal(t, 2, p.SegmentsCounter)
+	assert.Equal(t, 360948012, p.MediaSequence)
+
+	assert.Equal(t, 4.8, firstSegment.Duration)
+	assert.Equal(t, time.Date(2025, 01, 01, 12, 34, 56, 0, time.UTC), firstSegment.ProgramDateTime)
+	assert.Equal(t, 360948012, firstSegment.MediaSequence)
+
+	assert.Equal(t, 4.8, secondSegment.Duration)
+	assert.Equal(t, time.Date(2025, 01, 01, 12, 35, 00, 800000000, time.UTC), secondSegment.ProgramDateTime)
+	assert.Equal(t, 360948013, secondSegment.MediaSequence)
 }
 
 func TestStreamInfParser(t *testing.T) {
