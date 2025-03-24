@@ -4,3 +4,8 @@
 A Golang [m3u8](https://tools.ietf.org/html/rfc8216) parser.
 
 
+## Getting started
+
+```
+go get github.com/globocom/go-m3u8
+```
