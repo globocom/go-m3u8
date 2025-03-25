@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/globocom/go-m3u8/internal"
 )
@@ -65,12 +67,20 @@ func (p targetDurationParser) Parse(tag string, playlist *Playlist) error {
 }
 
 func (p mediaSequenceParser) Parse(tag string, playlist *Playlist) error {
+	var err error
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 && parts[1] != "" {
+		mediaSequence := strings.TrimSpace(parts[1])
 		playlist.Insert(&internal.Node{
 			Name:  "MediaSequence",
-			Attrs: map[string]string{mediaSequenceTag: strings.TrimSpace(parts[1])},
+			Attrs: map[string]string{mediaSequenceTag: mediaSequence},
 		})
+
+		playlist.MediaSequence, err = strconv.Atoi(mediaSequence)
+		if err != nil {
+			return fmt.Errorf("%w: invalid media sequence number", ErrParseLine)
+		}
+
 		return nil
 	}
 	return fmt.Errorf("%w: invalid media sequence tag", ErrParseLine)
@@ -78,14 +88,28 @@ func (p mediaSequenceParser) Parse(tag string, playlist *Playlist) error {
 
 func (p programDateTimeParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.SplitN(tag, ":", 2)
-	if len(parts) > 1 {
-		playlist.Insert(&internal.Node{
-			Name:  "ProgramDateTime",
-			Attrs: map[string]string{programDateTimeTag: strings.TrimSpace(parts[1])},
-		})
-		return nil
+
+	if len(parts) <= 1 {
+		return fmt.Errorf("%w: invalid program date time tag", ErrParseLine)
 	}
-	return fmt.Errorf("%w: invalid program tag", ErrParseLine)
+
+	dateTimeValue := strings.TrimSpace(parts[1])
+	playlist.Insert(&internal.Node{
+		Name:  "ProgramDateTime",
+		Attrs: map[string]string{programDateTimeTag: dateTimeValue},
+	})
+
+	if playlist.ProgramDateTime.Format(time.DateOnly) == "0001-01-01" {
+		parsedTime, err := time.Parse(time.RFC3339Nano, dateTimeValue)
+
+		if err != nil {
+			return fmt.Errorf("%w: invalid program date time tag", ErrParseLine)
+		}
+
+		playlist.ProgramDateTime = parsedTime
+	}
+
+	return nil
 }
 
 func (p dateRangeParser) Parse(tag string, playlist *Playlist) error {
@@ -115,12 +139,19 @@ func (p streamInfParser) Parse(tag string, playlist *Playlist) error {
 func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 {
-		duration := strings.Split(parts[1], ",")[0]
+		duration := strings.TrimSpace(strings.Split(parts[1], ",")[0])
+		floatDuration, _ := strconv.ParseFloat(duration, 64)
+		dvrInNanoseconds := playlist.DVR * float64(time.Second)
+
 		playlist.CurrentSegment = &Segment{
-			Duration: map[string]string{
-				"Duration": strings.TrimSpace(duration),
-			},
+			Duration:        floatDuration,
+			MediaSequence:   playlist.MediaSequence + playlist.SegmentsCounter,
+			ProgramDateTime: playlist.ProgramDateTime.Add(time.Duration(dvrInNanoseconds)),
 		}
+
+		playlist.DVR += floatDuration
+		playlist.SegmentsCounter += 1
+
 		return nil
 	}
 	return fmt.Errorf("%w: invalid extension tag", ErrParseLine)
@@ -182,17 +213,20 @@ func (p cueInParser) Parse(tag string, playlist *Playlist) error {
 
 func HandleNonTags(line string, playlist *Playlist) error {
 	switch {
+	// Handle HLS segment lines
 	case playlist.CurrentSegment != nil && strings.HasSuffix(line, ".ts"):
 		playlist.CurrentSegment.URI = line
 		playlist.Insert(&internal.Node{
-			Name:  "ExtInf",
-			Attrs: playlist.CurrentSegment.Duration,
-			URI:   line,
+			Name:   "ExtInf",
+			Attrs:  map[string]string{"Duration": strconv.FormatFloat(playlist.CurrentSegment.Duration, 'f', -1, 64)},
+			URI:    line,
+			Object: playlist.CurrentSegment,
 		},
 		)
 		playlist.CurrentSegment = nil
 		return nil
 
+	// Handle HLS media playlist lines
 	case playlist.CurrentStreamInf != nil && strings.HasSuffix(line, ".m3u8"):
 		playlist.CurrentStreamInf.URI = line
 		attrs := map[string]string{
@@ -203,12 +237,14 @@ func HandleNonTags(line string, playlist *Playlist) error {
 			"FRAME-RATE":        playlist.CurrentStreamInf.FrameRate,
 		}
 		playlist.Insert(&internal.Node{
-			Name:  "StreamInf",
-			Attrs: attrs,
-			URI:   line,
+			Name:   "StreamInf",
+			Attrs:  attrs,
+			URI:    line,
+			Object: playlist.CurrentStreamInf,
 		})
 		playlist.CurrentStreamInf = nil
 		return nil
+	// Comment tags
 	default:
 		attrs := map[string]string{
 			"Comment": line,

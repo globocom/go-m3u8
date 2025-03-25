@@ -12,6 +12,7 @@ type Node struct {
 	Attrs      map[string]string
 	URI        string
 	Prev, Next *Node
+	Object     any
 }
 
 func (l *DoublyLinkedList) Insert(node *Node) {

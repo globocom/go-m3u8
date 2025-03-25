@@ -1,5 +1,9 @@
 package go_m3u8
 
+import (
+	"time"
+)
+
 const (
 	m3u8IdentifierTag     = "#EXTM3U"
 	versionTag            = "#EXT-X-VERSION"
@@ -27,6 +31,11 @@ type StreamInf struct {
 }
 
 type Segment struct {
-	Duration map[string]string
-	URI      string
+	Duration        float64
+	ProgramDateTime time.Time
+	MediaSequence   int
+	URI             string
+}
+
+type DateRange struct {
 }
