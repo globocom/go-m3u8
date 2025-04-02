@@ -49,7 +49,7 @@ func TestParsePlaylist(t *testing.T) {
 			kind:           "media",
 			path:           "./testdata/default/media.m3u8",
 			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
-			dvr:            76.79979999999998,
+			dvr:            76.7998,
 			segmentCounter: 16,
 		},
 		{
@@ -57,7 +57,7 @@ func TestParsePlaylist(t *testing.T) {
 			kind:           "media",
 			path:           "./testdata/default/mediaWithDiscontinuity.m3u8",
 			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
-			dvr:            76.79979999999998,
+			dvr:            76.7998,
 			segmentCounter: 16,
 		},
 		{

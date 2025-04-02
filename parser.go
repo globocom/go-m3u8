@@ -3,6 +3,7 @@ package go_m3u8
 import (
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -167,12 +168,17 @@ func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 {
 		var currentDateRangeNode *internal.Node
-		duration := strings.TrimSpace(strings.Split(parts[1], ",")[0])
-		floatDuration, _ := strconv.ParseFloat(duration, 64)
-		dvrInNanoseconds := playlist.DVR * float64(time.Second)
-		segmentProgramDateTime := playlist.ProgramDateTime.Add(time.Duration(dvrInNanoseconds))
 
-		currentDaterange, ok := playlist.CurrentDateRange.Object.(DateRange)
+		duration := strings.TrimSpace(strings.Split(parts[1], ",")[0])
+		floatDuration, err := strconv.ParseFloat(duration, 64)
+		if err != nil {
+			return fmt.Errorf("%w: invalid duration tag", ErrParseLine)
+		}
+
+		currentDVRInNanoseconds := int(playlist.DVR * float64(time.Second))
+		segmentProgramDateTime := playlist.ProgramDateTime.Add(time.Duration(currentDVRInNanoseconds))
+
+		currentDaterange, ok := playlist.CurrentDateRange.Object.(*DateRange)
 		if ok && segmentProgramDateTime.UnixMilli()-currentDaterange.StartDate.UnixMilli() >= 0 {
 			currentDateRangeNode = playlist.CurrentDateRange
 		}
@@ -184,7 +190,7 @@ func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 			DateRange:       currentDateRangeNode,
 		}
 
-		playlist.DVR += floatDuration
+		playlist.DVR = roundFloat(playlist.DVR+floatDuration, 4)
 		playlist.SegmentsCounter += 1
 
 		return nil
@@ -305,4 +311,9 @@ func tagsToMap(line string) map[string]string {
 	}
 
 	return m
+}
+
+func roundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
 }
