@@ -1,8 +1,21 @@
 package go_m3u8
 
 import (
+	"time"
+
 	"github.com/globocom/go-m3u8/internal"
 )
+
+type Playlist struct {
+	*internal.DoublyLinkedList
+	CurrentDateRange *internal.Node
+	CurrentSegment   *Segment
+	CurrentStreamInf *StreamInf
+	ProgramDateTime  time.Time
+	MediaSequence    int
+	SegmentsCounter  int
+	DVR              float64
+}
 
 func (p *Playlist) VersionValue() string {
 	node, found := p.Find("Version")

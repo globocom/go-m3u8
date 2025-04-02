@@ -11,16 +11,6 @@ import (
 	"github.com/globocom/go-m3u8/internal"
 )
 
-type Playlist struct {
-	*internal.DoublyLinkedList
-	CurrentSegment   *Segment
-	CurrentStreamInf *StreamInf
-	ProgramDateTime  time.Time
-	MediaSequence    int
-	SegmentsCounter  int
-	DVR              float64
-}
-
 type TagParser interface {
 	Parse(tag string, playlist *Playlist) error
 }
