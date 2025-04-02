@@ -44,7 +44,7 @@ func TestMediaSequence(t *testing.T) {
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	node, found := playlist.MediaSequence()
+	node, found := playlist.MediaSequenceTag()
 	assert.True(t, found)
 	assert.NotNil(t, node)
 	assert.Equal(t, node.Attrs["#EXT-X-MEDIA-SEQUENCE"], "360948012")

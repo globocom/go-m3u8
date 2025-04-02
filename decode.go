@@ -5,16 +5,11 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/globocom/go-m3u8/internal"
 )
-
-type Playlist struct {
-	*internal.DoublyLinkedList
-	CurrentSegment   *Segment
-	CurrentStreamInf *StreamInf
-}
 
 type TagParser interface {
 	Parse(tag string, playlist *Playlist) error
@@ -43,8 +38,13 @@ type Source interface {
 func ParsePlaylist(src Source) (*Playlist, error) {
 	playlist := &Playlist{
 		DoublyLinkedList: new(internal.DoublyLinkedList),
+		CurrentDateRange: new(internal.Node),
 		CurrentSegment:   new(Segment),
 		CurrentStreamInf: new(StreamInf),
+		ProgramDateTime:  *new(time.Time),
+		MediaSequence:    0,
+		SegmentsCounter:  0,
+		DVR:              0,
 	}
 
 	scanner := bufio.NewScanner(src)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/stretchr/testify/assert"
@@ -21,10 +22,14 @@ func (f fakeSource) Close() error {
 
 func TestParsePlaylist(t *testing.T) {
 	type testCaseParams struct {
-		name   string
-		path   string
-		source m3u8.Source
-		error  bool
+		name           string
+		kind           string
+		path           string
+		pdt            time.Time
+		source         m3u8.Source
+		dvr            float64
+		segmentCounter int
+		error          bool
 	}
 	testCases := []testCaseParams{
 		{
@@ -35,19 +40,29 @@ func TestParsePlaylist(t *testing.T) {
 		},
 		{
 			name:  "Missing version in master playlist",
+			kind:  "master",
 			path:  "./testdata/default/masterMissingVersion.m3u8",
 			error: true,
 		},
 		{
-			name: "Parse media playlist",
-			path: "./testdata/default/media.m3u8",
+			name:           "Parse media playlist",
+			kind:           "media",
+			path:           "./testdata/default/media.m3u8",
+			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
+			dvr:            76.7998,
+			segmentCounter: 16,
 		},
 		{
-			name: "Parse media with discontinuity playlist",
-			path: "./testdata/default/mediaWithDiscontinuity.m3u8",
+			name:           "Parse media with discontinuity playlist",
+			kind:           "media",
+			path:           "./testdata/default/mediaWithDiscontinuity.m3u8",
+			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
+			dvr:            76.7998,
+			segmentCounter: 16,
 		},
 		{
 			name: "Parse master playlist with variants",
+			kind: "master",
 			path: "./testdata/default/master.m3u8",
 		},
 	}
@@ -77,6 +92,12 @@ func TestParsePlaylist(t *testing.T) {
 			assert.NotNil(t, playlist)
 			assert.NotNil(t, playlist.Head)
 			assert.NotNil(t, playlist.Tail)
+
+			if tc.kind == "media" {
+				assert.Equal(t, playlist.ProgramDateTime, tc.pdt)
+				assert.Equal(t, playlist.SegmentsCounter, tc.segmentCounter)
+				assert.Equal(t, playlist.DVR, tc.dvr)
+			}
 		})
 	}
 }
