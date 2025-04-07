@@ -2,8 +2,6 @@ package go_m3u8
 
 import (
 	"time"
-
-	"github.com/globocom/go-m3u8/internal"
 )
 
 const (
@@ -37,7 +35,6 @@ type Segment struct {
 	ProgramDateTime time.Time
 	MediaSequence   int
 	URI             string
-	DateRange       *internal.Node
 }
 
 type DateRange struct {

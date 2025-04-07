@@ -7,12 +7,19 @@ import (
 type DoublyLinkedList struct {
 	Head, Tail *Node
 }
+
+// Node refers to each element in a playlist, being represented by a doubly linked list.
+//   - Name: The name of the node.
+//   - URI: The Uniform Resource Identifier of the node (if applicable)
+//   - Attrs: In-manifest node attributes, in key-value format.
+//   - Details: Not-in-manifest node attributes, in key-value format.
+//   - Prev, Next: Pointers to previous or next node in the linked list.
 type Node struct {
 	Name       string
-	Attrs      map[string]string
 	URI        string
+	Attrs      map[string]string
+	Details    map[string]string
 	Prev, Next *Node
-	Object     any
 }
 
 func (l *DoublyLinkedList) Insert(node *Node) {

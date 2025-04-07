@@ -119,28 +119,11 @@ func (p dateRangeParser) Parse(tag string, playlist *Playlist) error {
 		return fmt.Errorf("%w: invalid date range tag", ErrParseLine)
 	}
 
-	// START-DATE attribute must be present
-	dateRangeStartDate, err := time.Parse(time.RFC3339Nano, params["START-DATE"])
-	if err != nil {
-		return fmt.Errorf("%w: invalid date range start date", ErrParseLine)
-	}
-
-	// END-DATE and PLANNED-DURATION are optional attributes
-	dateRangeEndDate, _ := time.Parse(time.RFC3339Nano, params["END-DATE"])
-	plannedDuration, _ := strconv.ParseFloat(params["PLANNED-DURATION"], 64)
-
 	dateRangeNode := &internal.Node{
 		Name:  "DateRange",
 		Attrs: params,
-		Object: &DateRange{
-			ID:              params["ID"],
-			Class:           params["CLASS"],
-			StartDate:       dateRangeStartDate,
-			EndDate:         dateRangeEndDate,
-			PlannedDuration: plannedDuration,
-			Scte35Out:       params["SCTE35-OUT"],
-			Scte35In:        params["SCTE35-IN"],
-			MediaSequence:   playlist.MediaSequence + playlist.SegmentsCounter,
+		Details: map[string]string{
+			"MediaSequence": fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter),
 		},
 	}
 
@@ -167,8 +150,6 @@ func (p streamInfParser) Parse(tag string, playlist *Playlist) error {
 func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 {
-		var currentDateRangeNode *internal.Node
-
 		duration := strings.TrimSpace(strings.Split(parts[1], ",")[0])
 		floatDuration, err := strconv.ParseFloat(duration, 64)
 		if err != nil {
@@ -178,16 +159,10 @@ func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 		currentDVRInNanoseconds := int(playlist.DVR * float64(time.Second))
 		segmentProgramDateTime := playlist.ProgramDateTime.Add(time.Duration(currentDVRInNanoseconds))
 
-		currentDaterange, ok := playlist.CurrentDateRange.Object.(*DateRange)
-		if ok && segmentProgramDateTime.UnixMilli()-currentDaterange.StartDate.UnixMilli() >= 0 {
-			currentDateRangeNode = playlist.CurrentDateRange
-		}
-
 		playlist.CurrentSegment = &Segment{
 			Duration:        floatDuration,
 			MediaSequence:   playlist.MediaSequence + playlist.SegmentsCounter,
 			ProgramDateTime: segmentProgramDateTime,
-			DateRange:       currentDateRangeNode,
 		}
 
 		playlist.DVR = roundFloat(playlist.DVR+floatDuration, 4)
@@ -262,12 +237,16 @@ func HandleNonTags(line string, playlist *Playlist) error {
 	case playlist.CurrentSegment != nil && strings.HasSuffix(line, ".ts"):
 		playlist.CurrentSegment.URI = line
 		playlist.Insert(&internal.Node{
-			Name:   "ExtInf",
-			Attrs:  map[string]string{"Duration": strconv.FormatFloat(playlist.CurrentSegment.Duration, 'f', -1, 64)},
-			URI:    line,
-			Object: playlist.CurrentSegment,
-		},
-		)
+			Name: "ExtInf",
+			URI:  line,
+			Attrs: map[string]string{
+				"Duration": strconv.FormatFloat(playlist.CurrentSegment.Duration, 'f', -1, 64),
+			},
+			Details: map[string]string{
+				"MediaSequence":   fmt.Sprintf("%d", playlist.CurrentSegment.MediaSequence),
+				"ProgramDateTime": playlist.CurrentSegment.ProgramDateTime.Format(time.RFC3339Nano),
+			},
+		})
 		playlist.CurrentSegment = nil
 		return nil
 
@@ -282,10 +261,9 @@ func HandleNonTags(line string, playlist *Playlist) error {
 			"FRAME-RATE":        playlist.CurrentStreamInf.FrameRate,
 		}
 		playlist.Insert(&internal.Node{
-			Name:   "StreamInf",
-			Attrs:  attrs,
-			URI:    line,
-			Object: playlist.CurrentStreamInf,
+			Name:  "StreamInf",
+			Attrs: attrs,
+			URI:   line,
 		})
 		playlist.CurrentStreamInf = nil
 		return nil
