@@ -4,14 +4,15 @@ import (
 	"fmt"
 )
 
+// A HLS Playlist is a doubly-linked list of of Node objects.
+// Each Node represents an Element of the Playlist, amounting to one or more lines of the m3u8 file.
+// For example, a Media Segment Node will be comprised of two lines: the #EXTINF tag + the segment URI below it.
+// Alternatively, a Media Sequence Node is only one line long: the #EXT-X-MEDIA-SEQUENCE tag.
 type DoublyLinkedList struct {
 	Head, Tail *Node
 }
 
-// A Node represents an element of an HLS playlist (i.e. tag, URI, comment, etc).
-// A Playlist will be group of Nodes arranged in a doubly-linked list.
-// A single Node does not necessarily equal a single line of the playlist.
-// For example, a Media Segment Node will be comprised of two lines: the #EXTINF tag + the URI line (.ts).
+// The Node data type holds the following attributes:
 //   - Name: The name of the node.
 //   - URI: The Uniform Resource Identifier of the node (if applicable)
 //   - Attrs: In-manifest node attributes, in key-value format.
