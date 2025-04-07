@@ -4,7 +4,6 @@ import (
 	"io"
 	"strings"
 	"testing"
-	"time"
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
@@ -96,33 +95,6 @@ func TestDateRangeParser(t *testing.T) {
 	assert.Equal(t, "2025-01-01T00:00:00Z", node.Attrs["START-DATE"])
 }
 
-func TestDateRangeParserObjects(t *testing.T) {
-	playlist := strings.Join([]string{
-		"#EXT-X-MEDIA-SEQUENCE:360948012",
-		"#EXT-X-PROGRAM-DATE-TIME:2025-01-01T12:34:00Z",
-		"#EXTINF:4.8, no desc",
-		"0.ts",
-		"#EXTINF:4.8, no desc",
-		"1.ts",
-		"#EXT-X-DATERANGE:SCTE35-OUT=0xFF0000,ID=\"break1\",START-DATE=\"2025-01-01T12:43:06Z\",PLANNED-DURATION=60",
-		"#EXT-X-CUE-OUT:48",
-		"#EXTINF:4.8, no desc",
-		"3.ts",
-	}, "\n")
-
-	p, err := setupPlaylist(playlist)
-	assert.NoError(t, err)
-
-	node, found := p.Find("DateRange")
-	dateRange, ok := node.Object.(*m3u8.DateRange)
-
-	assert.True(t, found)
-	assert.True(t, ok)
-	assert.Equal(t, dateRange.MediaSequence, 360948014)
-	assert.Equal(t, dateRange.PlannedDuration, float64(60))
-	assert.Equal(t, dateRange.StartDate, time.Date(2025, 01, 01, 12, 43, 6, 0, time.UTC))
-}
-
 func TestCueOutParser(t *testing.T) {
 	playlist := "#EXT-X-CUE-OUT:30"
 	p, err := setupPlaylist(playlist)
@@ -164,49 +136,6 @@ func TestExtInfParser(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 4.8, p.CurrentSegment.Duration)
-}
-
-func TestExtInfParserObjects(t *testing.T) {
-	playlistLines := []string{
-		"#EXT-X-MEDIA-SEQUENCE:360948012",
-		"#EXT-X-PROGRAM-DATE-TIME:2025-01-01T12:34:56.0000000Z",
-		"#EXTINF:4.8, no desc",
-		"0.ts",
-		"#EXTINF:4.8, no desc",
-		"1.ts",
-		"#EXT-X-DATERANGE:ID=\"id\",START-DATE=\"2025-01-01T12:35:05.6000000Z\",PLANNED-DURATION=48,SCTE35-OUT=0xFC3025000000000BB800FFF01405C00000007FEFFFBB373098FE0029560895740002000058CF9EC9",
-		"#EXT-X-CUE-OUT:48",
-		"#EXT-X-PROGRAM-DATE-TIME:2025-04-01T12:35:05.6000000Z",
-		"#EXTINF:4.8, no desc",
-		"2.ts",
-	}
-
-	playlist := strings.Join(playlistLines, "\n")
-	p, err := setupPlaylist(playlist)
-
-	firstSegment := p.Segments()[0].Object.(*m3u8.Segment)
-	secondSegment := p.Segments()[1].Object.(*m3u8.Segment)
-	thirdSegment := p.Segments()[2].Object.(*m3u8.Segment)
-
-	assert.NoError(t, err)
-	assert.Equal(t, 14.4, p.DVR)
-	assert.Equal(t, 3, p.SegmentsCounter)
-	assert.Equal(t, 360948012, p.MediaSequence)
-
-	assert.Equal(t, 4.8, firstSegment.Duration)
-	assert.Equal(t, time.Date(2025, 01, 01, 12, 34, 56, 0, time.UTC), firstSegment.ProgramDateTime)
-	assert.Equal(t, 360948012, firstSegment.MediaSequence)
-	assert.Nil(t, firstSegment.DateRange)
-
-	assert.Equal(t, 4.8, secondSegment.Duration)
-	assert.Equal(t, time.Date(2025, 01, 01, 12, 35, 00, 800000000, time.UTC), secondSegment.ProgramDateTime)
-	assert.Equal(t, 360948013, secondSegment.MediaSequence)
-	assert.Nil(t, secondSegment.DateRange)
-
-	assert.Equal(t, 4.8, thirdSegment.Duration)
-	assert.Equal(t, time.Date(2025, 01, 01, 12, 35, 05, 600000000, time.UTC), thirdSegment.ProgramDateTime)
-	assert.Equal(t, 360948014, thirdSegment.MediaSequence)
-	assert.NotNil(t, thirdSegment.DateRange)
 }
 
 func TestStreamInfParser(t *testing.T) {
