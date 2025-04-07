@@ -8,12 +8,15 @@ type DoublyLinkedList struct {
 	Head, Tail *Node
 }
 
-// Node refers to each element in a playlist, being represented by a doubly linked list.
+// A Node represents an element of an HLS playlist (i.e. tag, URI, comment, etc).
+// A Playlist will be group of Nodes arranged in a doubly-linked list.
+// A single Node does not necessarily equal a single line of the playlist.
+// For example, a Media Segment Node will be comprised of two lines: the #EXTINF tag + the URI line (.ts).
 //   - Name: The name of the node.
 //   - URI: The Uniform Resource Identifier of the node (if applicable)
 //   - Attrs: In-manifest node attributes, in key-value format.
 //   - Details: Not-in-manifest node attributes, in key-value format.
-//   - Prev, Next: Pointers to previous or next node in the linked list.
+//   - Prev, Next: Pointers to previous or next node in the list.
 type Node struct {
 	Name       string
 	URI        string
