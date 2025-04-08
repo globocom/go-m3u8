@@ -8,7 +8,8 @@ import (
 
 type Playlist struct {
 	*internal.DoublyLinkedList
-	CurrentDateRange *internal.Node
+	CurrentNode      *internal.Node
+	CurrentDateRange *internal.DateRange
 	CurrentSegment   *internal.Segment
 	CurrentStreamInf *internal.StreamInf
 	ProgramDateTime  time.Time
