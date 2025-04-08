@@ -12,7 +12,6 @@ func TestDoublyLinkedListInsert(t *testing.T) {
 	firstNode := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "Version",
-			Type: "tag",
 			Attrs: map[string]string{
 				"#EXT-X-VERSION": "3",
 			},
