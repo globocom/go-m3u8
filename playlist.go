@@ -9,8 +9,8 @@ import (
 type Playlist struct {
 	*internal.DoublyLinkedList
 	CurrentDateRange *internal.Node
-	CurrentSegment   *Segment
-	CurrentStreamInf *StreamInf
+	CurrentSegment   *internal.Segment
+	CurrentStreamInf *internal.StreamInf
 	ProgramDateTime  time.Time
 	MediaSequence    int
 	SegmentsCounter  int

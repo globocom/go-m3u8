@@ -149,7 +149,7 @@ func (p dateRangeParser) Parse(tag string, playlist *Playlist) error {
 
 func (p streamInfParser) Parse(tag string, playlist *Playlist) error {
 	params := tagsToMap(tag)
-	playlist.CurrentStreamInf = &StreamInf{
+	playlist.CurrentStreamInf = &internal.StreamInf{
 		Bandwidth:        params["BANDWIDTH"],
 		AverageBandwidth: params["AVERAGE-BANDWIDTH"],
 		Codecs:           strings.Split(params["CODECS"], ","),
@@ -171,7 +171,7 @@ func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 		currentDVRInNanoseconds := int(playlist.DVR * float64(time.Second))
 		segmentProgramDateTime := playlist.ProgramDateTime.Add(time.Duration(currentDVRInNanoseconds))
 
-		playlist.CurrentSegment = &Segment{
+		playlist.CurrentSegment = &internal.Segment{
 			Duration:        floatDuration,
 			MediaSequence:   playlist.MediaSequence + playlist.SegmentsCounter,
 			ProgramDateTime: segmentProgramDateTime,
