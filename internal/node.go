@@ -31,10 +31,10 @@ func (l *DoublyLinkedList) Insert(node *Node) {
 	}
 }
 
-func (l *DoublyLinkedList) Find(tagName string) (*Node, bool) {
+func (l *DoublyLinkedList) Find(elementName string) (*Node, bool) {
 	current := l.Head
 	for current != nil {
-		if current.HLSElement.Name == tagName {
+		if current.HLSElement.Name == elementName {
 			return current, true
 		}
 		current = current.Next
@@ -43,11 +43,11 @@ func (l *DoublyLinkedList) Find(tagName string) (*Node, bool) {
 	return nil, false
 }
 
-func (l *DoublyLinkedList) FindAll(tagName string) []*Node {
+func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 	current := l.Head
 	result := make([]*Node, 0)
 	for current != nil {
-		if current.HLSElement.Name == tagName {
+		if current.HLSElement.Name == elementName {
 			result = append(result, current)
 		}
 		current = current.Next
