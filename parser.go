@@ -35,9 +35,11 @@ type (
 
 func (p m3u8IdentifierParser) Parse(tag string, playlist *Playlist) error {
 	playlist.Insert(&internal.Node{
-		Name: "M3u8Identifier",
-		Attrs: map[string]string{
-			m3u8IdentifierTag: "",
+		HLSElement: &internal.HLSElement{
+			Name: "M3u8Identifier",
+			Attrs: map[string]string{
+				m3u8IdentifierTag: "",
+			},
 		},
 	})
 	return nil
@@ -47,8 +49,10 @@ func (p versionParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 && parts[1] != "" {
 		playlist.Insert(&internal.Node{
-			Name:  "Version",
-			Attrs: map[string]string{versionTag: strings.TrimSpace(parts[1])},
+			HLSElement: &internal.HLSElement{
+				Name:  "Version",
+				Attrs: map[string]string{versionTag: strings.TrimSpace(parts[1])},
+			},
 		})
 		return nil
 	}
@@ -59,8 +63,10 @@ func (p targetDurationParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 && parts[1] != "" {
 		playlist.Insert(&internal.Node{
-			Name:  "TargetDuration",
-			Attrs: map[string]string{targetDurationTag: strings.TrimSpace(parts[1])},
+			HLSElement: &internal.HLSElement{
+				Name:  "TargetDuration",
+				Attrs: map[string]string{targetDurationTag: strings.TrimSpace(parts[1])},
+			},
 		})
 		return nil
 	}
@@ -73,8 +79,10 @@ func (p mediaSequenceParser) Parse(tag string, playlist *Playlist) error {
 	if len(parts) > 1 && parts[1] != "" {
 		mediaSequence := strings.TrimSpace(parts[1])
 		playlist.Insert(&internal.Node{
-			Name:  "MediaSequence",
-			Attrs: map[string]string{mediaSequenceTag: mediaSequence},
+			HLSElement: &internal.HLSElement{
+				Name:  "MediaSequence",
+				Attrs: map[string]string{mediaSequenceTag: mediaSequence},
+			},
 		})
 
 		playlist.MediaSequence, err = strconv.Atoi(mediaSequence)
@@ -96,8 +104,10 @@ func (p programDateTimeParser) Parse(tag string, playlist *Playlist) error {
 
 	dateTimeValue := strings.TrimSpace(parts[1])
 	playlist.Insert(&internal.Node{
-		Name:  "ProgramDateTime",
-		Attrs: map[string]string{programDateTimeTag: dateTimeValue},
+		HLSElement: &internal.HLSElement{
+			Name:  "ProgramDateTime",
+			Attrs: map[string]string{programDateTimeTag: dateTimeValue},
+		},
 	})
 
 	if playlist.ProgramDateTime.Format(time.DateOnly) == "0001-01-01" {
@@ -120,14 +130,16 @@ func (p dateRangeParser) Parse(tag string, playlist *Playlist) error {
 	}
 
 	dateRangeNode := &internal.Node{
-		Name:  "DateRange",
-		Attrs: params,
-		Details: map[string]string{
-			"MediaSequence": fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter),
+		HLSElement: &internal.HLSElement{
+			Name:  "DateRange",
+			Attrs: params,
+			Details: map[string]string{
+				"MediaSequence": fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter),
+			},
 		},
 	}
 
-	if dateRangeNode.Attrs["SCTE35-OUT"] != "" {
+	if dateRangeNode.HLSElement.Attrs["SCTE35-OUT"] != "" {
 		playlist.CurrentDateRange = dateRangeNode
 	}
 
@@ -175,9 +187,11 @@ func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 
 func (p independentSegmentsParser) Parse(tag string, playlist *Playlist) error {
 	playlist.Insert(&internal.Node{
-		Name: "IndependentSegments",
-		Attrs: map[string]string{
-			independentSegmentTag: "",
+		HLSElement: &internal.HLSElement{
+			Name: "IndependentSegments",
+			Attrs: map[string]string{
+				independentSegmentTag: "",
+			},
 		},
 	})
 	return nil
@@ -185,9 +199,11 @@ func (p independentSegmentsParser) Parse(tag string, playlist *Playlist) error {
 
 func (p discontinuityParser) Parse(tag string, playlist *Playlist) error {
 	playlist.Insert(&internal.Node{
-		Name: "Discontinuity",
-		Attrs: map[string]string{
-			discontinuityTag: "",
+		HLSElement: &internal.HLSElement{
+			Name: "Discontinuity",
+			Attrs: map[string]string{
+				discontinuityTag: "",
+			},
 		},
 	})
 	return nil
@@ -198,8 +214,10 @@ func (p uspTimestampMapParser) Parse(tag string, playlist *Playlist) error {
 	if len(parts) > 0 {
 		params := tagsToMap(parts[1])
 		playlist.Insert(&internal.Node{
-			Name:  "UspTimestampMap",
-			Attrs: params,
+			HLSElement: &internal.HLSElement{
+				Name:  "UspTimestampMap",
+				Attrs: params,
+			},
 		})
 		return nil
 	}
@@ -210,8 +228,10 @@ func (p cueOutParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.SplitN(tag, ":", 2)
 	if len(parts) > 1 {
 		playlist.Insert(&internal.Node{
-			Name:  "CueOut",
-			Attrs: map[string]string{cueOutTag: strings.TrimSpace(parts[1])},
+			HLSElement: &internal.HLSElement{
+				Name:  "CueOut",
+				Attrs: map[string]string{cueOutTag: strings.TrimSpace(parts[1])},
+			},
 		})
 		return nil
 	}
@@ -219,9 +239,11 @@ func (p cueOutParser) Parse(tag string, playlist *Playlist) error {
 }
 func (p cueInParser) Parse(tag string, playlist *Playlist) error {
 	playlist.Insert(&internal.Node{
-		Name: "CueIn",
-		Attrs: map[string]string{
-			cueInTag: "",
+		HLSElement: &internal.HLSElement{
+			Name: "CueIn",
+			Attrs: map[string]string{
+				cueInTag: "",
+			},
 		},
 	})
 
@@ -237,14 +259,16 @@ func HandleNonTags(line string, playlist *Playlist) error {
 	case playlist.CurrentSegment != nil && strings.HasSuffix(line, ".ts"):
 		playlist.CurrentSegment.URI = line
 		playlist.Insert(&internal.Node{
-			Name: "ExtInf",
-			URI:  line,
-			Attrs: map[string]string{
-				"Duration": strconv.FormatFloat(playlist.CurrentSegment.Duration, 'f', -1, 64),
-			},
-			Details: map[string]string{
-				"MediaSequence":   fmt.Sprintf("%d", playlist.CurrentSegment.MediaSequence),
-				"ProgramDateTime": playlist.CurrentSegment.ProgramDateTime.Format(time.RFC3339Nano),
+			HLSElement: &internal.HLSElement{
+				Name: "ExtInf",
+				URI:  line,
+				Attrs: map[string]string{
+					"Duration": strconv.FormatFloat(playlist.CurrentSegment.Duration, 'f', -1, 64),
+				},
+				Details: map[string]string{
+					"MediaSequence":   fmt.Sprintf("%d", playlist.CurrentSegment.MediaSequence),
+					"ProgramDateTime": playlist.CurrentSegment.ProgramDateTime.Format(time.RFC3339Nano),
+				},
 			},
 		})
 		playlist.CurrentSegment = nil
@@ -261,9 +285,11 @@ func HandleNonTags(line string, playlist *Playlist) error {
 			"FRAME-RATE":        playlist.CurrentStreamInf.FrameRate,
 		}
 		playlist.Insert(&internal.Node{
-			Name:  "StreamInf",
-			Attrs: attrs,
-			URI:   line,
+			HLSElement: &internal.HLSElement{
+				Name:  "StreamInf",
+				Attrs: attrs,
+				URI:   line,
+			},
 		})
 		playlist.CurrentStreamInf = nil
 		return nil
@@ -273,8 +299,10 @@ func HandleNonTags(line string, playlist *Playlist) error {
 			"Comment": line,
 		}
 		playlist.Insert(&internal.Node{
-			Name:  "Comment",
-			Attrs: attrs,
+			HLSElement: &internal.HLSElement{
+				Name:  "Comment",
+				Attrs: attrs,
+			},
 		})
 		return nil
 	}

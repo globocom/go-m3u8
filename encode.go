@@ -55,12 +55,12 @@ func EncodePlaylist(playlist *Playlist) (string, error) {
 	var builder strings.Builder
 	current := playlist.Head
 	for current != nil {
-		encoder, exists := encoders[current.Name]
+		encoder, exists := encoders[current.HLSElement.Name]
 		if !exists {
-			return "", fmt.Errorf("unknown tag: %s", current.Name)
+			return "", fmt.Errorf("unknown tag: %s", current.HLSElement.Name)
 		}
 		if err := encoder.Encode(current, &builder); err != nil {
-			return "", fmt.Errorf("error encoding tag %s: %w", current.Name, err)
+			return "", fmt.Errorf("error encoding tag %s: %w", current.HLSElement.Name, err)
 		}
 		current = current.Next
 	}
@@ -88,30 +88,30 @@ func (e programDateTimeEncoder) Encode(node *internal.Node, builder *strings.Bui
 	return encodeSimpleTag(node, builder, programDateTimeTag, programDateTimeTag)
 }
 func (e extInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	_, err := builder.WriteString(fmt.Sprintf("%s:%s\n%s\n", extInfTag, node.Attrs["Duration"], node.URI))
+	_, err := builder.WriteString(fmt.Sprintf("%s:%s\n%s\n", extInfTag, node.HLSElement.Attrs["Duration"], node.HLSElement.URI))
 	return err
 }
 
 func (e streamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	order := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE"}
-	if err := encodeTagWithAttributes(builder, streamInfTag, node.Attrs, order); err != nil {
+	if err := encodeTagWithAttributes(builder, streamInfTag, node.HLSElement.Attrs, order); err != nil {
 		return err
 	}
-	if node.URI != "" {
-		_, err := builder.WriteString(node.URI + "\n")
+	if node.HLSElement.URI != "" {
+		_, err := builder.WriteString(node.HLSElement.URI + "\n")
 		return err
 	}
 	return nil
 }
 
 func (e commentEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	_, err := builder.WriteString(fmt.Sprintf("%s\n", node.Attrs["Comment"]))
+	_, err := builder.WriteString(fmt.Sprintf("%s\n", node.HLSElement.Attrs["Comment"]))
 	return err
 }
 
 func (e dateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	order := []string{"ID", "START-DATE", "PLANNED-DURATION", "END-DATE", "DURATION", "SCTE35-OUT", "SCTE35-IN"}
-	return encodeTagWithAttributes(builder, dateRangeTag, node.Attrs, order)
+	return encodeTagWithAttributes(builder, dateRangeTag, node.HLSElement.Attrs, order)
 }
 
 func (e independentSegmentsEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
@@ -126,7 +126,7 @@ func (e discontinuityEncoder) Encode(node *internal.Node, builder *strings.Build
 
 func (e uspTimestampMapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	order := []string{"MPEGTS", "LOCAL"}
-	return encodeTagWithAttributes(builder, uspTimestampMapTag, node.Attrs, order)
+	return encodeTagWithAttributes(builder, uspTimestampMapTag, node.HLSElement.Attrs, order)
 }
 
 func (e cueOutEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
@@ -170,7 +170,7 @@ func encodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 }
 
 func encodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey string) error {
-	if value, exists := node.Attrs[attrKey]; exists {
+	if value, exists := node.HLSElement.Attrs[attrKey]; exists {
 		_, err := builder.WriteString(fmt.Sprintf("%s:%s\n", tag, value))
 		return err
 	}
