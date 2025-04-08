@@ -27,7 +27,7 @@ func TestVersion(t *testing.T) {
 	node, found := playlist.Version()
 	assert.True(t, found)
 	assert.NotNil(t, node)
-	assert.Equal(t, node.Attrs["#EXT-X-VERSION"], "3")
+	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-VERSION"], "3")
 }
 
 func TestMediaSequenceValue(t *testing.T) {
@@ -47,7 +47,7 @@ func TestMediaSequence(t *testing.T) {
 	node, found := playlist.MediaSequenceTag()
 	assert.True(t, found)
 	assert.NotNil(t, node)
-	assert.Equal(t, node.Attrs["#EXT-X-MEDIA-SEQUENCE"], "360948012")
+	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"], "360948012")
 }
 
 func TestBreaks(t *testing.T) {
@@ -59,7 +59,7 @@ func TestBreaks(t *testing.T) {
 	assert.NotNil(t, nodes)
 	assert.Len(t, nodes, 1)
 	for _, node := range nodes {
-		assert.Equal(t, node.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B")
+		assert.Equal(t, node.HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B")
 	}
 }
 
@@ -89,23 +89,31 @@ func TestReplaceBreaksURI(t *testing.T) {
 	}
 
 	node1 := &internal.Node{
-		Name: "DateRange",
-		Attrs: map[string]string{
-			"SCTE35-OUT": "0xFFFF",
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"SCTE35-OUT": "0xFFFF",
+			},
 		},
 	}
 	node2 := &internal.Node{
-		Name: "ExtInf",
-		URI:  "1.ts",
+		HLSElement: &internal.HLSElement{
+			Name: "ExtInf",
+			URI:  "1.ts",
+		},
 	}
 	node3 := &internal.Node{
-		Name: "ExtInf",
-		URI:  "2.ts",
+		HLSElement: &internal.HLSElement{
+			Name: "ExtInf",
+			URI:  "2.ts",
+		},
 	}
 	node4 := &internal.Node{
-		Name: "DateRange",
-		Attrs: map[string]string{
-			"SCTE35-IN": "0xFFFD",
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"SCTE35-IN": "0xFFFD",
+			},
 		},
 	}
 
@@ -120,8 +128,8 @@ func TestReplaceBreaksURI(t *testing.T) {
 
 	err := playlist.ReplaceBreaksURI(transform)
 	assert.NoError(t, err)
-	assert.Equal(t, "ad-server-bucket-1.ts", node2.URI)
-	assert.Equal(t, "ad-server-bucket-2.ts", node3.URI)
-	assert.Equal(t, "0xFFFF", node1.Attrs["SCTE35-OUT"])
-	assert.Equal(t, "0xFFFD", node4.Attrs["SCTE35-IN"])
+	assert.Equal(t, "ad-server-bucket-1.ts", node2.HLSElement.URI)
+	assert.Equal(t, "ad-server-bucket-2.ts", node3.HLSElement.URI)
+	assert.Equal(t, "0xFFFF", node1.HLSElement.Attrs["SCTE35-OUT"])
+	assert.Equal(t, "0xFFFD", node4.HLSElement.Attrs["SCTE35-IN"])
 }
