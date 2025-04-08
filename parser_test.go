@@ -89,7 +89,7 @@ func TestDateRangeParser(t *testing.T) {
 
 	node, found := p.Find("DateRange")
 	assert.True(t, found)
-	assert.Equal(t, p.CurrentDateRange, node)
+	assert.Equal(t, p.CurrentDateRange, node.HLSElement.ToDateRangeType(p.MediaSequence, p.SegmentsCounter))
 	assert.Equal(t, "0xFF0000", node.HLSElement.Attrs["SCTE35-OUT"])
 	assert.Equal(t, "break1", node.HLSElement.Attrs["ID"])
 	assert.Equal(t, "2025-01-01T00:00:00Z", node.HLSElement.Attrs["START-DATE"])
@@ -116,7 +116,7 @@ func TestCueInParser(t *testing.T) {
 
 	node, ok := p.Find("CueIn")
 	assert.True(t, ok)
-	assert.Equal(t, p.CurrentDateRange, &internal.Node{})
+	assert.Equal(t, p.CurrentDateRange, &internal.DateRange{})
 	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-CUE-IN"])
 }
 
