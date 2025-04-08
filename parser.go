@@ -140,7 +140,7 @@ func (p dateRangeParser) Parse(tag string, playlist *Playlist) error {
 	}
 
 	if dateRangeNode.HLSElement.Attrs["SCTE35-OUT"] != "" {
-		playlist.CurrentDateRange = dateRangeNode
+		playlist.CurrentDateRange = dateRangeNode.HLSElement.ToDateRangeType(playlist.MediaSequence, playlist.SegmentsCounter)
 	}
 
 	playlist.Insert(dateRangeNode)
@@ -148,14 +148,7 @@ func (p dateRangeParser) Parse(tag string, playlist *Playlist) error {
 }
 
 func (p streamInfParser) Parse(tag string, playlist *Playlist) error {
-	params := tagsToMap(tag)
-	playlist.CurrentStreamInf = &internal.StreamInf{
-		Bandwidth:        params["BANDWIDTH"],
-		AverageBandwidth: params["AVERAGE-BANDWIDTH"],
-		Codecs:           strings.Split(params["CODECS"], ","),
-		Resolution:       params["RESOLUTION"],
-		FrameRate:        params["FRAME-RATE"],
-	}
+	playlist.CurrentStreamInf = internal.ToStreamInfType(tagsToMap(tag))
 	return nil
 }
 
@@ -163,21 +156,10 @@ func (p extInfParser) Parse(tag string, playlist *Playlist) error {
 	parts := strings.Split(tag, ":")
 	if len(parts) > 1 {
 		duration := strings.TrimSpace(strings.Split(parts[1], ",")[0])
-		floatDuration, err := strconv.ParseFloat(duration, 64)
-		if err != nil {
-			return fmt.Errorf("%w: invalid duration tag", ErrParseLine)
-		}
 
-		currentDVRInNanoseconds := int(playlist.DVR * float64(time.Second))
-		segmentProgramDateTime := playlist.ProgramDateTime.Add(time.Duration(currentDVRInNanoseconds))
+		playlist.CurrentSegment = internal.ToSegmentType(duration, playlist.MediaSequence, playlist.SegmentsCounter, playlist.DVR, playlist.ProgramDateTime)
 
-		playlist.CurrentSegment = &internal.Segment{
-			Duration:        floatDuration,
-			MediaSequence:   playlist.MediaSequence + playlist.SegmentsCounter,
-			ProgramDateTime: segmentProgramDateTime,
-		}
-
-		playlist.DVR = roundFloat(playlist.DVR+floatDuration, 4)
+		playlist.DVR = roundFloat(playlist.DVR+playlist.CurrentSegment.Duration, 4)
 		playlist.SegmentsCounter += 1
 
 		return nil
@@ -248,7 +230,7 @@ func (p cueInParser) Parse(tag string, playlist *Playlist) error {
 	})
 
 	// When break ends, should reset current daterange
-	playlist.CurrentDateRange = &internal.Node{}
+	playlist.CurrentDateRange = &internal.DateRange{}
 
 	return nil
 }
