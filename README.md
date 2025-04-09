@@ -9,6 +9,11 @@ go-m3u8
 </h1>
 
 
+### Work in progress!
+
+There isn't a stable version for now. As this is currently a WIP, the API may have changes.
+
+
 ## Golang m3u8 parser
 
 
