@@ -1,7 +1,10 @@
 <div align=center><img src="gopher.png" height=100px></div>
 <h1 align=center>
 go-m3u8
-<div align=center><img src="https://github.com/globocom/go-m3u8/actions/workflows/go.yml/badge.svg"></div>
+<div align=center>
+<img src="https://github.com/globocom/go-m3u8/actions/workflows/go.yml/badge.svg">
+<a href="https://goreportcard.com/badge/github.com/globocom/go-m3u8"><img src="https://goreportcard.com/badge/github.com/globocom/go-m3u8"/></a>
+</div>
 </h1>
 
 
