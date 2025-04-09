@@ -4,6 +4,7 @@ go-m3u8
 <div align=center>
 <img src="https://github.com/globocom/go-m3u8/actions/workflows/go.yml/badge.svg">
 <a href="https://goreportcard.com/badge/github.com/globocom/go-m3u8"><img src="https://goreportcard.com/badge/github.com/globocom/go-m3u8"/></a>
+<img src="https://img.shields.io/github/go-mod/go-version/globocom/go-m3u8">
 </div>
 </h1>
 
