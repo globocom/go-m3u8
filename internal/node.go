@@ -4,15 +4,20 @@ import (
 	"fmt"
 )
 
+// A HLS Playlist is a doubly-linked list of of Node objects.
+// Each Node represents a HLSElement of the Playlist, amounting to one or more lines of the m3u8 file.
+// For example, a Media Segment Node will be comprised of two lines: the #EXTINF tag + the segment URI below it.
+// Alternatively, a Media Sequence Node is only one line long: the #EXT-X-MEDIA-SEQUENCE tag.
 type DoublyLinkedList struct {
 	Head, Tail *Node
 }
+
+// The Node data type holds the following attributes:
+//   - HLSElement: Pointer to HLSElement it represents on the list.
+//   - Prev, Next: Pointers to previous or next Node in the list.
 type Node struct {
-	Name       string
-	Attrs      map[string]string
-	URI        string
+	HLSElement *HLSElement
 	Prev, Next *Node
-	Object     any
 }
 
 func (l *DoublyLinkedList) Insert(node *Node) {
@@ -26,10 +31,10 @@ func (l *DoublyLinkedList) Insert(node *Node) {
 	}
 }
 
-func (l *DoublyLinkedList) Find(tagName string) (*Node, bool) {
+func (l *DoublyLinkedList) Find(elementName string) (*Node, bool) {
 	current := l.Head
 	for current != nil {
-		if current.Name == tagName {
+		if current.HLSElement.Name == elementName {
 			return current, true
 		}
 		current = current.Next
@@ -38,11 +43,11 @@ func (l *DoublyLinkedList) Find(tagName string) (*Node, bool) {
 	return nil, false
 }
 
-func (l *DoublyLinkedList) FindAll(tagName string) []*Node {
+func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 	current := l.Head
 	result := make([]*Node, 0)
 	for current != nil {
-		if current.Name == tagName {
+		if current.HLSElement.Name == elementName {
 			result = append(result, current)
 		}
 		current = current.Next

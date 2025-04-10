@@ -29,6 +29,6 @@
 
 <!-- We encourage you to keep the code coverage percentage at 80% and above. -->
 
-- [ ] **Yes**
+- [ ] Yes
 - [ ] No, and this is why: _N/A_
 - [ ] I need help with writing tests

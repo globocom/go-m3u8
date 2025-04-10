@@ -38,9 +38,10 @@ type Source interface {
 func ParsePlaylist(src Source) (*Playlist, error) {
 	playlist := &Playlist{
 		DoublyLinkedList: new(internal.DoublyLinkedList),
-		CurrentDateRange: new(internal.Node),
-		CurrentSegment:   new(Segment),
-		CurrentStreamInf: new(StreamInf),
+		CurrentNode:      new(internal.Node),
+		CurrentDateRange: new(internal.DateRange),
+		CurrentSegment:   new(internal.Segment),
+		CurrentStreamInf: new(internal.StreamInf),
 		ProgramDateTime:  *new(time.Time),
 		MediaSequence:    0,
 		SegmentsCounter:  0,
