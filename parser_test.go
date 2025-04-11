@@ -7,6 +7,7 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
+	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -188,6 +189,6 @@ func TestHandleNonTags_Comment(t *testing.T) {
 	assert.Equal(t, "## splice_insert(SCTE35-IN matches Auto Return Mode)", node.HLSElement.Attrs["Comment"])
 }
 
-func setupPlaylist(input string) (*m3u8.Playlist, error) {
+func setupPlaylist(input string) (*pl.Playlist, error) {
 	return m3u8.ParsePlaylist(io.NopCloser(strings.NewReader(input)))
 }

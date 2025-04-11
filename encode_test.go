@@ -5,6 +5,7 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
+	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ func TestM3u8IdentifierEncoder(t *testing.T) {
 		},
 	}
 
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -38,7 +39,7 @@ func TestVersionEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -62,7 +63,7 @@ func TestExtInfEncoder(t *testing.T) {
 			URI: "1.ts",
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -92,7 +93,7 @@ func TestStreamInfEncoder(t *testing.T) {
 			URI: "playlist.m3u8",
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -117,7 +118,7 @@ func TestCommentEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -145,7 +146,7 @@ func TestDateRangeEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node1,
 			Tail: node1,
@@ -169,7 +170,7 @@ func TestDateRangeEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist = &m3u8.Playlist{
+	playlist = &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node2,
 			Tail: node2,
@@ -190,7 +191,7 @@ func TestIndependentSegmentsEncoder(t *testing.T) {
 			Name: "IndependentSegments",
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -210,7 +211,7 @@ func TestDiscontinuityEncoder(t *testing.T) {
 			Name: "Discontinuity",
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -234,7 +235,7 @@ func TestUspTimestampMapEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -259,7 +260,7 @@ func TestCueOutEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -282,7 +283,7 @@ func TestCueInEncoder(t *testing.T) {
 			},
 		},
 	}
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node,
 			Tail: node,
@@ -344,7 +345,7 @@ func TestEncodeMasterPlaylist(t *testing.T) {
 		},
 	}
 
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node1,
 			Tail: node1,
@@ -446,7 +447,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 		},
 	}
 
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{
 			Head: node1,
 			Tail: node1,

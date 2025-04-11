@@ -77,7 +77,7 @@ func TestParsePlaylist(t *testing.T) {
 				if tc.name == "Parse multivariant playlist without EXT-X-VERSION tag" {
 					file, err = os.Open(tc.path)
 					playlist, err = m3u8.ParsePlaylist(file)
-					assert.ErrorContains(t, err, m3u8.ErrParseLine.Error())
+					assert.ErrorContains(t, err, "invalid version tag")
 					assert.Nil(t, playlist)
 					return
 				} else if tc.name == "Error parsing playlist" {
