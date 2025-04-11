@@ -16,16 +16,6 @@ const (
 	VersionTag        = "#EXT-X-VERSION"
 )
 
-type M3u8IdentifierElement struct {
-	Name string
-	Tag  string
-}
-
-type VersionElement struct {
-	Name string
-	Tag  string
-}
-
 type (
 	M3u8IdentifierParser struct{}
 	VersionParser        struct{}
