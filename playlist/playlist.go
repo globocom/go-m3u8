@@ -88,6 +88,8 @@ func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
 	return p.ModifyNodesBetween(startCondition, endCondition, transformFunc)
 }
 
+//// PARSER/DECODE METHODS
+
 func HandleNonTags(line string, p *Playlist) error {
 	switch {
 	// Handle HLS segment lines
@@ -142,8 +144,6 @@ func HandleNonTags(line string, p *Playlist) error {
 		return nil
 	}
 }
-
-//// PARSER/DECODE METHODS
 
 // https://regex101.com/r/0A2ulC/1
 func TagsToMap(line string) map[string]string {
