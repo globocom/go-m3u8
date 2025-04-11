@@ -1,4 +1,4 @@
-package go_m3u8_test
+package playlist_test
 
 import (
 	"fmt"
@@ -7,11 +7,12 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
+	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestVersionValue(t *testing.T) {
-	file, err := os.Open("./testdata/media/media.m3u8")
+	file, err := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -20,7 +21,7 @@ func TestVersionValue(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	file, err := os.Open("./testdata/media/media.m3u8")
+	file, err := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -31,7 +32,7 @@ func TestVersion(t *testing.T) {
 }
 
 func TestMediaSequenceValue(t *testing.T) {
-	file, err := os.Open("./testdata/media/media.m3u8")
+	file, err := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -40,7 +41,7 @@ func TestMediaSequenceValue(t *testing.T) {
 }
 
 func TestMediaSequence(t *testing.T) {
-	file, err := os.Open("./testdata/media/media.m3u8")
+	file, err := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -51,7 +52,7 @@ func TestMediaSequence(t *testing.T) {
 }
 
 func TestBreaks(t *testing.T) {
-	file, err := os.Open("./testdata/media/media.m3u8")
+	file, err := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -64,7 +65,7 @@ func TestBreaks(t *testing.T) {
 }
 
 func TestVariants(t *testing.T) {
-	file, err := os.Open("./testdata/multivariant/multivariant.m3u8")
+	file, err := os.Open("./../testdata/multivariant/multivariant.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -74,7 +75,7 @@ func TestVariants(t *testing.T) {
 }
 
 func TestSegments(t *testing.T) {
-	file, err := os.Open("./testdata/media/media.m3u8")
+	file, err := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -84,7 +85,7 @@ func TestSegments(t *testing.T) {
 }
 
 func TestReplaceBreaksURI(t *testing.T) {
-	playlist := &m3u8.Playlist{
+	playlist := &pl.Playlist{
 		DoublyLinkedList: &internal.DoublyLinkedList{},
 	}
 
