@@ -11,7 +11,7 @@ import (
 )
 
 func TestVersionValue(t *testing.T) {
-	file, err := os.Open("./testdata/default/media.m3u8")
+	file, err := os.Open("./testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -20,7 +20,7 @@ func TestVersionValue(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	file, err := os.Open("./testdata/default/media.m3u8")
+	file, err := os.Open("./testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -31,7 +31,7 @@ func TestVersion(t *testing.T) {
 }
 
 func TestMediaSequenceValue(t *testing.T) {
-	file, err := os.Open("./testdata/default/media.m3u8")
+	file, err := os.Open("./testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -40,7 +40,7 @@ func TestMediaSequenceValue(t *testing.T) {
 }
 
 func TestMediaSequence(t *testing.T) {
-	file, err := os.Open("./testdata/default/media.m3u8")
+	file, err := os.Open("./testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -51,7 +51,7 @@ func TestMediaSequence(t *testing.T) {
 }
 
 func TestBreaks(t *testing.T) {
-	file, err := os.Open("./testdata/default/media.m3u8")
+	file, err := os.Open("./testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -64,7 +64,7 @@ func TestBreaks(t *testing.T) {
 }
 
 func TestVariants(t *testing.T) {
-	file, err := os.Open("./testdata/default/master.m3u8")
+	file, err := os.Open("./testdata/multivariant/multivariant.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -74,7 +74,7 @@ func TestVariants(t *testing.T) {
 }
 
 func TestSegments(t *testing.T) {
-	file, err := os.Open("./testdata/default/media.m3u8")
+	file, err := os.Open("./testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 

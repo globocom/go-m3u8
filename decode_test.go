@@ -39,31 +39,31 @@ func TestParsePlaylist(t *testing.T) {
 			error:  true,
 		},
 		{
-			name:  "Missing version in master playlist",
-			kind:  "master",
-			path:  "./testdata/default/masterMissingVersion.m3u8",
+			name:  "Parse multivariant playlist without EXT-X-VERSION tag",
+			kind:  "multivariant",
+			path:  "./testdata/multivariant/missingVersion.m3u8",
 			error: true,
 		},
 		{
 			name:           "Parse media playlist",
 			kind:           "media",
-			path:           "./testdata/default/media.m3u8",
+			path:           "./testdata/media/media.m3u8",
 			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
 			dvr:            76.7998,
 			segmentCounter: 16,
 		},
 		{
-			name:           "Parse media with discontinuity playlist",
+			name:           "Parse media playlist with EXT-X-DISCONTINUITY tag",
 			kind:           "media",
-			path:           "./testdata/default/mediaWithDiscontinuity.m3u8",
+			path:           "./testdata/media/withDiscontinuity.m3u8",
 			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
 			dvr:            76.7998,
 			segmentCounter: 16,
 		},
 		{
-			name: "Parse master playlist with variants",
-			kind: "master",
-			path: "./testdata/default/master.m3u8",
+			name: "Parse multivariant playlist",
+			kind: "multivariant",
+			path: "./testdata/multivariant/multivariant.m3u8",
 		},
 	}
 
@@ -74,7 +74,7 @@ func TestParsePlaylist(t *testing.T) {
 			file, err := os.Open(tc.path)
 			playlist, err := m3u8.ParsePlaylist(file)
 			if tc.error {
-				if tc.name == "Missing version in master playlist" {
+				if tc.name == "Parse multivariant playlist without EXT-X-VERSION tag" {
 					file, err = os.Open(tc.path)
 					playlist, err = m3u8.ParsePlaylist(file)
 					assert.ErrorContains(t, err, m3u8.ErrParseLine.Error())
