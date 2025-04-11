@@ -13,26 +13,6 @@ import (
 	"github.com/globocom/go-m3u8/tags"
 )
 
-// type TagParser interface {
-// 	Parse(tag string, playlist *Playlist) error
-// }
-
-// var parsers = map[string]TagParser{
-// 	m3u8IdentifierTag:     m3u8IdentifierParser{},
-// 	versionTag:            versionParser{},
-// 	targetDurationTag:     targetDurationParser{},
-// 	mediaSequenceTag:      mediaSequenceParser{},
-// 	programDateTimeTag:    programDateTimeParser{},
-// 	dateRangeTag:          dateRangeParser{},
-// 	extInfTag:             extInfParser{},
-// 	streamInfTag:          streamInfParser{},
-// 	independentSegmentTag: independentSegmentsParser{},
-// 	discontinuityTag:      discontinuityParser{},
-// 	uspTimestampMapTag:    uspTimestampMapParser{},
-// 	cueOutTag:             cueOutParser{},
-// 	cueInTag:              cueInParser{},
-// }
-
 type Source interface {
 	io.ReadCloser
 }
