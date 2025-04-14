@@ -11,6 +11,7 @@ import (
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
+	"github.com/rs/zerolog/log"
 )
 
 type Source interface {
@@ -31,7 +32,11 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 	}
 
 	scanner := bufio.NewScanner(src)
-	defer src.Close()
+	defer func() {
+		if err := src.Close(); err != nil {
+			log.Error().Err(err).Msg("error scanning playlist file")
+		}
+	}()
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
