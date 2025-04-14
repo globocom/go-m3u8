@@ -91,6 +91,7 @@ func (e EventCueInEncoder) Encode(node *internal.Node, builder *strings.Builder)
 }
 
 func (e CommentEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	_, err := builder.WriteString(fmt.Sprintf("%s\n", node.HLSElement.Attrs["Comment"]))
+	attr := fmt.Sprintf("%s\n", node.HLSElement.Attrs["Comment"])
+	_, err := builder.WriteString(attr)
 	return err
 }

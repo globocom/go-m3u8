@@ -256,13 +256,14 @@ func TestParsePlaylist(t *testing.T) {
 			file, _ := os.Open(tc.path)
 			playlist, err := m3u8.ParsePlaylist(file)
 			if tc.error {
-				if tc.name == "Parse multivariant playlist without EXT-X-VERSION tag" {
+				switch tc.name {
+				case "Parse multivariant playlist without EXT-X-VERSION tag":
 					file, _ = os.Open(tc.path)
 					playlist, err = m3u8.ParsePlaylist(file)
 					assert.ErrorContains(t, err, "invalid version tag")
 					assert.Nil(t, playlist)
 					return
-				} else if tc.name == "Error parsing playlist" {
+				case "Error parsing playlist":
 					playlist, err = m3u8.ParsePlaylist(tc.source)
 					assert.ErrorContains(t, err, "fake error")
 					assert.Nil(t, playlist)

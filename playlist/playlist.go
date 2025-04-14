@@ -189,13 +189,16 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key]))
 	}
 
-	_, err := builder.WriteString(fmt.Sprintf("%s:%s\n", tag, strings.Join(formattedAttrs, ",")))
+	attributes := fmt.Sprintf("%s:%s\n", tag, strings.Join(formattedAttrs, ","))
+
+	_, err := builder.WriteString(attributes)
 	return err
 }
 
 func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey string) error {
 	if value, exists := node.HLSElement.Attrs[attrKey]; exists {
-		_, err := builder.WriteString(fmt.Sprintf("%s:%s\n", tag, value))
+		attr := fmt.Sprintf("%s:%s\n", tag, value)
+		_, err := builder.WriteString(attr)
 		return err
 	}
 	return fmt.Errorf("attribute %s not found for tag %s", attrKey, tag)

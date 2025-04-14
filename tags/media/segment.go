@@ -98,7 +98,8 @@ func (p ProgramDateTimeParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e ExtInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	_, err := builder.WriteString(fmt.Sprintf("%s:%s\n%s\n", ExtInfTag, node.HLSElement.Attrs["Duration"], node.HLSElement.URI))
+	attr := fmt.Sprintf("%s:%s\n%s\n", ExtInfTag, node.HLSElement.Attrs["Duration"], node.HLSElement.URI)
+	_, err := builder.WriteString(attr)
 	return err
 }
 
