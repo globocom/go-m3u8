@@ -9,40 +9,60 @@ go-m3u8
 </h1>
 
 
-### Work in progress!
+### Work in Progress!
 
-There isn't a stable version for now. As this is currently a WIP, the API may have changes.
+_There isn't a stable version for now. As this is currently a WIP, the API may have changes._
 
+## go-m3u8
 
-## Golang m3u8 parser
+Parser for [m3u8](https://tools.ietf.org/html/rfc8216) to facilitate manifest manipulation.
 
+_We currently only support scenarios for manipulating Live Streaming manifests._
 
-This library has the goal of parse a HLS [m3u8](https://tools.ietf.org/html/rfc8216) into a doubly linked list and, for some tags, we can access the tag struct from the node.
+### 1. Doubly Linked List
 
-### 1. Doubly linked list
+The m3u8 is represented by a doubly linked list. This data structure allows us to access the manifest in a sorted manner and apply operations (modify, add, remove) to its content. 
 
-This data structure allows us to access the manifest sorted and apply operations (modify, add and remove) to them. So we can access the HLS data (decode), manipulate it, and get it back in string format (encode).
-
-#### Exemples of usefull node operation:
+#### Examples of Useful Operations
 
 - **Add** discontinuity tag for `SSAI segments manipulation`
 - **Change** discontinuity sequence tag count
 - Remove DRM for SSAI segments manipulation by **adding** the tag `#EXT-X-KEY:METHOD=NONE`
-- **Add** `SGAI` at DateRange tags
+- **Add** `SGAI` at `DateRange` tags
 - **Remove** packager comment lines
 
+### 2. Tags
 
-### 2. Objects
+To guarantee scalibility, our lib considers a data structure for the HLS elements that follows the [RFC documentation](https://tools.ietf.org/html/rfc8216).
 
-To simplify the way we access the tags attributes, some nodes can be accessed via [custom structs](https://github.com/globocom/go-m3u8/blob/main/types.go):
+The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS elements into sub-packages according to the [**Playlist Tags**](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4) section on the RFC.
 
-- Media Manifest (StreamInf)
-- Segment
-- DateRange
+(The tags listed below are the ones currently supported by the lib.)
 
+1. **basic -** Basic Tags (Section 4.4.1).
+- `#EXTM3U`
+- `#EXT-X-VERSION`
+
+2. **exclusive -** Media or Multivariant Playlist Tags (Section 4.4.2).
+- `#EXT-X-INDEPENDENT-SEGMENTS`
+
+3. **media -** Media Playlist, Metada and Segment Tags (Sections 4.4.3 to 4.4.5).
+- `#EXT-X-DATERANGE`
+
+4. **multivariant -** Multivariant Playlist Tags (Section 4.4.6).
+- `#EXT-X-TARGETDURATION`
+- `#EXT-X-MEDIA-SEQUENCE`
+- `#EXTINF`
+- `#EXT-X-DISCONTINUITY`
+- `#EXT-X-PROGRAM-DATE-TIME`
+
+5. **others -** The tags in this section are "non-official" and are not listed in the RFC, e.g. tags added to the manifest by the packaging service.
+- `#EXT-X-CUE-OUT`
+- `#EXT-X-CUE-IN`
+- In-manifest comments (begin with `#` and are NOT tags).
 
 ## Getting started
 
 ```
-go get github.com/globocom/go-m3u8
+go install github.com/globocom/go-m3u8
 ```
