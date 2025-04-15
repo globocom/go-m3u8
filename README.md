@@ -17,7 +17,7 @@ _There isn't a stable version for now. As this is currently a WIP, the API may h
 
 Parser for [m3u8](https://tools.ietf.org/html/rfc8216) to facilitate manifest manipulation.
 
-_We currently only support scenarios for manipulating Live Streaming manifests._
+_We currently only support Live Streaming manifests._
 
 ### 1. Doubly Linked List
 
