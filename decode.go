@@ -9,34 +9,17 @@ import (
 	"unicode"
 
 	"github.com/globocom/go-m3u8/internal"
+	pl "github.com/globocom/go-m3u8/playlist"
+	"github.com/globocom/go-m3u8/tags"
+	"github.com/rs/zerolog/log"
 )
-
-type TagParser interface {
-	Parse(tag string, playlist *Playlist) error
-}
-
-var parsers = map[string]TagParser{
-	m3u8IdentifierTag:     m3u8IdentifierParser{},
-	versionTag:            versionParser{},
-	targetDurationTag:     targetDurationParser{},
-	mediaSequenceTag:      mediaSequenceParser{},
-	programDateTimeTag:    programDateTimeParser{},
-	dateRangeTag:          dateRangeParser{},
-	extInfTag:             extInfParser{},
-	streamInfTag:          streamInfParser{},
-	independentSegmentTag: independentSegmentsParser{},
-	discontinuityTag:      discontinuityParser{},
-	uspTimestampMapTag:    uspTimestampMapParser{},
-	cueOutTag:             cueOutParser{},
-	cueInTag:              cueInParser{},
-}
 
 type Source interface {
 	io.ReadCloser
 }
 
-func ParsePlaylist(src Source) (*Playlist, error) {
-	playlist := &Playlist{
+func ParsePlaylist(src Source) (*pl.Playlist, error) {
+	playlist := &pl.Playlist{
 		DoublyLinkedList: new(internal.DoublyLinkedList),
 		CurrentNode:      new(internal.Node),
 		CurrentDateRange: new(internal.DateRange),
@@ -49,18 +32,22 @@ func ParsePlaylist(src Source) (*Playlist, error) {
 	}
 
 	scanner := bufio.NewScanner(src)
-	defer src.Close()
+	defer func() {
+		if err := src.Close(); err != nil {
+			log.Error().Err(err).Msg("error scanning playlist file")
+		}
+	}()
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		linePrefix := extractPrefix(line)
-		parser, exists := parsers[linePrefix]
+		parser, exists := tags.Parsers[linePrefix]
 		if exists {
 			if err := parser.Parse(line, playlist); err != nil {
 				return nil, fmt.Errorf("error parsing tag %s: %w", linePrefix, err)
 			}
 		} else {
-			if err := HandleNonTags(line, playlist); err != nil {
+			if err := pl.HandleNonTags(line, playlist); err != nil {
 				return nil, fmt.Errorf("error handling non-tag line %q: %w", line, err)
 			}
 		}
