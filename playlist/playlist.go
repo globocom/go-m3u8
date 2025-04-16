@@ -62,6 +62,40 @@ func (p *Playlist) Segments() []*internal.Node {
 	return p.FindAll("ExtInf")
 }
 
+func (p *Playlist) FindSegment(segmentName, segmentURI string) (*internal.Node, bool) {
+	current := p.Head
+	for current != nil {
+		if (current.HLSElement.Name == segmentName) && (current.HLSElement.URI == segmentURI) {
+			return current, true
+		}
+		current = current.Next
+	}
+
+	return nil, false
+}
+
+func (p *Playlist) FindSegmentAdBreak(segmentName, segmentURI string) (*internal.Node, bool) {
+	segment, ok := p.FindSegment(segmentName, segmentURI)
+	if !ok {
+		return nil, false
+	}
+
+	current := segment
+	for current != nil {
+		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
+			return current, true
+		}
+
+		if (current.HLSElement.Name == "CueIn") || (current.HLSElement.Name == "DateRange" && current.HLSElement.Attrs["SCTE35-IN"] != "") {
+			return nil, false
+		}
+
+		current = current.Prev
+	}
+
+	return nil, false
+}
+
 func (p *Playlist) Breaks() []*internal.Node {
 	result := make([]*internal.Node, 0)
 	nodes := p.FindAll("DateRange")
