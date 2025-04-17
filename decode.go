@@ -35,8 +35,8 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 				return nil, fmt.Errorf("error parsing tag %s: %w", linePrefix, err)
 			}
 		} else {
-			if err := pl.HandleNonTags(line, playlist); err != nil {
-				return nil, fmt.Errorf("error handling non-tag line %q: %w", line, err)
+			if err := pl.HandleMultiLineHLSElements(line, playlist); err != nil {
+				return nil, fmt.Errorf("error handling multi-line HLS element %q: %w", line, err)
 			}
 		}
 	}

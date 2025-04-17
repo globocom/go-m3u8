@@ -135,7 +135,13 @@ func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
 	return p.ModifyNodesBetween(startCondition, endCondition, transformFunc)
 }
 
-// / METHODS FOR MULTI-LINE TAGS (StreamInf and ExtInf)
+//// METHODS FOR DECODING MULTI-LINE TAGS
+
+// StreamInfData holds data for StreamInf HLS Element, whose format in manifest is multi-line:
+//
+// #EXT-X-STREAM-INF:<attribute-list>
+//
+// <URI>
 type StreamInfData struct {
 	Codecs           []string
 	Bandwidth        string
@@ -145,6 +151,11 @@ type StreamInfData struct {
 	URI              string
 }
 
+// ExtInfData holds data for ExtInf HLS element, whose format in manifest is multi-line:
+//
+// #EXTINF:<duration>,[<title>]
+//
+// <URI>
 type ExtInfData struct {
 	Duration        float64
 	ProgramDateTime time.Time
@@ -152,6 +163,7 @@ type ExtInfData struct {
 	URI             string
 }
 
+// Internal parser returns new StreamInfData object
 func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 	return &StreamInfData{
 		Bandwidth:        mappedAttr["BANDWIDTH"],
@@ -162,6 +174,7 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 	}
 }
 
+// Internal parser returns new ExtInfData object
 func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
 	floatDuration, err := strconv.ParseFloat(duration, 64)
 	if err != nil {
@@ -179,8 +192,12 @@ func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCount
 	}
 }
 
-// DECODE METHODS
-func HandleNonTags(line string, p *Playlist) error {
+// Handles HLS Elements whose format in manifest are multi-line:
+//
+//   - ExtInf (tag + uri)
+//   - StreamInf (tag + uri)
+//   - Comments
+func HandleMultiLineHLSElements(line string, p *Playlist) error {
 	switch {
 	// Handle HLS segment lines
 	case p.CurrentSegment != nil && strings.HasSuffix(line, ".ts"):
@@ -235,6 +252,8 @@ func HandleNonTags(line string, p *Playlist) error {
 	}
 }
 
+//// AUXILIARY METHODS FOR DECODING
+
 // https://regex101.com/r/0A2ulC/1
 func TagsToMap(line string) map[string]string {
 	m := make(map[string]string)
@@ -251,7 +270,9 @@ func RoundFloat(val float64, precision uint) float64 {
 	return math.Round(val*ratio) / ratio
 }
 
-// // ENCODE METHODS
+//// AUXILIARY METHODS FOR ENCODING
+
+// Encodes tag with attributes into string object
 func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string) error {
 	if len(attrs) == 0 {
 		_, err := builder.WriteString(tag + "\n")
@@ -285,6 +306,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	return err
 }
 
+// Encodes tag without attributes into string object
 func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey string) error {
 	if value, exists := node.HLSElement.Attrs[attrKey]; exists {
 		attr := fmt.Sprintf("%s:%s\n", tag, value)
