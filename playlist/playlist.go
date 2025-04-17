@@ -86,24 +86,7 @@ func (p *Playlist) Breaks() []*internal.Node {
 	return result
 }
 
-func (p *Playlist) FindSegment(segment *internal.Node) (*internal.Node, bool) {
-	current := p.Head
-	for current != nil {
-		if (current.HLSElement.Name == segment.HLSElement.Name) && (current.HLSElement.URI == segment.HLSElement.URI) {
-			return current, true
-		}
-		current = current.Next
-	}
-
-	return nil, false
-}
-
 func (p *Playlist) FindSegmentAdBreak(segment *internal.Node) (*internal.Node, bool) {
-	segment, ok := p.FindSegment(segment)
-	if !ok {
-		return nil, false
-	}
-
 	current := segment
 	for current != nil {
 		// segment is inside Ad Break if it is preceeded by a DateRange tag with attribute SCTE35-OUT

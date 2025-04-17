@@ -135,31 +135,6 @@ func TestReplaceBreaksURI(t *testing.T) {
 	assert.Equal(t, "0xFFFD", node4.HLSElement.Attrs["SCTE35-IN"])
 }
 
-func TestFindSegment(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
-	playlist, err := m3u8.ParsePlaylist(file)
-	assert.NoError(t, err)
-
-	// #EXTINF:4.8, no desc
-	// channel-audio_1=96000-video=2262976-360948204.ts
-	expectedSegment := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "ExtInf",
-			URI:  "channel-audio_1=96000-video=2262976-360948204.ts",
-			Attrs: map[string]string{
-				"Duration": "4.8",
-			},
-		},
-	}
-
-	segment, _ := playlist.FindSegment(expectedSegment)
-
-	assert.NotNil(t, segment)
-	assert.Equal(t, segment.HLSElement.Name, expectedSegment.HLSElement.Name)
-	assert.Equal(t, segment.HLSElement.URI, expectedSegment.HLSElement.URI)
-	assert.Equal(t, segment.HLSElement.Attrs["Duration"], expectedSegment.HLSElement.Attrs["Duration"])
-}
-
 func TestFindSegmentInsideAdBreak(t *testing.T) {
 	file, _ := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -167,15 +142,9 @@ func TestFindSegmentInsideAdBreak(t *testing.T) {
 
 	// #EXTINF:6.2666, no desc
 	// channel-audio_1=96000-video=2262976-360948206.ts
-	adBreakSegment := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "ExtInf",
-			URI:  "channel-audio_1=96000-video=2262976-360948206.ts",
-			Attrs: map[string]string{
-				"Duration": "6.2666",
-			},
-		},
-	}
+	adBreakSegment := playlist.Segments()[2]
+	assert.Equal(t, adBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948206.ts")
+
 	// #EXT-X-DATERANGE:ID="1-1732551382",START-DATE="2024-11-25T16:16:22.933333Z",PLANNED-DURATION=60.1,SCTE35-OUT=0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B
 	expectedAdBreak := &internal.Node{
 		HLSElement: &internal.HLSElement{
@@ -205,28 +174,14 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 	// after break
 	// #EXTINF:3.7666, no desc
 	// channel-audio_1=96000-video=2262976-360948218.ts
-	afterBreakSegment := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "ExtInf",
-			URI:  "channel-audio_1=96000-video=2262976-360948218.ts",
-			Attrs: map[string]string{
-				"Duration": "3.7666",
-			},
-		},
-	}
+	afterBreakSegment := playlist.Segments()[14]
+	assert.Equal(t, afterBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948218.ts")
 
 	// before break
-	//#EXTINF:4.8, no desc
-	//channel-audio_1=96000-video=2262976-360948204.ts
-	beforeBreakSegment := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "ExtInf",
-			URI:  "channel-audio_1=96000-video=2262976-360948204.ts",
-			Attrs: map[string]string{
-				"Duration": "4.8",
-			},
-		},
-	}
+	// #EXTINF:4.8, no desc
+	// channel-audio_1=96000-video=2262976-360948204.ts
+	beforeBreakSegment := playlist.Segments()[0]
+	assert.Equal(t, beforeBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948204.ts")
 
 	afterAdBreak, _ := playlist.FindSegmentAdBreak(afterBreakSegment)
 	beforeAdBreak, _ := playlist.FindSegmentAdBreak(beforeBreakSegment)
