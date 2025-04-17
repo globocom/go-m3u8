@@ -19,7 +19,7 @@ var (
 	EventCueOutTag     = "#EXT-X-CUE-OUT"
 	EventCueInTag      = "#EXT-X-CUE-IN"
 	CommentLineTag     = "# comment"
-	CommentLineRegex   = regexp2.MustCompile(`^#(?!(EXT|ext|USP)).*`, 0)
+	CommentLineRegex   = regexp2.MustCompile(`^#(?!(EXT|ext|USP)).*`, 0) // excludes tags (#EXT, #ext or #USP)
 )
 
 type (
