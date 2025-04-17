@@ -190,7 +190,6 @@ func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCount
 //
 //   - ExtInf (tag + uri)
 //   - StreamInf (tag + uri)
-//   - Comments
 func HandleMultiLineHLSElements(line string, p *Playlist) error {
 	switch {
 	// Handle HLS segment lines

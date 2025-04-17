@@ -159,14 +159,12 @@ func TestStreamInfParser(t *testing.T) {
 }
 
 func TestCommentParser(t *testing.T) {
-	playlist := `
-#EXTM3U
-#EXT-X-VERSION:4
+	playlist := `#EXTM3U
+							#EXT-X-VERSION:4
 
-## Created with Unified Streaming Platform  (version=1.14.4-30793)
-# AUDIO groups
-#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-aacl-96",LANGUAGE="pt",NAME="Portuguese",DEFAULT=YES,AUTOSELECT=YES,CHANNELS="2"
-`
+							## Created with Unified Streaming Platform  (version=1.14.4-30793)
+							# AUDIO groups
+							#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-aacl-96",LANGUAGE="pt",NAME="Portuguese",DEFAULT=YES,AUTOSELECT=YES,CHANNELS="2"`
 	p, err := setupPlaylist(playlist)
 	assert.NoError(t, err)
 
@@ -177,7 +175,7 @@ func TestCommentParser(t *testing.T) {
 	assert.Equal(t, "# AUDIO groups", nodes[1].HLSElement.Attrs["Comment"])
 }
 
-func TestHandleNonTags_Segments(t *testing.T) {
+func TestMultiLineHLSElements_Segments(t *testing.T) {
 	playlist := `#EXTINF:4.8, no desc
               1.ts`
 	p, err := setupPlaylist(playlist)
@@ -190,7 +188,7 @@ func TestHandleNonTags_Segments(t *testing.T) {
 	assert.Equal(t, "4.8", node.HLSElement.Attrs["Duration"])
 }
 
-func TestHandleNonTags_StreamInf(t *testing.T) {
+func TestMultiLineHLSElements_StreamInf(t *testing.T) {
 	playlist := `#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=256x144,FRAME-RATE=30
               channel-audio_1=96000-video=80000.m3u8`
 	p, err := setupPlaylist(playlist)
