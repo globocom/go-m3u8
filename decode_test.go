@@ -158,6 +158,25 @@ func TestStreamInfParser(t *testing.T) {
 	assert.Equal(t, "1280x720", p.CurrentStreamInf.Resolution)
 }
 
+func TestCommentParser(t *testing.T) {
+	playlist := `
+#EXTM3U
+#EXT-X-VERSION:4
+
+## Created with Unified Streaming Platform  (version=1.14.4-30793)
+# AUDIO groups
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-aacl-96",LANGUAGE="pt",NAME="Portuguese",DEFAULT=YES,AUTOSELECT=YES,CHANNELS="2"
+`
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	nodes := p.FindAll("Comment")
+
+	assert.True(t, len(nodes) == 2)
+	assert.Equal(t, "## Created with Unified Streaming Platform  (version=1.14.4-30793)", nodes[0].HLSElement.Attrs["Comment"])
+	assert.Equal(t, "# AUDIO groups", nodes[1].HLSElement.Attrs["Comment"])
+}
+
 func TestHandleNonTags_Segments(t *testing.T) {
 	playlist := `#EXTINF:4.8, no desc
               1.ts`
@@ -186,17 +205,6 @@ func TestHandleNonTags_StreamInf(t *testing.T) {
 	assert.Equal(t, "mp4a.40.2,avc1.64001F", node.HLSElement.Attrs["CODECS"])
 	assert.Equal(t, "256x144", node.HLSElement.Attrs["RESOLUTION"])
 	assert.Equal(t, "30", node.HLSElement.Attrs["FRAME-RATE"])
-}
-
-func TestHandleNonTags_Comment(t *testing.T) {
-	playlist := `## splice_insert(SCTE35-IN matches Auto Return Mode)`
-	p, err := setupPlaylist(playlist)
-	assert.NoError(t, err)
-
-	node, found := p.Find("Comment")
-	assert.True(t, found)
-	assert.Equal(t, "", node.HLSElement.URI)
-	assert.Equal(t, "## splice_insert(SCTE35-IN matches Auto Return Mode)", node.HLSElement.Attrs["Comment"])
 }
 
 func TestParsePlaylist(t *testing.T) {

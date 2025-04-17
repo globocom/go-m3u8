@@ -31,6 +31,7 @@ var Parsers = map[string]TagParser{
 	others.USPTimestampMapTag:        others.USPTimestampMapParser{},
 	others.EventCueOutTag:            others.EventCueOutParser{},
 	others.EventCueInTag:             others.EventCueInParser{},
+	others.CommentLineTag:            others.CommentParser{},
 }
 
 // Parse tag *Node in *Playlist to string

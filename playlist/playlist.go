@@ -231,17 +231,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 		})
 		p.CurrentStreamInf = nil
 		return nil
-	// Handle Comments
 	default:
-		attrs := map[string]string{
-			"Comment": line,
-		}
-		p.Insert(&internal.Node{
-			HLSElement: &internal.HLSElement{
-				Name:  "Comment",
-				Attrs: attrs,
-			},
-		})
 		return nil
 	}
 }

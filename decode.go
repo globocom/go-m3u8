@@ -9,6 +9,7 @@ import (
 
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
+	"github.com/globocom/go-m3u8/tags/others"
 	"github.com/rs/zerolog/log"
 )
 
@@ -47,11 +48,26 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 	return playlist, nil
 }
 
+// Lines that start with the character '#' are either comments or tags.
+// Tags begin with #EXT.  They are case sensitive.  All other lines that begin with '#' are comments and SHOULD be ignored.
 func extractPrefix(line string) string {
+	// check for blank lines
 	if line == "" {
 		return ""
 	}
 
+	// check for comments
+	isComment, err := others.CommentLineRegex.MatchString(line)
+	if err != nil {
+		log.Error().Err(err).Msgf("failed to parse line: %s", line)
+		return ""
+	}
+
+	if isComment {
+		return others.CommentLineTag
+	}
+
+	// check for tags and uri
 	for i, r := range line {
 		if r == ':' || unicode.IsSpace(r) {
 			return line[:i]
