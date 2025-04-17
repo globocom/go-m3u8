@@ -140,19 +140,19 @@ func TestFindSegment(t *testing.T) {
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	// #EXTINF:6.2666, no desc
-	// channel-audio_1=96000-video=2262976-360948206.ts
+	// #EXTINF:4.8, no desc
+	// channel-audio_1=96000-video=2262976-360948204.ts
 	expectedSegment := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "ExtInf",
-			URI:  "channel-audio_1=96000-video=2262976-360948206.ts",
+			URI:  "channel-audio_1=96000-video=2262976-360948204.ts",
 			Attrs: map[string]string{
-				"Duration": "6.2666",
+				"Duration": "4.8",
 			},
 		},
 	}
 
-	segment, _ := playlist.FindSegment(expectedSegment.HLSElement.Name, expectedSegment.HLSElement.URI)
+	segment, _ := playlist.FindSegment(expectedSegment)
 
 	assert.NotNil(t, segment)
 	assert.Equal(t, segment.HLSElement.Name, expectedSegment.HLSElement.Name)
@@ -189,7 +189,7 @@ func TestFindSegmentInsideAdBreak(t *testing.T) {
 		},
 	}
 
-	adBreak, _ := playlist.FindSegmentAdBreak(adBreakSegment.HLSElement.Name, adBreakSegment.HLSElement.URI)
+	adBreak, _ := playlist.FindSegmentAdBreak(adBreakSegment)
 
 	assert.NotNil(t, adBreak)
 	assert.Equal(t, adBreak.HLSElement.Name, expectedAdBreak.HLSElement.Name)
@@ -228,8 +228,8 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 		},
 	}
 
-	afterAdBreak, _ := playlist.FindSegmentAdBreak(afterBreakSegment.HLSElement.Name, afterBreakSegment.HLSElement.URI)
-	beforeAdBreak, _ := playlist.FindSegmentAdBreak(beforeBreakSegment.HLSElement.Name, beforeBreakSegment.HLSElement.URI)
+	afterAdBreak, _ := playlist.FindSegmentAdBreak(afterBreakSegment)
+	beforeAdBreak, _ := playlist.FindSegmentAdBreak(beforeBreakSegment)
 
 	assert.Nil(t, afterAdBreak)
 	assert.Nil(t, beforeAdBreak)
