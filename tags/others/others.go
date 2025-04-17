@@ -78,7 +78,6 @@ func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
-// TODO: Match regex ==> ^#(?!(EXT|ext)).*
 func (p CommentParser) Parse(line string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
