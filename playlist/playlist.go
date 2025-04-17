@@ -86,6 +86,15 @@ func (p *Playlist) Breaks() []*internal.Node {
 	return result
 }
 
+// Returns true if media segment is inside ad break and false otherwise.
+// When true, method also returns de DateRange object for the segment Ad Break.
+//
+// For entering the Ad Break, we always have DateRange tag with SCTE-OUT and CueOutEvent tag.
+// However, for exiting the Ad Break, we have three possible manifests:
+//
+//   - DateRange SCTE-IN is ALWAYS present.
+//   - No DateRange SCTE-IN. Exit is ONLY marked by CueInEvent tag instead.
+//   - SOMETIMES DateRange SCTE-IN is present, alongside the CueInEvent tag.
 func (p *Playlist) FindSegmentAdBreak(segment *internal.Node) (*internal.Node, bool) {
 	current := segment
 	for current != nil {
