@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/globocom/go-m3u8/internal"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -21,8 +22,8 @@ var (
 type Playlist struct {
 	*internal.DoublyLinkedList
 	CurrentNode      *internal.Node
-	CurrentSegment   *internal.Segment
-	CurrentStreamInf *internal.StreamInf
+	CurrentSegment   *ExtInfData
+	CurrentStreamInf *StreamInfData
 	ProgramDateTime  time.Time
 	MediaSequence    int
 	SegmentsCounter  int
@@ -61,6 +62,17 @@ func (p *Playlist) Segments() []*internal.Node {
 	return p.FindAll("ExtInf")
 }
 
+func (p *Playlist) Breaks() []*internal.Node {
+	result := make([]*internal.Node, 0)
+	nodes := p.FindAll("DateRange")
+	for _, node := range nodes {
+		if node.HLSElement.Attrs["SCTE35-OUT"] != "" {
+			result = append(result, node)
+		}
+	}
+	return result
+}
+
 func (p *Playlist) FindSegment(segmentName, segmentURI string) (*internal.Node, bool) {
 	current := p.Head
 	for current != nil {
@@ -95,17 +107,6 @@ func (p *Playlist) FindSegmentAdBreak(segmentName, segmentURI string) (*internal
 	return nil, false
 }
 
-func (p *Playlist) Breaks() []*internal.Node {
-	result := make([]*internal.Node, 0)
-	nodes := p.FindAll("DateRange")
-	for _, node := range nodes {
-		if node.HLSElement.Attrs["SCTE35-OUT"] != "" {
-			result = append(result, node)
-		}
-	}
-	return result
-}
-
 func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
 	startCondition := func(node *internal.Node) bool {
 		return node.HLSElement.Name == "DateRange" && node.HLSElement.Attrs["SCTE35-OUT"] != ""
@@ -121,8 +122,51 @@ func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
 	return p.ModifyNodesBetween(startCondition, endCondition, transformFunc)
 }
 
-//// PARSER/DECODE METHODS
+// / METHODS FOR MULTI-LINE TAGS (StreamInf and ExtInf)
+type StreamInfData struct {
+	Codecs           []string
+	Bandwidth        string
+	AverageBandwidth string
+	Resolution       string
+	FrameRate        string
+	URI              string
+}
 
+type ExtInfData struct {
+	Duration        float64
+	ProgramDateTime time.Time
+	MediaSequence   int
+	URI             string
+}
+
+func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
+	return &StreamInfData{
+		Bandwidth:        mappedAttr["BANDWIDTH"],
+		AverageBandwidth: mappedAttr["AVERAGE-BANDWIDTH"],
+		Codecs:           strings.Split(mappedAttr["CODECS"], ","),
+		Resolution:       mappedAttr["RESOLUTION"],
+		FrameRate:        mappedAttr["FRAME-RATE"],
+	}
+}
+
+func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
+	floatDuration, err := strconv.ParseFloat(duration, 64)
+	if err != nil {
+		log.Error().Err(err).Msgf("failed to parse duration for segment: %s", duration)
+		return &ExtInfData{}
+	}
+
+	currentDVRInNanoseconds := int(playlistDVR * float64(time.Second))
+	segmentProgramDateTime := playlistPDT.Add(time.Duration(currentDVRInNanoseconds))
+
+	return &ExtInfData{
+		Duration:        floatDuration,
+		MediaSequence:   playlistMediaSequence + playlistSegmentsCounter,
+		ProgramDateTime: segmentProgramDateTime,
+	}
+}
+
+// DECODE METHODS
 func HandleNonTags(line string, p *Playlist) error {
 	switch {
 	// Handle HLS segment lines

@@ -28,7 +28,7 @@ type StreamInfParser struct{}
 type StreamInfEncoder struct{}
 
 func (p StreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
-	playlist.CurrentStreamInf = internal.ToStreamInfType(pl.TagsToMap(tag))
+	playlist.CurrentStreamInf = pl.GetStreamInfData(pl.TagsToMap(tag))
 	return nil
 }
 
