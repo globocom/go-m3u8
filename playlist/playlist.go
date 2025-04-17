@@ -30,6 +30,19 @@ type Playlist struct {
 	DVR              float64
 }
 
+func NewPlaylist() *Playlist {
+	return &Playlist{
+		DoublyLinkedList: new(internal.DoublyLinkedList),
+		CurrentNode:      new(internal.Node),
+		CurrentSegment:   new(ExtInfData),
+		CurrentStreamInf: new(StreamInfData),
+		ProgramDateTime:  *new(time.Time),
+		MediaSequence:    0,
+		SegmentsCounter:  0,
+		DVR:              0,
+	}
+}
+
 func (p *Playlist) VersionValue() string {
 	node, found := p.Find("Version")
 	if !found {

@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"time"
 	"unicode"
 
-	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
 	"github.com/rs/zerolog/log"
@@ -19,16 +17,7 @@ type Source interface {
 }
 
 func ParsePlaylist(src Source) (*pl.Playlist, error) {
-	playlist := &pl.Playlist{
-		DoublyLinkedList: new(internal.DoublyLinkedList),
-		CurrentNode:      new(internal.Node),
-		CurrentSegment:   new(pl.ExtInfData),
-		CurrentStreamInf: new(pl.StreamInfData),
-		ProgramDateTime:  *new(time.Time),
-		MediaSequence:    0,
-		SegmentsCounter:  0,
-		DVR:              0,
-	}
+	playlist := pl.NewPlaylist()
 
 	scanner := bufio.NewScanner(src)
 	defer func() {
