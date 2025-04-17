@@ -47,7 +47,7 @@ func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
 	if len(parts) > 1 {
 		duration := strings.TrimSpace(strings.Split(parts[1], ",")[0])
 
-		playlist.CurrentSegment = internal.ToSegmentType(duration, playlist.MediaSequence, playlist.SegmentsCounter, playlist.DVR, playlist.ProgramDateTime)
+		playlist.CurrentSegment = pl.GetExtInfData(duration, playlist.MediaSequence, playlist.SegmentsCounter, playlist.DVR, playlist.ProgramDateTime)
 
 		playlist.DVR = pl.RoundFloat(playlist.DVR+playlist.CurrentSegment.Duration, 4)
 		playlist.SegmentsCounter += 1

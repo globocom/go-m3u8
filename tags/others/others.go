@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dlclark/regexp2"
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 )
@@ -17,12 +18,15 @@ var (
 	USPTimestampMapTag = "#USP-X-TIMESTAMP-MAP"
 	EventCueOutTag     = "#EXT-X-CUE-OUT"
 	EventCueInTag      = "#EXT-X-CUE-IN"
+	CommentLineTag     = "# comment"
+	CommentLineRegex   = regexp2.MustCompile(`^#(?!(EXT|ext|USP)).*`, 0) // excludes tags (#EXT, #ext or #USP)
 )
 
 type (
 	USPTimestampMapParser struct{}
 	EventCueOutParser     struct{}
 	EventCueInParser      struct{}
+	CommentParser         struct{}
 )
 
 type (
@@ -60,6 +64,7 @@ func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
 	}
 	return fmt.Errorf("invalid cue out tag: %s", tag)
 }
+
 func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
@@ -70,8 +75,18 @@ func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 		},
 	})
 
-	// When break ends, should reset current daterange
-	playlist.CurrentDateRange = &internal.DateRange{}
+	return nil
+}
+
+func (p CommentParser) Parse(line string, playlist *pl.Playlist) error {
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Comment",
+			Attrs: map[string]string{
+				"Comment": line,
+			},
+		},
+	})
 
 	return nil
 }

@@ -3,6 +3,7 @@ module github.com/globocom/go-m3u8
 go 1.24.0
 
 require (
+	github.com/dlclark/regexp2 v1.11.5
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.10.0
 )

@@ -134,3 +134,58 @@ func TestReplaceBreaksURI(t *testing.T) {
 	assert.Equal(t, "0xFFFF", node1.HLSElement.Attrs["SCTE35-OUT"])
 	assert.Equal(t, "0xFFFD", node4.HLSElement.Attrs["SCTE35-IN"])
 }
+
+func TestFindSegmentInsideAdBreak(t *testing.T) {
+	file, _ := os.Open("./../testdata/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// #EXTINF:6.2666, no desc
+	// channel-audio_1=96000-video=2262976-360948206.ts
+	adBreakSegment := playlist.Segments()[2]
+	assert.Equal(t, adBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948206.ts")
+
+	// #EXT-X-DATERANGE:ID="1-1732551382",START-DATE="2024-11-25T16:16:22.933333Z",PLANNED-DURATION=60.1,SCTE35-OUT=0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B
+	expectedAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"ID":               "1-1732551382",
+				"START-DATE":       "2024-11-25T16:16:22.933333Z",
+				"PLANNED-DURATION": "60.1",
+				"SCTE35-OUT":       "0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B",
+			},
+		},
+	}
+
+	adBreak, _ := playlist.FindSegmentAdBreak(adBreakSegment)
+
+	assert.NotNil(t, adBreak)
+	assert.Equal(t, adBreak.HLSElement.Name, expectedAdBreak.HLSElement.Name)
+	assert.Equal(t, adBreak.HLSElement.URI, expectedAdBreak.HLSElement.URI)
+	assert.Equal(t, adBreak.HLSElement.Attrs["SCTE35-OUT"], expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"])
+}
+
+func TestFindSegmentOutsideAdBreak(t *testing.T) {
+	file, _ := os.Open("./../testdata/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// after break
+	// #EXTINF:3.7666, no desc
+	// channel-audio_1=96000-video=2262976-360948218.ts
+	afterBreakSegment := playlist.Segments()[14]
+	assert.Equal(t, afterBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948218.ts")
+
+	// before break
+	// #EXTINF:4.8, no desc
+	// channel-audio_1=96000-video=2262976-360948204.ts
+	beforeBreakSegment := playlist.Segments()[0]
+	assert.Equal(t, beforeBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948204.ts")
+
+	afterAdBreak, _ := playlist.FindSegmentAdBreak(afterBreakSegment)
+	beforeAdBreak, _ := playlist.FindSegmentAdBreak(beforeBreakSegment)
+
+	assert.Nil(t, afterAdBreak)
+	assert.Nil(t, beforeAdBreak)
+}

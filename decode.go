@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"time"
 	"unicode"
 
-	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
+	"github.com/globocom/go-m3u8/tags/others"
 	"github.com/rs/zerolog/log"
 )
 
@@ -19,17 +18,7 @@ type Source interface {
 }
 
 func ParsePlaylist(src Source) (*pl.Playlist, error) {
-	playlist := &pl.Playlist{
-		DoublyLinkedList: new(internal.DoublyLinkedList),
-		CurrentNode:      new(internal.Node),
-		CurrentDateRange: new(internal.DateRange),
-		CurrentSegment:   new(internal.Segment),
-		CurrentStreamInf: new(internal.StreamInf),
-		ProgramDateTime:  *new(time.Time),
-		MediaSequence:    0,
-		SegmentsCounter:  0,
-		DVR:              0,
-	}
+	playlist := pl.NewPlaylist()
 
 	scanner := bufio.NewScanner(src)
 	defer func() {
@@ -47,8 +36,8 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 				return nil, fmt.Errorf("error parsing tag %s: %w", linePrefix, err)
 			}
 		} else {
-			if err := pl.HandleNonTags(line, playlist); err != nil {
-				return nil, fmt.Errorf("error handling non-tag line %q: %w", line, err)
+			if err := pl.HandleMultiLineHLSElements(line, playlist); err != nil {
+				return nil, fmt.Errorf("error handling multi-line HLS element %q: %w", line, err)
 			}
 		}
 	}
@@ -59,11 +48,26 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 	return playlist, nil
 }
 
+// Lines that start with the character '#' are either comments or tags.
+// Tags begin with #EXT.  They are case sensitive.  All other lines that begin with '#' are comments and SHOULD be ignored.
 func extractPrefix(line string) string {
+	// check for blank lines
 	if line == "" {
 		return ""
 	}
 
+	// check for comments
+	isComment, err := others.CommentLineRegex.MatchString(line)
+	if err != nil {
+		log.Error().Err(err).Msgf("failed to parse line: %s", line)
+		return ""
+	}
+
+	if isComment {
+		return others.CommentLineTag
+	}
+
+	// check for tags and uri
 	for i, r := range line {
 		if r == ':' || unicode.IsSpace(r) {
 			return line[:i]

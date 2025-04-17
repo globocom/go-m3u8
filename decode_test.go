@@ -9,7 +9,6 @@ import (
 	"time"
 
 	m3u8 "github.com/globocom/go-m3u8"
-	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
@@ -103,7 +102,6 @@ func TestDateRangeParser(t *testing.T) {
 
 	node, found := p.Find("DateRange")
 	assert.True(t, found)
-	assert.Equal(t, p.CurrentDateRange, node.HLSElement.ToDateRangeType(p.MediaSequence, p.SegmentsCounter))
 	assert.Equal(t, "0xFF0000", node.HLSElement.Attrs["SCTE35-OUT"])
 	assert.Equal(t, "break1", node.HLSElement.Attrs["ID"])
 	assert.Equal(t, "2025-01-01T00:00:00Z", node.HLSElement.Attrs["START-DATE"])
@@ -130,7 +128,6 @@ func TestCueInParser(t *testing.T) {
 
 	node, ok := p.Find("CueIn")
 	assert.True(t, ok)
-	assert.Equal(t, p.CurrentDateRange, &internal.DateRange{})
 	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-CUE-IN"])
 }
 
@@ -161,7 +158,24 @@ func TestStreamInfParser(t *testing.T) {
 	assert.Equal(t, "1280x720", p.CurrentStreamInf.Resolution)
 }
 
-func TestHandleNonTags_Segments(t *testing.T) {
+func TestCommentParser(t *testing.T) {
+	playlist := `#EXTM3U
+							#EXT-X-VERSION:4
+
+							## Created with Unified Streaming Platform  (version=1.14.4-30793)
+							# AUDIO groups
+							#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-aacl-96",LANGUAGE="pt",NAME="Portuguese",DEFAULT=YES,AUTOSELECT=YES,CHANNELS="2"`
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	nodes := p.FindAll("Comment")
+
+	assert.True(t, len(nodes) == 2)
+	assert.Equal(t, "## Created with Unified Streaming Platform  (version=1.14.4-30793)", nodes[0].HLSElement.Attrs["Comment"])
+	assert.Equal(t, "# AUDIO groups", nodes[1].HLSElement.Attrs["Comment"])
+}
+
+func TestMultiLineHLSElements_Segments(t *testing.T) {
 	playlist := `#EXTINF:4.8, no desc
               1.ts`
 	p, err := setupPlaylist(playlist)
@@ -174,7 +188,7 @@ func TestHandleNonTags_Segments(t *testing.T) {
 	assert.Equal(t, "4.8", node.HLSElement.Attrs["Duration"])
 }
 
-func TestHandleNonTags_StreamInf(t *testing.T) {
+func TestMultiLineHLSElements_StreamInf(t *testing.T) {
 	playlist := `#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=256x144,FRAME-RATE=30
               channel-audio_1=96000-video=80000.m3u8`
 	p, err := setupPlaylist(playlist)
@@ -189,17 +203,6 @@ func TestHandleNonTags_StreamInf(t *testing.T) {
 	assert.Equal(t, "mp4a.40.2,avc1.64001F", node.HLSElement.Attrs["CODECS"])
 	assert.Equal(t, "256x144", node.HLSElement.Attrs["RESOLUTION"])
 	assert.Equal(t, "30", node.HLSElement.Attrs["FRAME-RATE"])
-}
-
-func TestHandleNonTags_Comment(t *testing.T) {
-	playlist := `## splice_insert(SCTE35-IN matches Auto Return Mode)`
-	p, err := setupPlaylist(playlist)
-	assert.NoError(t, err)
-
-	node, found := p.Find("Comment")
-	assert.True(t, found)
-	assert.Equal(t, "", node.HLSElement.URI)
-	assert.Equal(t, "## splice_insert(SCTE35-IN matches Auto Return Mode)", node.HLSElement.Attrs["Comment"])
 }
 
 func TestParsePlaylist(t *testing.T) {

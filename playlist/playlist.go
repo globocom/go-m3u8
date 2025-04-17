@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/globocom/go-m3u8/internal"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -21,13 +22,25 @@ var (
 type Playlist struct {
 	*internal.DoublyLinkedList
 	CurrentNode      *internal.Node
-	CurrentDateRange *internal.DateRange
-	CurrentSegment   *internal.Segment
-	CurrentStreamInf *internal.StreamInf
+	CurrentSegment   *ExtInfData
+	CurrentStreamInf *StreamInfData
 	ProgramDateTime  time.Time
 	MediaSequence    int
 	SegmentsCounter  int
 	DVR              float64
+}
+
+func NewPlaylist() *Playlist {
+	return &Playlist{
+		DoublyLinkedList: new(internal.DoublyLinkedList),
+		CurrentNode:      new(internal.Node),
+		CurrentSegment:   new(ExtInfData),
+		CurrentStreamInf: new(StreamInfData),
+		ProgramDateTime:  *new(time.Time),
+		MediaSequence:    0,
+		SegmentsCounter:  0,
+		DVR:              0,
+	}
 }
 
 func (p *Playlist) VersionValue() string {
@@ -73,6 +86,34 @@ func (p *Playlist) Breaks() []*internal.Node {
 	return result
 }
 
+// Returns true if media segment is inside ad break and false otherwise.
+// When true, method also returns de DateRange object for the segment Ad Break.
+//
+// For entering the Ad Break, we always have DateRange tag with SCTE-OUT and CueOutEvent tag.
+// However, for exiting the Ad Break, we have three possible manifests:
+//
+//   - DateRange SCTE-IN is ALWAYS present.
+//   - No DateRange SCTE-IN. Exit is ONLY marked by CueInEvent tag instead.
+//   - SOMETIMES DateRange SCTE-IN is present, alongside the CueInEvent tag.
+func (p *Playlist) FindSegmentAdBreak(segment *internal.Node) (*internal.Node, bool) {
+	current := segment
+	for current != nil {
+		// segment is inside Ad Break if it is preceeded by a DateRange tag with attribute SCTE35-OUT
+		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
+			return current, true
+		}
+
+		// segment is outside Ad Break if it is preceeded by a CueIn tag or a DateRange tag with attribute SCTE35-IN
+		if (current.HLSElement.Name == "CueIn") || (current.HLSElement.Name == "DateRange" && current.HLSElement.Attrs["SCTE35-IN"] != "") {
+			return nil, false
+		}
+
+		current = current.Prev
+	}
+
+	return nil, false
+}
+
 func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
 	startCondition := func(node *internal.Node) bool {
 		return node.HLSElement.Name == "DateRange" && node.HLSElement.Attrs["SCTE35-OUT"] != ""
@@ -88,9 +129,68 @@ func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
 	return p.ModifyNodesBetween(startCondition, endCondition, transformFunc)
 }
 
-//// PARSER/DECODE METHODS
+//// METHODS FOR DECODING MULTI-LINE TAGS
 
-func HandleNonTags(line string, p *Playlist) error {
+// StreamInfData holds data for StreamInf HLS Element, whose format in manifest is multi-line:
+//
+// #EXT-X-STREAM-INF:<attribute-list>
+//
+// <URI>
+type StreamInfData struct {
+	Codecs           []string
+	Bandwidth        string
+	AverageBandwidth string
+	Resolution       string
+	FrameRate        string
+	URI              string
+}
+
+// ExtInfData holds data for ExtInf HLS element, whose format in manifest is multi-line:
+//
+// #EXTINF:<duration>,[<title>]
+//
+// <URI>
+type ExtInfData struct {
+	Duration        float64
+	ProgramDateTime time.Time
+	MediaSequence   int
+	URI             string
+}
+
+// Internal parser returns new StreamInfData object
+func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
+	return &StreamInfData{
+		Bandwidth:        mappedAttr["BANDWIDTH"],
+		AverageBandwidth: mappedAttr["AVERAGE-BANDWIDTH"],
+		Codecs:           strings.Split(mappedAttr["CODECS"], ","),
+		Resolution:       mappedAttr["RESOLUTION"],
+		FrameRate:        mappedAttr["FRAME-RATE"],
+	}
+}
+
+// Internal parser returns new ExtInfData object
+func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
+	floatDuration, err := strconv.ParseFloat(duration, 64)
+	if err != nil {
+		log.Error().Err(err).Msgf("failed to parse duration for segment: %s", duration)
+		return &ExtInfData{}
+	}
+
+	currentDVRInNanoseconds := int(playlistDVR * float64(time.Second))
+	segmentProgramDateTime := playlistPDT.Add(time.Duration(currentDVRInNanoseconds))
+
+	return &ExtInfData{
+		Duration:        floatDuration,
+		MediaSequence:   playlistMediaSequence + playlistSegmentsCounter,
+		ProgramDateTime: segmentProgramDateTime,
+	}
+}
+
+// Handles HLS Elements whose format in manifest are multi-line:
+//
+//   - ExtInf (tag + uri)
+//   - StreamInf (tag + uri)
+func HandleMultiLineHLSElements(line string, p *Playlist) error {
 	switch {
 	// Handle HLS segment lines
 	case p.CurrentSegment != nil && strings.HasSuffix(line, ".ts"):
@@ -130,20 +230,12 @@ func HandleNonTags(line string, p *Playlist) error {
 		})
 		p.CurrentStreamInf = nil
 		return nil
-	// Handle Comments
 	default:
-		attrs := map[string]string{
-			"Comment": line,
-		}
-		p.Insert(&internal.Node{
-			HLSElement: &internal.HLSElement{
-				Name:  "Comment",
-				Attrs: attrs,
-			},
-		})
 		return nil
 	}
 }
+
+//// AUXILIARY METHODS FOR DECODING
 
 // https://regex101.com/r/0A2ulC/1
 func TagsToMap(line string) map[string]string {
@@ -161,7 +253,9 @@ func RoundFloat(val float64, precision uint) float64 {
 	return math.Round(val*ratio) / ratio
 }
 
-// // ENCODE METHODS
+//// AUXILIARY METHODS FOR ENCODING
+
+// Encodes tag with attributes into string object
 func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string) error {
 	if len(attrs) == 0 {
 		_, err := builder.WriteString(tag + "\n")
@@ -195,6 +289,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	return err
 }
 
+// Encodes tag without attributes into string object
 func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey string) error {
 	if value, exists := node.HLSElement.Attrs[attrKey]; exists {
 		attr := fmt.Sprintf("%s:%s\n", tag, value)
