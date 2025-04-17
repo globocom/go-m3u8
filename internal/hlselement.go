@@ -36,34 +36,6 @@ type Segment struct {
 	URI             string
 }
 
-type DateRange struct {
-	ID              string
-	Class           string
-	StartDate       time.Time
-	EndDate         time.Time
-	PlannedDuration float64
-	Scte35Out       string
-	Scte35In        string
-	MediaSequence   int
-}
-
-func (e *HLSElement) ToDateRangeType(playlistMediaSequence, playlistSegmentsCounter int) *DateRange {
-	startDate, _ := time.Parse(time.RFC3339Nano, e.Attrs["START-DATE"])
-	endDate, _ := time.Parse(time.RFC3339Nano, e.Attrs["END-DATE"])
-	duration, _ := strconv.ParseFloat(e.Attrs["DURATION"], 64)
-
-	return &DateRange{
-		ID:              e.Attrs["ID"],
-		Class:           e.Attrs["CLASS"],
-		StartDate:       startDate,
-		EndDate:         endDate,
-		PlannedDuration: duration,
-		Scte35Out:       e.Attrs["SCTE35-OUT"],
-		Scte35In:        e.Attrs["SCTE35-IN"],
-		MediaSequence:   playlistMediaSequence + playlistSegmentsCounter,
-	}
-}
-
 func ToStreamInfType(mappedAttr map[string]string) *StreamInf {
 	return &StreamInf{
 		Bandwidth:        mappedAttr["BANDWIDTH"],

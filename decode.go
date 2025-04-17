@@ -22,7 +22,6 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 	playlist := &pl.Playlist{
 		DoublyLinkedList: new(internal.DoublyLinkedList),
 		CurrentNode:      new(internal.Node),
-		CurrentDateRange: new(internal.DateRange),
 		CurrentSegment:   new(internal.Segment),
 		CurrentStreamInf: new(internal.StreamInf),
 		ProgramDateTime:  *new(time.Time),

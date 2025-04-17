@@ -41,10 +41,6 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 		},
 	}
 
-	if dateRangeNode.HLSElement.Attrs["SCTE35-OUT"] != "" {
-		playlist.CurrentDateRange = dateRangeNode.HLSElement.ToDateRangeType(playlist.MediaSequence, playlist.SegmentsCounter)
-	}
-
 	playlist.Insert(dateRangeNode)
 	return nil
 }

@@ -70,9 +70,6 @@ func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 		},
 	})
 
-	// When break ends, should reset current daterange
-	playlist.CurrentDateRange = &internal.DateRange{}
-
 	return nil
 }
 
