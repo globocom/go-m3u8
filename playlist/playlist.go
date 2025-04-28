@@ -21,7 +21,6 @@ var (
 
 type Playlist struct {
 	*internal.DoublyLinkedList
-	CurrentNode      *internal.Node
 	CurrentSegment   *ExtInfData
 	CurrentStreamInf *StreamInfData
 	ProgramDateTime  time.Time
