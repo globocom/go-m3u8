@@ -186,15 +186,12 @@ func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCount
 	}
 }
 
-// Handles HLS Elements whose format in manifest are multi-line:
-//
-//   - ExtInf (tag + uri)
-//   - StreamInf (tag + uri)
+// Handles HLS Elements whose format in manifest are multi-line: tag + uri.
+// The URI line that follows the EXT-X-STREAM-INF and EXTINF tags is REQUIRED.
 func HandleMultiLineHLSElements(line string, p *Playlist) error {
 	switch {
-	// Handle HLS segment lines
-	case p.CurrentSegment != nil && strings.HasSuffix(line, ".ts"):
-		p.CurrentSegment.URI = line
+	// Handle EXTINF
+	case p.CurrentSegment != nil:
 		p.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
 				Name: "ExtInf",
@@ -211,21 +208,19 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 		p.CurrentSegment = nil
 		return nil
 
-	// Handle HLS media playlist lines
-	case p.CurrentStreamInf != nil && strings.HasSuffix(line, ".m3u8"):
-		p.CurrentStreamInf.URI = line
-		attrs := map[string]string{
-			"BANDWIDTH":         p.CurrentStreamInf.Bandwidth,
-			"AVERAGE-BANDWIDTH": p.CurrentStreamInf.AverageBandwidth,
-			"CODECS":            strings.Join(p.CurrentStreamInf.Codecs, ","),
-			"RESOLUTION":        p.CurrentStreamInf.Resolution,
-			"FRAME-RATE":        p.CurrentStreamInf.FrameRate,
-		}
+	// Handle EXT-X-STREAM-INF
+	case p.CurrentStreamInf != nil:
 		p.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
-				Name:  "StreamInf",
-				Attrs: attrs,
-				URI:   line,
+				Name: "StreamInf",
+				URI:  line,
+				Attrs: map[string]string{
+					"BANDWIDTH":         p.CurrentStreamInf.Bandwidth,
+					"AVERAGE-BANDWIDTH": p.CurrentStreamInf.AverageBandwidth,
+					"CODECS":            strings.Join(p.CurrentStreamInf.Codecs, ","),
+					"RESOLUTION":        p.CurrentStreamInf.Resolution,
+					"FRAME-RATE":        p.CurrentStreamInf.FrameRate,
+				},
 			},
 		})
 		p.CurrentStreamInf = nil
