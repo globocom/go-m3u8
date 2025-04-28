@@ -205,6 +205,48 @@ func TestMultiLineHLSElements_StreamInf(t *testing.T) {
 	assert.Equal(t, "30", node.HLSElement.Attrs["FRAME-RATE"])
 }
 
+func TestCompleteMultivariantPlaylist(t *testing.T) {
+	playlist := `#EXTM3U
+							#EXT-X-VERSION:3
+							## Created with Unified Streaming Platform  (version=1.14.4-30793)
+
+							# variants
+							#EXT-X-STREAM-INF:BANDWIDTH=759000,AVERAGE-BANDWIDTH=690000,CODECS=\"mp4a.40.2,avc1.64001F\",RESOLUTION=640x360,FRAME-RATE=30
+							coelhodai-audio_1=96000-video=558976.m3u8?dvr_window_length=600
+							#EXT-X-STREAM-INF:BANDWIDTH=759000,AVERAGE-BANDWIDTH=690000,CODECS=\"mp4a.40.2,avc1.64001F\",RESOLUTION=720x480,FRAME-RATE=30
+							coelhodai-audio_1=96000-video=123456.m3u8?dvr_window_length=600`
+
+	p, err := setupPlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "StreamInf")
+	assert.Equal(t, len(p.Variants()), 2)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+}
+
+func TestCompleteMediaPlaylist(t *testing.T) {
+	playlist := `#EXTM3U
+							#EXT-X-VERSION:3
+							## Created with Unified Streaming Platform  (version=1.14.4-30793)
+
+							# variants
+							#EXT-X-STREAM-INF:BANDWIDTH=759000,AVERAGE-BANDWIDTH=690000,CODECS=\"mp4a.40.2,avc1.64001F\",RESOLUTION=640x360,FRAME-RATE=30
+							coelhodai-audio_1=96000-video=558976.m3u8?dvr_window_length=600
+							#EXT-X-STREAM-INF:BANDWIDTH=759000,AVERAGE-BANDWIDTH=690000,CODECS=\"mp4a.40.2,avc1.64001F\",RESOLUTION=720x480,FRAME-RATE=30
+							coelhodai-audio_1=96000-video=123456.m3u8?dvr_window_length=600`
+
+	p, err := setupPlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "StreamInf")
+	assert.NotEqual(t, p.Variants(), 0)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+}
+
 func TestParsePlaylist(t *testing.T) {
 	type testCaseParams struct {
 		name           string
