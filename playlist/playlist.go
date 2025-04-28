@@ -33,9 +33,8 @@ type Playlist struct {
 func NewPlaylist() *Playlist {
 	return &Playlist{
 		DoublyLinkedList: new(internal.DoublyLinkedList),
-		CurrentNode:      new(internal.Node),
-		CurrentSegment:   new(ExtInfData),
-		CurrentStreamInf: new(StreamInfData),
+		CurrentSegment:   nil,
+		CurrentStreamInf: nil,
 		ProgramDateTime:  *new(time.Time),
 		MediaSequence:    0,
 		SegmentsCounter:  0,
