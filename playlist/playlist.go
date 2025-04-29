@@ -41,6 +41,22 @@ func NewPlaylist() *Playlist {
 	}
 }
 
+func (p *Playlist) Print() {
+	if p.Head == nil || p.Tail == nil {
+		log.Warn().Msg("playlist is empty")
+		return
+	}
+
+	current := p.Head
+	for current != nil {
+		fmt.Printf(">>>>>>>>> Node: %+v\n", current)
+		if current.HLSElement != nil {
+			fmt.Printf("HLSElement: %+v\n", current.HLSElement)
+		}
+		current = current.Next
+	}
+}
+
 func (p *Playlist) VersionValue() string {
 	node, found := p.Find("Version")
 	if !found {
