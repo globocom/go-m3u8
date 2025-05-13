@@ -10,9 +10,11 @@ package media
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -39,6 +41,25 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 				"MediaSequence": fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter),
 			},
 		},
+	}
+
+	// date range tag with scte-35 attribute (i.e. indicates ad break start)
+	if dateRangeNode.HLSElement.Attrs["SCTE35-OUT"] != "" {
+		startDate, err := time.Parse(time.RFC3339Nano, dateRangeNode.HLSElement.Attrs["START-DATE"])
+		if err != nil {
+			return fmt.Errorf("failed to parse start time of date range tag: %s", tag)
+		}
+
+		// date range's media sequence should equal the ad break's first segment's media sequence
+		// however, when the ad break has begun and segments are outside DVR limit, we have lost the first segment's information
+		// as a solution, we will set the date range's media sequence to zero
+
+		// in this case, the program date time tag could come AFTER the date range tag in the playlist, being parsed as a zero value
+		// or it comes BEFORE the date range tag, and its timestamp is later than date range's start date
+		if playlist.ProgramDateTime.IsZero() || playlist.ProgramDateTime.After(startDate) {
+			log.Info().Msg("break about to leave dvr limit, media sequence will be zero")
+			dateRangeNode.HLSElement.Details["MediaSequence"] = "0"
+		}
 	}
 
 	playlist.Insert(dateRangeNode)
