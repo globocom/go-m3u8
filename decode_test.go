@@ -219,11 +219,11 @@ func TestParseMultivariantPlaylist(t *testing.T) {
 	p, err := setupPlaylist(playlist)
 
 	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
 	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
 	assert.Equal(t, p.Tail.HLSElement.Name, "StreamInf")
 	assert.Equal(t, len(p.Variants()), 2)
-	assert.Nil(t, p.CurrentSegment)
-	assert.Nil(t, p.CurrentStreamInf)
 }
 
 func TestParseMediaPlaylist(t *testing.T) {
@@ -231,48 +231,116 @@ func TestParseMediaPlaylist(t *testing.T) {
 	p, err := m3u8.ParsePlaylist(file)
 
 	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
 	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 	assert.Equal(t, len(p.Segments()), 16)
-	assert.Nil(t, p.CurrentSegment)
-	assert.Nil(t, p.CurrentStreamInf)
 }
 
-func TestParseMediaPlaylist_WithAdBreak(t *testing.T) {
-	file, _ := os.Open("testdata/media/withAdBreak.m3u8")
+func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withCompleteAdBreak.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
-	p.Print()
-
-	cueIn, foundCueIn := p.Find("CueIn")
+	_, foundCueOut := p.Find("CueOut")
+	_, foundCueIn := p.Find("CueIn")
 	breaks := p.Breaks()
 
 	assert.NoError(t, err)
-	assert.True(t, foundCueIn)
-	assert.Equal(t, cueIn.HLSElement.Name, "CueIn")
-	assert.Equal(t, len(breaks), 1)
-	assert.Equal(t, breaks[0].HLSElement.Details["MediaSequence"], "363903241")
 	assert.Nil(t, p.CurrentSegment)
 	assert.Nil(t, p.CurrentStreamInf)
+	assert.True(t, foundCueOut)
+	assert.True(t, foundCueIn)
+	assert.Equal(t, len(breaks), 1)
+	assert.Equal(t, breaks[0].HLSElement.Details["MediaSequence"], "363969994")
 }
 
-func TestParseMediaPlaylist_WithAdBreakOutsideDVR(t *testing.T) {
-	file, _ := os.Open("testdata/media/withAdBreakOutsideDVR.m3u8")
+func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withAdBreakBeforeDVRLimit.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
-	cueIn, foundCueIn := p.Find("CueIn")
-	breaks := p.Breaks()
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.PDTs()
 
 	assert.NoError(t, err)
-	assert.True(t, foundCueIn)
-	assert.Equal(t, cueIn.HLSElement.Name, "CueIn")
-	assert.Equal(t, len(breaks), 1)
-	// TODO: We do not want the daterange's media sequence to change
-	// It should always be equal to the break's first segment's media sequence
-	// In this example, it should remain 363903241, and not increment 363903242
-	assert.Equal(t, breaks[0].HLSElement.Details["MediaSequence"], "363903242")
-	assert.Nil(t, p.CurrentSegment)
-	assert.Nil(t, p.CurrentStreamInf)
+	assert.True(t, foundCueOut)
+	assert.Equal(t, len(allBreaks), 1)
+
+	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991004")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "363991006")
+
+	assert.Equal(t, len(allPDTs), 3)
+	assert.NotEqual(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
+	assert.Equal(t, allPDTs[1].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
+}
+
+func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withAdBreakOnDVRLimit.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.PDTs()
+
+	assert.NoError(t, err)
+	assert.True(t, foundCueOut)
+	assert.Equal(t, len(allBreaks), 1)
+
+	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991006")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "0")
+
+	assert.Equal(t, len(allPDTs), 2)
+	assert.Equal(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
+}
+
+func TestParseMediaPlaylist_WithPartialAdBreak_OutsideDVRLimit(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withAdBreakOutsideDVRLimit.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.PDTs()
+
+	assert.NoError(t, err)
+	assert.False(t, foundCueOut)
+	assert.Equal(t, len(allBreaks), 1)
+
+	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991008")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "0")
+
+	assert.Equal(t, len(allPDTs), 2)
+	assert.NotEqual(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
+}
+
+func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withAdBreakNewNotReady.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.PDTs()
+
+	assert.NoError(t, err)
+	assert.False(t, foundCueOut)
+	assert.Equal(t, len(allPDTs), 1)
+	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "363969994")
+	assert.Nil(t, allBreaks[0].Next)
+}
+
+func TestParseMediaPlaylist_WithPartialAdBreak_NewReady(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withAdBreakNewReady.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.PDTs()
+
+	assert.NoError(t, err)
+	assert.True(t, foundCueOut)
+	assert.Equal(t, len(allPDTs), 2)
+	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "363969994")
+	assert.NotNil(t, allBreaks[0].Next)
 }
 
 func TestParsePlaylist(t *testing.T) {
