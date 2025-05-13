@@ -7,7 +7,7 @@ An Ad Break is present on the media playlist by way of SCTE-35 Marking.
 - The `EXT-X-CUE-OUT` and `EXT-X-CUE-IN` tags are usually accompanied by a PDT `EXT-X-PROGRAM-DATE-TIME` tag.
 - The Break's *Media Sequence* should ALWAYS equal the *Media Sequence* of the first segment inside the Break.
 
-Depending on the playlist DVR, not all Ad Breaks will have this full structure present on the manifest at the time of request. There could be Ad Breaks that are already partially outside the DVR limit, and Ad Breaks which are still starting, without the first segment being present on the manifest.
+Depending on the playlist DVR, not all Ad Breaks will have this full structure present on the manifest at the time of request. There could be Ad Break segments that have already left the manifest due to the DVR, and Ad Breaks which are still starting and don't have the first segment on the manifest yet.
 
 This leaves us with three possible scenarios to handle when parsing the media playlist:
 
