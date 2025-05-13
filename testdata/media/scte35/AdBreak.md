@@ -78,8 +78,6 @@ It is possible that when the client requests the playlist, there will be an Ad B
 
 The `EXT-X-DATERANGE` (`SCTE-OUT`) tag is already on the manifest, as might be the `EXT-X-CUE-OUT` tag, but there are NO Break segments or PDT tag yet. 
 
-In this case, when calculating the *Media Sequence* for the Ad Break, we assume the value will be **zero**. 
-
 **Test File:** `/testdata/media/scte35/withAdBreakNewNotReady.m3u8`
 ```
 #EXTM3U
@@ -112,8 +110,6 @@ channel-audio_1=96000-video=3442944-363969993.ts
 ```
 
 Later, when the first segment for the Ad Break has been generated, we will have the `EXT-X-DATERANGE` (`SCTE-OUT`), `EXT-X-CUEOUT` and `EXT-X-PROGRAM-DATE-TIME` tags, followed by the first Break segment `EXTINF`. 
-
-As normally, the *Media Sequence* for the Ad Break is the same as the first Break's segment's.
 
 **Test File:** `/testdata/media/scte35/withAdBreakNewtReady.m3u8`
 ```
