@@ -38,7 +38,7 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 			Name:  "DateRange",
 			Attrs: params,
 			Details: map[string]string{
-				"MediaSequence": fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter),
+				"FirstSegmentMediaSequence": fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter),
 			},
 		},
 	}
@@ -58,7 +58,7 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 		// or it comes BEFORE the date range tag, and its timestamp is later than date range's start date
 		if playlist.ProgramDateTime.IsZero() || playlist.ProgramDateTime.After(startDate) {
 			log.Info().Msg("break about to leave dvr limit, media sequence will be zero")
-			dateRangeNode.HLSElement.Details["MediaSequence"] = "0"
+			dateRangeNode.HLSElement.Details["FirstSegmentMediaSequence"] = "0"
 		}
 	}
 

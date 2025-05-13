@@ -252,7 +252,7 @@ func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
 	assert.True(t, foundCueOut)
 	assert.True(t, foundCueIn)
 	assert.Equal(t, len(breaks), 1)
-	assert.Equal(t, breaks[0].HLSElement.Details["MediaSequence"], "363969994")
+	assert.Equal(t, breaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "363969994")
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
@@ -268,7 +268,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
 	assert.Equal(t, len(allBreaks), 1)
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991004")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "363991006")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "363991006")
 
 	assert.Equal(t, len(allPDTs), 3)
 	assert.NotEqual(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
@@ -288,7 +288,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
 	assert.Equal(t, len(allBreaks), 1)
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991006")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "0")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "0")
 
 	assert.Equal(t, len(allPDTs), 2)
 	assert.Equal(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
@@ -307,7 +307,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OutsideDVRLimit(t *testing.T) {
 	assert.Equal(t, len(allBreaks), 1)
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991008")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "0")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "0")
 
 	assert.Equal(t, len(allPDTs), 2)
 	assert.NotEqual(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
@@ -324,7 +324,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, foundCueOut)
 	assert.Equal(t, len(allPDTs), 1)
-	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "363969994")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "363969994")
 	assert.Nil(t, allBreaks[0].Next)
 }
 
@@ -339,7 +339,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReady(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, foundCueOut)
 	assert.Equal(t, len(allPDTs), 2)
-	assert.Equal(t, allBreaks[0].HLSElement.Details["MediaSequence"], "363969994")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "363969994")
 	assert.NotNil(t, allBreaks[0].Next)
 }
 
