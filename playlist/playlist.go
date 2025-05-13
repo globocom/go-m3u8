@@ -100,6 +100,10 @@ func (p *Playlist) Breaks() []*internal.Node {
 	return result
 }
 
+func (p *Playlist) PDTs() []*internal.Node {
+	return p.FindAll("ProgramDateTime")
+}
+
 // Returns true if media segment is inside ad break and false otherwise.
 // When true, method also returns de DateRange object for the segment Ad Break.
 //
