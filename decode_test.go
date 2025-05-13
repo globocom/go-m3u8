@@ -261,7 +261,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
 
 	_, foundCueOut := p.Find("CueOut")
 	allBreaks := p.Breaks()
-	allPDTs := p.PDTs()
+	allPDTs := p.FindAll("ProgramDateTime")
 
 	assert.NoError(t, err)
 	assert.True(t, foundCueOut)
@@ -281,7 +281,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
 
 	_, foundCueOut := p.Find("CueOut")
 	allBreaks := p.Breaks()
-	allPDTs := p.PDTs()
+	allPDTs := p.FindAll("ProgramDateTime")
 
 	assert.NoError(t, err)
 	assert.True(t, foundCueOut)
@@ -300,7 +300,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OutsideDVRLimit(t *testing.T) {
 
 	_, foundCueOut := p.Find("CueOut")
 	allBreaks := p.Breaks()
-	allPDTs := p.PDTs()
+	allPDTs := p.FindAll("ProgramDateTime")
 
 	assert.NoError(t, err)
 	assert.False(t, foundCueOut)
@@ -319,7 +319,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
 
 	_, foundCueOut := p.Find("CueOut")
 	allBreaks := p.Breaks()
-	allPDTs := p.PDTs()
+	allPDTs := p.FindAll("ProgramDateTime")
 
 	assert.NoError(t, err)
 	assert.False(t, foundCueOut)
@@ -334,7 +334,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReady(t *testing.T) {
 
 	_, foundCueOut := p.Find("CueOut")
 	allBreaks := p.Breaks()
-	allPDTs := p.PDTs()
+	allPDTs := p.FindAll("ProgramDateTime")
 
 	assert.NoError(t, err)
 	assert.True(t, foundCueOut)
