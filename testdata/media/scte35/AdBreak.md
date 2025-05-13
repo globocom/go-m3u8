@@ -23,7 +23,7 @@ Note that this will leave the playlist with multiple `EXT-X-PROGRAM-DATE-TIME` t
 
 Therefore, we have one PDT that tracks the playlist's media sequence, and others that track when the Ad Break starts and finishes.
 
-**Test File:** `/testdata/media/scte35/withAdBreak.m3u8`
+**Test File:** `/testdata/media/scte35/withCompleteAdBreak.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:11
@@ -80,7 +80,7 @@ The `EXT-X-DATERANGE` (`SCTE-OUT`) tag is already on the manifest, as might be t
 
 In this case, when calculating the *Media Sequence* for the Ad Break, we assume the value will be **zero**. 
 
-**Test File:** `/testdata/media/scte35/withAdBreakStartReady.m3u8`
+**Test File:** `/testdata/media/scte35/withAdBreakNewNotReady.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:3
@@ -115,7 +115,7 @@ Later, when the first segment for the Ad Break has been generated, we will have 
 
 As normally, the *Media Sequence* for the Ad Break is the same as the first Break's segment's.
 
-**Test File:** `/testdata/media/scte35/withAdBreakStartNotReady.m3u8`
+**Test File:** `/testdata/media/scte35/withAdBreakNewtReady.m3u8`
 ```
 (...)
 #EXTINF:4.8, no desc
