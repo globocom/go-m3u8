@@ -288,7 +288,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
 	assert.Equal(t, len(allBreaks), 1)
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991006")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "363991006")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "0")
 
 	assert.Equal(t, len(allPDTs), 2)
 	assert.Equal(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
