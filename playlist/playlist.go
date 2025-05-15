@@ -91,32 +91,12 @@ func (p *Playlist) Segments() []*internal.Node {
 
 func (p *Playlist) Breaks() []*internal.Node {
 	result := make([]*internal.Node, 0)
-
-	current := p.Head
-	for current != nil {
-		// date range tag with scte-35 attribute (i.e. indicates ad break start)
-		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
-			// when date range tag exists, but we don't have the cue out tag yet nor the first media segment inside the break
-			// as a solution, we will set the date range's media sequence to zero
-			if current.Next == nil || (current.Next.HLSElement.Name == "CueOut" && current.Next.Next == nil) {
-				log.Info().Msg("no cue out tag or first break segment found after date range, media sequence will be zero")
-				current.HLSElement.Details["FirstSegmentMediaSequence"] = "0"
-			}
-
-			// when the ad break has begun and segments are outside DVR limit, we have lost the first segment's information
-			// as a solution, we will set the date range's media sequence to zero
-			startDate, _ := time.Parse(time.RFC3339Nano, current.HLSElement.Attrs["START-DATE"])
-			if p.ProgramDateTime.After(startDate) {
-				log.Info().Msg("break about to leave dvr limit, media sequence will be zero")
-				current.HLSElement.Details["FirstSegmentMediaSequence"] = "0"
-			}
-
-			result = append(result, current)
+	nodes := p.FindAll("DateRange")
+	for _, node := range nodes {
+		if node.HLSElement.Attrs["SCTE35-OUT"] != "" {
+			result = append(result, node)
 		}
-
-		current = current.Next
 	}
-
 	return result
 }
 
