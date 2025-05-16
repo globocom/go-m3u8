@@ -9,7 +9,6 @@ package media
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -60,7 +59,7 @@ func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 // The Ad Break's media sequence will be the media sequence of the first segment inside the break
 // If we don't have information
 func getBreakMediaSequence(playlist *pl.Playlist, dateRangeNode *internal.Node) string {
-	defaultMediaSequence := fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter)
+	currentMediaSequence := fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter)
 
 	// when ad break segments are leaving DVR limit, we lose the break's first segment's media sequence
 
@@ -76,7 +75,7 @@ func getBreakMediaSequence(playlist *pl.Playlist, dateRangeNode *internal.Node) 
 
 	// if the playlist's PDT tag is not parsed yet, we check if there are any media segments before the date range tag
 	// if there aren't, the break is leaving the DVR and we will set the break media sequence to zero
-	parsedSegmentsBeforeBreak := playlist.FindAll("ExtInf")
+	parsedSegmentsBeforeBreak := playlist.Segments()
 	if len(parsedSegmentsBeforeBreak) == 0 {
 		log.Info().Msg("no media segments present before ad break, media sequence will be zero")
 		return "0"
@@ -84,17 +83,13 @@ func getBreakMediaSequence(playlist *pl.Playlist, dateRangeNode *internal.Node) 
 
 	// when date range tag exists, but we don't know if we have the break's first media segment yet
 
-	lastSegmentBeforeBreak := parsedSegmentsBeforeBreak[len(parsedSegmentsBeforeBreak)-1]
-	lastSegmentPDT, _ := time.Parse(time.RFC3339Nano, lastSegmentBeforeBreak.HLSElement.Details["ProgramDateTime"])
-	lastSegmentDuration, _ := strconv.ParseFloat(lastSegmentBeforeBreak.HLSElement.Attrs["Duration"], 64)
-	nextSegmentPDT := lastSegmentPDT.Add(time.Duration(lastSegmentDuration * float64(time.Second)))
-
 	// we check if the break's start date comes later than the estimated next segment's PDT
 	// in this case, we will set the break media sequence to zero
-	if (breakStartDate.Round(time.Millisecond)).After(nextSegmentPDT.Round(time.Millisecond)) {
+	nextSegmentEstimatedPDT := playlist.ProgramDateTime.Add(time.Duration(playlist.DVR * float64(time.Second)))
+	if (breakStartDate.Round(time.Millisecond)).After(nextSegmentEstimatedPDT.Round(time.Millisecond)) {
 		log.Info().Msg("ad break does not contain segments yet, media sequence will be zero")
 		return "0"
 	}
 
-	return defaultMediaSequence
+	return currentMediaSequence
 }
