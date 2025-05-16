@@ -37,7 +37,7 @@ func TestMediaSequenceValue(t *testing.T) {
 	assert.NoError(t, err)
 
 	mediaSequence := playlist.MediaSequenceValue()
-	assert.Equal(t, mediaSequence, "360948012")
+	assert.Equal(t, mediaSequence, "364042169")
 }
 
 func TestMediaSequence(t *testing.T) {
@@ -48,7 +48,7 @@ func TestMediaSequence(t *testing.T) {
 	node, found := playlist.MediaSequenceTag()
 	assert.True(t, found)
 	assert.NotNil(t, node)
-	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"], "360948012")
+	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"], "364042169")
 }
 
 func TestBreaks(t *testing.T) {
@@ -60,7 +60,7 @@ func TestBreaks(t *testing.T) {
 	assert.NotNil(t, nodes)
 	assert.Len(t, nodes, 1)
 	for _, node := range nodes {
-		assert.Equal(t, node.HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B")
+		assert.Equal(t, node.HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5")
 	}
 }
 
@@ -81,7 +81,7 @@ func TestSegments(t *testing.T) {
 
 	nodes := playlist.Segments()
 	assert.NotNil(t, nodes)
-	assert.Len(t, nodes, 16)
+	assert.Len(t, nodes, 27)
 }
 
 func TestReplaceBreaksURI(t *testing.T) {
@@ -140,20 +140,20 @@ func TestFindSegmentInsideAdBreak(t *testing.T) {
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	// #EXTINF:6.2666, no desc
-	// channel-audio_1=96000-video=2262976-360948206.ts
-	adBreakSegment := playlist.Segments()[2]
-	assert.Equal(t, adBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948206.ts")
+	// #EXTINF:5.3, no desc
+	// channel-audio_1=96000-video=3442944-364042175.ts
+	adBreakSegment := playlist.Segments()[6]
+	assert.Equal(t, adBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042175.ts")
 
-	// #EXT-X-DATERANGE:ID="1-1732551382",START-DATE="2024-11-25T16:16:22.933333Z",PLANNED-DURATION=60.1,SCTE35-OUT=0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B
+	// #EXT-X-DATERANGE:ID="1-1747402436",START-DATE="2025-05-16T13:33:56.266666Z",PLANNED-DURATION=60.033333,SCTE35-OUT=0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5
 	expectedAdBreak := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "DateRange",
 			Attrs: map[string]string{
-				"ID":               "1-1732551382",
-				"START-DATE":       "2024-11-25T16:16:22.933333Z",
-				"PLANNED-DURATION": "60.1",
-				"SCTE35-OUT":       "0xFC3025000000000BB802FFF01405000000017FEFFF1A7B3B607E005288E8000100000000F799F45B",
+				"ID":               "1-1747402436",
+				"START-DATE":       "2025-05-16T13:33:56.266666Z",
+				"PLANNED-DURATION": "60.033333",
+				"SCTE35-OUT":       "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5",
 			},
 		},
 	}
@@ -172,16 +172,16 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 	assert.NoError(t, err)
 
 	// after break
-	// #EXTINF:3.7666, no desc
-	// channel-audio_1=96000-video=2262976-360948218.ts
-	afterBreakSegment := playlist.Segments()[14]
-	assert.Equal(t, afterBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948218.ts")
+	// #EXTINF:2.8666, no desc
+	// channel-audio_1=96000-video=3442944-364042187.ts
+	afterBreakSegment := playlist.Segments()[18]
+	assert.Equal(t, afterBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042187.ts")
 
 	// before break
-	// #EXTINF:4.8, no desc
-	// channel-audio_1=96000-video=2262976-360948204.ts
-	beforeBreakSegment := playlist.Segments()[0]
-	assert.Equal(t, beforeBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=2262976-360948204.ts")
+	// #EXTINF:4.3, no desc
+	// channel-audio_1=96000-video=3442944-364042174.ts
+	beforeBreakSegment := playlist.Segments()[5]
+	assert.Equal(t, beforeBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042174.ts")
 
 	afterAdBreak, _ := playlist.FindSegmentAdBreak(afterBreakSegment)
 	beforeAdBreak, _ := playlist.FindSegmentAdBreak(beforeBreakSegment)

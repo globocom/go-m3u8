@@ -119,7 +119,7 @@ func TestCueOutParser(t *testing.T) {
 
 func TestCueInParser(t *testing.T) {
 	playlist := strings.Join([]string{
-		"#EXT-X-DATERANGE:SCTE35-OUT=0xFF0000,ID=\"break1\",START-DATE=\"2025-01-01T00:00:00Z\"",
+		"#EXT-X-DATERANGE:SCTE35-IN=0xFF0000,ID=\"break1\",START-DATE=\"2025-01-01T00:00:00Z\"",
 		"#EXT-X-CUE-IN",
 	}, "\n")
 
@@ -235,7 +235,7 @@ func TestParseMediaPlaylist(t *testing.T) {
 	assert.Nil(t, p.CurrentStreamInf)
 	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
-	assert.Equal(t, len(p.Segments()), 16)
+	assert.Equal(t, len(p.Segments()), 27)
 }
 
 func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
@@ -373,9 +373,9 @@ func TestParsePlaylist(t *testing.T) {
 			name:           "Parse media playlist",
 			kind:           "media",
 			path:           "./testdata/media/media.m3u8",
-			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
-			dvr:            76.7998,
-			segmentCounter: 16,
+			pdt:            time.Date(2025, 05, 16, 13, 33, 27, 966666000, time.UTC),
+			dvr:            129.5999,
+			segmentCounter: 27,
 		},
 		{
 			name:           "Parse media playlist with EXT-X-DISCONTINUITY tag",
