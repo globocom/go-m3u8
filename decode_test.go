@@ -328,8 +328,23 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
 	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "0")
 }
 
-func TestParseMediaPlaylist_WithPartialAdBreak_NewReady(t *testing.T) {
+func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButNoSegment(t *testing.T) {
 	file, _ := os.Open("testdata/media/scte35/withAdBreakNewReady.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.FindAll("ProgramDateTime")
+
+	assert.NoError(t, err)
+	assert.False(t, foundCueOut)
+	assert.Nil(t, allBreaks[0].Next)
+	assert.Equal(t, len(allPDTs), 1)
+	assert.Equal(t, allBreaks[0].HLSElement.Details["FirstSegmentMediaSequence"], "363969994")
+}
+
+func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withAdBreakNewReadyWithSegment.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
