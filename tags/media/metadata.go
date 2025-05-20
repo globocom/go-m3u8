@@ -23,6 +23,12 @@ var (
 	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
 )
 
+const (
+	BreakStatusLeavingDVR = "leavingDVRLimit"
+	BreakStatusNotReady   = "segmentsNotReady"
+	BreakStatusComplete   = "complete"
+)
+
 type DateRangeParser struct{}
 
 type DateRangeEncoder struct{}
@@ -70,13 +76,13 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (str
 		// if the playlist's PDT tag was not parsed yet, we check if there are any media segments before the date range tag
 		if len(playlist.Segments()) == 0 {
 			log.Info().Msg("break is leaving dvr limit, media sequence will be zero")
-			return "0", "leavingDVRLimit"
+			return "0", BreakStatusLeavingDVR
 		}
 	} else {
 		// if the playlist's PDT tag was already parsed, we check if the playlist PDT is equal or higher than the break's start date
 		if playlist.ProgramDateTime.Equal(breakStartDate) || playlist.ProgramDateTime.After(breakStartDate) {
 			log.Info().Msg("break is leaving dvr limit, media sequence will be zero")
-			return "0", "leavingDVRLimit"
+			return "0", BreakStatusLeavingDVR
 		}
 	}
 
@@ -85,8 +91,8 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (str
 	nextSegmentEstimatedPDT := playlist.ProgramDateTime.Add(time.Duration(playlist.DVR * float64(time.Second)))
 	if (breakStartDate.Round(time.Millisecond)).After(nextSegmentEstimatedPDT.Round(time.Millisecond)) {
 		log.Info().Msg("segments for ad break are not ready yet, media sequence will be zero")
-		return "0", "segmentsNotReady"
+		return "0", BreakStatusNotReady
 	}
 
-	return currentMediaSequence, "complete"
+	return currentMediaSequence, BreakStatusComplete
 }
