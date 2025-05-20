@@ -10,6 +10,7 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	pl "github.com/globocom/go-m3u8/playlist"
+	"github.com/globocom/go-m3u8/tags/media"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -255,7 +256,7 @@ func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
 	assert.True(t, foundCueIn)
 	assert.Equal(t, len(breaks), 1)
 	assert.Equal(t, breaks[0].HLSElement.Details["StartMediaSequence"], "363969994")
-	assert.Equal(t, breaks[0].HLSElement.Details["Status"], "complete")
+	assert.Equal(t, breaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
@@ -272,7 +273,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991004")
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "363991006")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], "complete")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 
 	assert.Equal(t, len(allPDTs), 3)
 	assert.NotEqual(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
@@ -293,7 +294,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991006")
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "0")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], "leavingDVRLimit")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusLeavingDVR)
 
 	assert.Equal(t, len(allPDTs), 2)
 	assert.Equal(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
@@ -313,7 +314,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OutsideDVRLimit(t *testing.T) {
 
 	assert.Equal(t, fmt.Sprintf("%d", p.MediaSequence), "363991008")
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "0")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], "leavingDVRLimit")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusLeavingDVR)
 
 	assert.Equal(t, len(allPDTs), 2)
 	assert.NotEqual(t, allPDTs[0].HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"], allBreaks[0].HLSElement.Attrs["START-DATE"])
@@ -332,7 +333,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
 	assert.Nil(t, allBreaks[0].Next)
 	assert.Equal(t, len(allPDTs), 1)
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "0")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], "segmentsNotReady")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusNotReady)
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButNoSegment(t *testing.T) {
@@ -348,7 +349,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButNoSegment(t *testing.T
 	assert.Nil(t, allBreaks[0].Next)
 	assert.Equal(t, len(allPDTs), 1)
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "363969994")
-	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], "complete")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing.T) {
@@ -365,7 +366,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing
 	assert.NotNil(t, allBreaks[0].Next)
 	assert.Equal(t, len(allPDTs), 2)
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], newestSegment.HLSElement.Details["MediaSequence"])
-	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], "complete")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 }
 
 func TestParsePlaylist(t *testing.T) {
