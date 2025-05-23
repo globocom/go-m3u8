@@ -89,7 +89,7 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (str
 	// when date range tag exists, but we don't know if we have the break's first media segment yet
 	// we check if the break's start date comes later than the estimated next segment's PDT
 	nextSegmentEstimatedPDT := playlist.ProgramDateTime.Add(time.Duration(playlist.DVR * float64(time.Second)))
-	if (breakStartDate.Round(time.Millisecond)).After(nextSegmentEstimatedPDT.Round(time.Millisecond)) {
+	if (breakStartDate.Round(time.Second)).After(nextSegmentEstimatedPDT.Round(time.Second)) {
 		log.Debug().Msg("segments for ad break are not ready yet, media sequence will be zero")
 		return "0", BreakStatusNotReady
 	}
