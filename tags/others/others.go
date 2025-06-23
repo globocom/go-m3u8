@@ -12,6 +12,7 @@ import (
 	"github.com/dlclark/regexp2"
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -62,7 +63,8 @@ func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
 		})
 		return nil
 	}
-	return fmt.Errorf("invalid cue out tag: %s", tag)
+	log.Error().Msgf("invalid cue out tag: %s", tag)
+	return nil
 }
 
 func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
