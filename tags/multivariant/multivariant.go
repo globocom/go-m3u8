@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	StreamInfTag      = "#EXT-X-STREAM-INF"         //todo: has attributes
+	StreamInfTag      = "#EXT-X-STREAM-INF"
 	MediaTag          = "#EXT-X-MEDIA"              //todo: has attributes
 	IFrameStramInfTag = "#EXT-X-I-FRAME-STREAM-INF" //todo: has attributes
 	SessionKey        = "#EXT-X-SESSION-KEY"        //todo: has attributes

@@ -17,14 +17,14 @@ import (
 )
 
 var (
-	TargetDurationTag        = "#EXT-X-TARGETDURATION"         //todo: has one attribute
-	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"         //todo: has one attribute
+	TargetDurationTag        = "#EXT-X-TARGETDURATION"
+	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"
 	DiscontinuitySequenceTag = "#EXT-X-DISCONTINUITY-SEQUENCE" //todo: has one attribute
-	EndlistTag               = "#EXT-X-ENDLIST"
-	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE" //todo: has one attribute
-	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"
-	PartInfTag               = "#EXT-X-PART-INF"       //todo: has attributes
-	ServerControlTag         = "#EXT-X-SERVER-CONTROL" //todo: has attributes
+	EndlistTag               = "#EXT-X-ENDLIST"                //todo
+	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"          //todo: has one attribute
+	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"          //todo
+	PartInfTag               = "#EXT-X-PART-INF"               //todo: has attributes
+	ServerControlTag         = "#EXT-X-SERVER-CONTROL"         //todo: has attributes
 )
 
 type (

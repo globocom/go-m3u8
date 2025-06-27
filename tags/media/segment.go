@@ -20,14 +20,14 @@ import (
 )
 
 var (
-	ExtInfTag          = "#EXTINF"          //todo: has attributes
-	ByteRangeTag       = "#EXT-X-BYTERANGE" //todo: has attributes
+	ExtInfTag          = "#EXTINF"
 	DiscontinuityTag   = "#EXT-X-DISCONTINUITY"
-	KeyTag             = "#EXT-X-KEY"               //todo: has attributes
-	MapTag             = "#EXT-X-MAP"               //todo: has attributes
-	ProgramDateTimeTag = "#EXT-X-PROGRAM-DATE-TIME" //todo: has attributes
-	GapTag             = "#EXT-X-GAP"
-	PartTag            = "#EXT-X-PART" //todo: has attributes
+	ProgramDateTimeTag = "#EXT-X-PROGRAM-DATE-TIME"
+	ByteRangeTag       = "#EXT-X-BYTERANGE" //todo: has attributes
+	KeyTag             = "#EXT-X-KEY"       //todo: has attributes
+	MapTag             = "#EXT-X-MAP"       //todo: has attributes
+	GapTag             = "#EXT-X-GAP"       //todo
+	PartTag            = "#EXT-X-PART"      //todo: has attributes
 )
 
 type (

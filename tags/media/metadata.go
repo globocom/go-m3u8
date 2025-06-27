@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	DateRangeTag   = "#EXT-X-DATERANGE"    //todo: has attributes
+	DateRangeTag   = "#EXT-X-DATERANGE"
 	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
 	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
 )
