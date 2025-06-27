@@ -158,6 +158,7 @@ func TestExtInfParser(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 4.8, p.CurrentSegment.Duration)
+	assert.Equal(t, " no desc", p.CurrentSegment.Title)
 }
 
 func TestStreamInfParser(t *testing.T) {
@@ -197,6 +198,19 @@ func TestMultiLineHLSElements_Segments(t *testing.T) {
 	assert.True(t, found)
 	assert.Equal(t, "1.ts", node.HLSElement.URI)
 	assert.Equal(t, "4.8", node.HLSElement.Attrs["Duration"])
+	assert.Equal(t, " no desc", node.HLSElement.Attrs["Title"])
+
+	playlist = `#EXTINF:3.6
+              0.ts`
+	p, err = setupPlaylist(playlist)
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+
+	node, found = p.Find("ExtInf")
+	assert.True(t, found)
+	assert.Equal(t, "0.ts", node.HLSElement.URI)
+	assert.Equal(t, "3.6", node.HLSElement.Attrs["Duration"])
+	assert.Equal(t, "", node.HLSElement.Attrs["Title"])
 }
 
 func TestMultiLineHLSElements_StreamInf(t *testing.T) {

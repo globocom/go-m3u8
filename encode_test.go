@@ -59,6 +59,7 @@ func TestExtInfEncoder(t *testing.T) {
 			Name: "ExtInf",
 			Attrs: map[string]string{
 				"Duration": "4.8",
+				"Title":    " no desc",
 			},
 			URI: "1.ts",
 		},
@@ -74,7 +75,7 @@ func TestExtInfEncoder(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, p)
-	assert.Equal(t, "#EXTINF:4.8\n1.ts\n", p)
+	assert.Equal(t, "#EXTINF:4.8, no desc\n1.ts\n", p)
 }
 func TestStreamInfEncoder(t *testing.T) {
 	node := &internal.Node{
@@ -441,7 +442,8 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 		HLSElement: &internal.HLSElement{
 			Name: "ExtInf",
 			Attrs: map[string]string{
-				"Duration": "4.8, no desc",
+				"Duration": "4.8",
+				"Title":    " no desc",
 			},
 			URI: "1.ts",
 		},
