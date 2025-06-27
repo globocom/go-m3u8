@@ -419,7 +419,6 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-
 	node4 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "MediaSequence",
@@ -430,13 +429,21 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 	}
 	node5 := &internal.Node{
 		HLSElement: &internal.HLSElement{
+			Name: "DiscontinuitySequence",
+			Attrs: map[string]string{
+				"#EXT-X-DISCONTINUITY-SEQUENCE": "18",
+			},
+		},
+	}
+	node6 := &internal.Node{
+		HLSElement: &internal.HLSElement{
 			Name: "IndependentSegments",
 			Attrs: map[string]string{
 				"#EXT-X-INDEPENDENT-SEGMENTS": "",
 			},
 		},
 	}
-	node6 := &internal.Node{
+	node7 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "TargetDuration",
 			Attrs: map[string]string{
@@ -444,7 +451,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-	node7 := &internal.Node{
+	node8 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "UspTimestampMap",
 			Attrs: map[string]string{
@@ -453,7 +460,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-	node8 := &internal.Node{
+	node9 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "ProgramDateTime",
 			Attrs: map[string]string{
@@ -461,7 +468,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-	node9 := &internal.Node{
+	node10 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "ExtInf",
 			Attrs: map[string]string{
@@ -483,6 +490,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 #EXT-X-VERSION:3
 ## Created with Unified Streaming Platform (version=1.11.23-28141)
 #EXT-X-MEDIA-SEQUENCE:360948012
+#EXT-X-DISCONTINUITY-SEQUENCE:18
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-TARGETDURATION:7
 #USP-X-TIMESTAMP-MAP:MPEGTS=5048974016,LOCAL=2024-11-25T16:00:53.200000Z
@@ -500,6 +508,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 	playlist.Insert(node7)
 	playlist.Insert(node8)
 	playlist.Insert(node9)
+	playlist.Insert(node10)
 
 	p, err := m3u8.EncodePlaylist(playlist)
 
