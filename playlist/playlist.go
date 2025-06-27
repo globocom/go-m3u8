@@ -21,23 +21,25 @@ var (
 
 type Playlist struct {
 	*internal.DoublyLinkedList
-	CurrentSegment   *ExtInfData
-	CurrentStreamInf *StreamInfData
-	ProgramDateTime  time.Time
-	MediaSequence    int
-	SegmentsCounter  int
-	DVR              float64
+	CurrentSegment        *ExtInfData
+	CurrentStreamInf      *StreamInfData
+	ProgramDateTime       time.Time
+	MediaSequence         int
+	DiscontinuitySequence int
+	SegmentsCounter       int
+	DVR                   float64
 }
 
 func NewPlaylist() *Playlist {
 	return &Playlist{
-		DoublyLinkedList: new(internal.DoublyLinkedList),
-		CurrentSegment:   nil,
-		CurrentStreamInf: nil,
-		ProgramDateTime:  *new(time.Time),
-		MediaSequence:    0,
-		SegmentsCounter:  0,
-		DVR:              0,
+		DoublyLinkedList:      new(internal.DoublyLinkedList),
+		CurrentSegment:        nil,
+		CurrentStreamInf:      nil,
+		ProgramDateTime:       *new(time.Time),
+		MediaSequence:         0,
+		DiscontinuitySequence: 0,
+		SegmentsCounter:       0,
+		DVR:                   0,
 	}
 }
 
@@ -79,6 +81,18 @@ func (p *Playlist) MediaSequenceValue() string {
 
 func (p *Playlist) MediaSequenceTag() (*internal.Node, bool) {
 	return p.Find("MediaSequence")
+}
+
+func (p *Playlist) DiscontinuitySequenceTag() (*internal.Node, bool) {
+	return p.Find("DiscontinuitySequence")
+}
+
+func (p *Playlist) DiscontinuitySequenceValue() string {
+	node, found := p.Find("DiscontinuitySequence")
+	if !found {
+		return ""
+	}
+	return node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"]
 }
 
 func (p *Playlist) Variants() []*internal.Node {

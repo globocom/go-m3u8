@@ -54,6 +54,16 @@ func TestMediaSequenceParser(t *testing.T) {
 	assert.Equal(t, "360948012", node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"])
 }
 
+func TestDiscontinuitySequenceParser(t *testing.T) {
+	playlist := "#EXT-X-DISCONTINUITY-SEQUENCE:18"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("DiscontinuitySequence")
+	assert.True(t, found)
+	assert.Equal(t, "18", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
+}
+
 func TestIndependentSegmentsParser(t *testing.T) {
 	playlist := "#EXT-X-INDEPENDENT-SEGMENTS"
 	p, err := setupPlaylist(playlist)
@@ -407,6 +417,26 @@ func TestParseMediaPlaylist_WithCompleteAdBreak_RoundUpTimePrecision(t *testing.
 	assert.Equal(t, len(allPDTs), 3)
 	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "547307194")
 	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
+}
+
+func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
+	file, _ := os.Open("testdata/media/withDiscontinuity.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	node, found := p.Find("DiscontinuitySequence")
+	assert.True(t, found)
+	assert.Equal(t, "18", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
+	assert.Equal(t, p.DiscontinuitySequence, 18)
+
+	nodes := p.FindAll("Discontinuity")
+	assert.Len(t, nodes, 2)
+	assert.Equal(t, "", nodes[0].HLSElement.Attrs["#EXT-X-DISCONTINUITY"])
 }
 
 func TestParsePlaylist(t *testing.T) {

@@ -298,6 +298,29 @@ func TestCueInEncoder(t *testing.T) {
 	assert.Equal(t, "#EXT-X-CUE-IN\n", p)
 }
 
+func TestDiscontinuitySequenceEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DiscontinuitySequence",
+			Attrs: map[string]string{
+				"#EXT-X-DISCONTINUITY-SEQUENCE": "18",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, "#EXT-X-DISCONTINUITY-SEQUENCE:18\n", p)
+}
+
 func TestEncodeMasterPlaylist(t *testing.T) {
 	node1 := &internal.Node{
 		HLSElement: &internal.HLSElement{
