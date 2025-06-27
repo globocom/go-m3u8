@@ -169,6 +169,7 @@ type ExtInfData struct {
 	ProgramDateTime time.Time
 	MediaSequence   int
 	URI             string
+	Title           string
 }
 
 // Internal parser returns new StreamInfData object
@@ -183,7 +184,7 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 }
 
 // Internal parser returns new ExtInfData object
-func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
+func GetExtInfData(duration, title string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
 	floatDuration, err := strconv.ParseFloat(duration, 64)
 	if err != nil {
 		log.Error().Err(err).Msgf("failed to parse duration for segment: %s", duration)
@@ -195,6 +196,7 @@ func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCount
 
 	return &ExtInfData{
 		Duration:        floatDuration,
+		Title:           title,
 		MediaSequence:   playlistMediaSequence + playlistSegmentsCounter,
 		ProgramDateTime: segmentProgramDateTime,
 	}
@@ -212,6 +214,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 				URI:  line,
 				Attrs: map[string]string{
 					"Duration": strconv.FormatFloat(p.CurrentSegment.Duration, 'f', -1, 64),
+					"Title":    p.CurrentSegment.Title,
 				},
 				Details: map[string]string{
 					"MediaSequence":   fmt.Sprintf("%d", p.CurrentSegment.MediaSequence),
