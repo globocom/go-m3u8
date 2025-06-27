@@ -105,7 +105,16 @@ func (p ProgramDateTimeParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e ExtInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	attr := fmt.Sprintf("%s:%s\n%s\n", ExtInfTag, node.HLSElement.Attrs["Duration"], node.HLSElement.URI)
+	duration := node.HLSElement.Attrs["Duration"]
+	title := node.HLSElement.Attrs["Title"]
+	uri := node.HLSElement.URI
+
+	// #EXTINF:<duration>,[<title>]
+	if title != "" {
+		title = "," + title
+	}
+
+	attr := fmt.Sprintf("%s:%s%s\n%s\n", ExtInfTag, duration, title, uri)
 	_, err := builder.WriteString(attr)
 	return err
 }
