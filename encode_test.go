@@ -321,6 +321,32 @@ func TestDiscontinuitySequenceEncoder(t *testing.T) {
 	assert.Equal(t, "#EXT-X-DISCONTINUITY-SEQUENCE:18\n", p)
 }
 
+func TestVariableDefineEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "VariableDefine",
+			Attrs: map[string]string{
+				"NAME":  "video_id",
+				"VALUE": "12345",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-DEFINE:NAME="video_id",VALUE="12345"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
 func TestEncodeMasterPlaylist(t *testing.T) {
 	node1 := &internal.Node{
 		HLSElement: &internal.HLSElement{

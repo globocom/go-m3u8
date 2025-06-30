@@ -74,6 +74,33 @@ func TestIndependentSegmentsParser(t *testing.T) {
 	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-INDEPENDENT-SEGMENT"])
 }
 
+func TestVariableDefineParser(t *testing.T) {
+	// test valid variable define tag with NAME and VALUE
+	playlist := "#EXT-X-DEFINE:NAME=\"video_id\",VALUE=\"12345\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("VariableDefine")
+	assert.True(t, found)
+	assert.Equal(t, "video_id", node.HLSElement.Attrs["NAME"])
+	assert.Equal(t, "12345", node.HLSElement.Attrs["VALUE"])
+
+	// test valid variable define tag with NAME but without VALUE
+	playlist = "#EXT-X-DEFINE:NAME=\"video_id\""
+	p, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "error parsing tag #EXT-X-DEFINE: a VALUE attribute is REQUIRED for NAME attribute: #EXT-X-DEFINE:NAME=\"video_id\"")
+
+	// test valid variable define tag with QUERYPARAM
+	playlist = "#EXT-X-DEFINE:QUERYPARAM=\"video_id\""
+	p, err = setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found = p.Find("VariableDefine")
+	assert.True(t, found)
+	assert.Equal(t, "video_id", node.HLSElement.Attrs["QUERYPARAM"])
+}
+
 func TestTargetDurationParser(t *testing.T) {
 	playlist := "#EXT-X-TARGETDURATION:7"
 	p, err := setupPlaylist(playlist)
