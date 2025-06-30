@@ -59,7 +59,7 @@ func (p VariableDefineParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	// VALUE attribute is REQUIRED if the EXT-X-DEFINE tag has a NAME attribute
 	if params["NAME"] != "" && params["VALUE"] == "" {
-		return fmt.Errorf("a VALUE attribute is REQUIRED for NAME attribute: %s", tag)
+		return fmt.Errorf("VALUE attribute is required for NAME attribute: %s", tag)
 	}
 
 	playlist.Insert(&internal.Node{
