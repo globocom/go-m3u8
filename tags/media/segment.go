@@ -23,8 +23,8 @@ var (
 	ExtInfTag          = "#EXTINF"
 	DiscontinuityTag   = "#EXT-X-DISCONTINUITY"
 	ProgramDateTimeTag = "#EXT-X-PROGRAM-DATE-TIME"
+	KeyTag             = "#EXT-X-KEY"
 	ByteRangeTag       = "#EXT-X-BYTERANGE" //todo: has attributes
-	KeyTag             = "#EXT-X-KEY"       //todo: has attributes
 	MapTag             = "#EXT-X-MAP"       //todo: has attributes
 	GapTag             = "#EXT-X-GAP"       //todo
 	PartTag            = "#EXT-X-PART"      //todo: has attributes
@@ -34,12 +34,14 @@ type (
 	ExtInfParser          struct{}
 	DiscontinuityParser   struct{}
 	ProgramDateTimeParser struct{}
+	ExtKeyParser          struct{}
 )
 
 type (
 	ExtInfEncoder          struct{}
 	DiscontinuityEncoder   struct{}
 	ProgramDateTimeEncoder struct{}
+	ExtKeyEncoder          struct{}
 )
 
 func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -104,6 +106,37 @@ func (p ProgramDateTimeParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
+func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid ext key tag: %s", tag)
+	}
+
+	// METHOD attribute is REQUIRED by RFC
+	if params["METHOD"] == "" {
+		return fmt.Errorf("METHOD attribute is required: %s", tag)
+	}
+
+	// URI attribute is REQUIRED unless the METHOD is NONE
+	if (params["METHOD"] != "NONE") && (params["URI"] == "") {
+		return fmt.Errorf("URI attribute is required when METHOD is not NONE: %s", tag)
+	}
+
+	// IV attribute is required if METHOD is AES-128
+	if (params["METHOD"] == "AES-128") && params["IV"] == "" {
+		return fmt.Errorf("IV attribute is required when METHOD is AES-128: %s", tag)
+	}
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "ExtKey",
+			Attrs: params,
+		},
+	})
+
+	return nil
+}
+
 func (e ExtInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	duration := node.HLSElement.Attrs["Duration"]
 	title := node.HLSElement.Attrs["Title"]
@@ -126,4 +159,9 @@ func (e DiscontinuityEncoder) Encode(node *internal.Node, builder *strings.Build
 
 func (e ProgramDateTimeEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	return pl.EncodeSimpleTag(node, builder, ProgramDateTimeTag, ProgramDateTimeTag)
+}
+
+func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	order := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
+	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, order)
 }
