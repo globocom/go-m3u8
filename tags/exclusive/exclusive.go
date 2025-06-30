@@ -78,6 +78,12 @@ func (e IndependentSegmentsEncoder) Encode(node *internal.Node, builder *strings
 }
 
 func (e VariableDefineEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	order := []string{"NAME", "VALUE", "IMPORT", "QUERYPARAM"}
-	return pl.EncodeTagWithAttributes(builder, VariableDefineTag, node.HLSElement.Attrs, order)
+	orderAttr := []string{"NAME", "VALUE", "IMPORT", "QUERYPARAM"}
+	shouldQuoteAttr := map[string]bool{
+		"NAME":       true,
+		"VALUE":      true,
+		"IMPORT":     true,
+		"QUERYPARAM": true,
+	}
+	return pl.EncodeTagWithAttributes(builder, VariableDefineTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }

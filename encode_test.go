@@ -87,7 +87,7 @@ func TestStreamInfEncoder(t *testing.T) {
 				"CODECS":            "mp4a.40.2,avc1.64001F",
 				"RESOLUTION":        "1280x720",
 				"FRAME-RATE":        "30",
-				"CLOSED-CAPTIONS":   "cc",
+				"CLOSED-CAPTIONS":   "NONE",
 				"SUBTITLES":         "subtitle",
 				"AUDIO":             "audio",
 			},
@@ -101,7 +101,7 @@ func TestStreamInfEncoder(t *testing.T) {
 		},
 	}
 
-	expectedPlaylist := `#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION="1280x720",FRAME-RATE=30,AUDIO="audio",CLOSED-CAPTIONS="cc",SUBTITLES="subtitle"` + "\n" + "playlist.m3u8\n"
+	expectedPlaylist := `#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=1280x720,FRAME-RATE=30,AUDIO="audio",SUBTITLES="subtitle",CLOSED-CAPTIONS=NONE` + "\n" + "playlist.m3u8\n"
 
 	p, err := m3u8.EncodePlaylist(playlist)
 
@@ -434,7 +434,7 @@ func TestEncodeMasterPlaylist(t *testing.T) {
 #EXT-X-VERSION:3
 ## Created with Unified Streaming Platform (version=1.11.23-28141)
 # variants
-#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION="1280x720",FRAME-RATE=30,AUDIO="audio",CLOSED-CAPTIONS="cc",SUBTITLES="subtitle"
+#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=1280x720,FRAME-RATE=30,AUDIO="audio",SUBTITLES="subtitle",CLOSED-CAPTIONS="cc"
 playlist.m3u8
 `
 

@@ -162,6 +162,13 @@ func (e ProgramDateTimeEncoder) Encode(node *internal.Node, builder *strings.Bui
 }
 
 func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	order := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
-	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, order)
+	orderAttr := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
+	shouldQuoteAttr := map[string]bool{
+		"METHOD":            false,
+		"URI":               true,
+		"IV":                false,
+		"KEYFORMAT":         true,
+		"KEYFORMATVERSIONS": true,
+	}
+	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }

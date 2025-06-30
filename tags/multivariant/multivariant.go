@@ -33,8 +33,10 @@ func (p StreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	order := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE"}
-	if err := pl.EncodeTagWithAttributes(builder, StreamInfTag, node.HLSElement.Attrs, order); err != nil {
+	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE", "VIDEO-RANGE", "AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
+	shouldQuoteAttr := e.shouldQuoteStreamInf(node)
+
+	if err := pl.EncodeTagWithAttributes(builder, StreamInfTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr); err != nil {
 		return err
 	}
 	if node.HLSElement.URI != "" {
@@ -42,4 +44,26 @@ func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 		return err
 	}
 	return nil
+}
+
+func (e StreamInfEncoder) shouldQuoteStreamInf(node *internal.Node) map[string]bool {
+	shouldQuoteAttr := map[string]bool{
+		"BANDWIDTH":         false,
+		"AVERAGE-BANDWIDTH": false,
+		"CODECS":            true,
+		"RESOLUTION":        false,
+		"FRAME-RATE":        false,
+		"VIDEO-RANGE":       false,
+		"AUDIO":             true,
+		"VIDEO":             true,
+		"SUBTITLES":         true,
+		"CLOSED-CAPTIONS":   true,
+	}
+
+	// the value can be either a quoted-string or an enumerated-string with the value NONE
+	if node.HLSElement.Attrs["CLOSED-CAPTIONS"] == "NONE" {
+		shouldQuoteAttr["CLOSED-CAPTIONS"] = false
+	}
+
+	return shouldQuoteAttr
 }

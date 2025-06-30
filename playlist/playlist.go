@@ -282,7 +282,7 @@ func RoundFloat(val float64, precision uint) float64 {
 //// AUXILIARY METHODS FOR ENCODING
 
 // Encodes tag with attributes into string object
-func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string) error {
+func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string, shouldQuote map[string]bool) error {
 	if len(attrs) == 0 {
 		_, err := builder.WriteString(tag + "\n")
 		return err
@@ -293,7 +293,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 
 	for _, key := range order {
 		if value, exists := attrs[key]; exists {
-			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value))
+			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value, shouldQuote))
 			processed[key] = true
 		}
 	}
@@ -306,7 +306,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	}
 	sort.Strings(unorderedKeys)
 	for _, key := range unorderedKeys {
-		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key]))
+		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key], shouldQuote))
 	}
 
 	attributes := fmt.Sprintf("%s:%s\n", tag, strings.Join(formattedAttrs, ","))
@@ -325,42 +325,16 @@ func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey
 	return fmt.Errorf("attribute %s not found for tag %s", attrKey, tag)
 }
 
-func FormatAttribute(key, value string) string {
-	if ShouldQuote(key, value) {
+func FormatAttribute(key, value string, shouldQuote map[string]bool) string {
+	shouldQuoteValue, exists := shouldQuote[key]
+
+	if !exists {
+		shouldQuoteValue = true // default to quoting if not specified
+	}
+
+	if shouldQuoteValue {
 		return fmt.Sprintf(`%s="%s"`, key, value)
 	}
+
 	return fmt.Sprintf(`%s=%s`, key, value)
-}
-
-func ShouldQuote(key, value string) bool {
-	numericAttrs := map[string]bool{
-		"BANDWIDTH":         true,
-		"AVERAGE-BANDWIDTH": true,
-		"FRAME-RATE":        true,
-		"RESOLUTION":        true,
-		"PLANNED-DURATION":  true,
-		"DURATION":          true,
-		"MPEGTS":            true,
-	}
-
-	hexAttrs := map[string]bool{
-		"SCTE35-OUT": true,
-		"SCTE35-IN":  true,
-	}
-
-	if numericAttrs[key] {
-		if _, err := strconv.ParseFloat(value, 64); err == nil {
-			return false
-		}
-	}
-
-	if hexAttrs[key] && strings.HasPrefix(value, "0x") {
-		return false
-	}
-
-	if key == "LOCAL" {
-		return false
-	}
-
-	return true
 }
