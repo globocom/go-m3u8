@@ -87,7 +87,7 @@ func TestVariableDefineParser(t *testing.T) {
 
 	// test valid variable define tag with NAME but without VALUE
 	playlist = "#EXT-X-DEFINE:NAME=\"video_id\""
-	p, err = setupPlaylist(playlist)
+	_, err = setupPlaylist(playlist)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "error parsing tag #EXT-X-DEFINE: a VALUE attribute is REQUIRED for NAME attribute: #EXT-X-DEFINE:NAME=\"video_id\"")
 
