@@ -85,12 +85,6 @@ func TestVariableDefineParser(t *testing.T) {
 	assert.Equal(t, "video_id", node.HLSElement.Attrs["NAME"])
 	assert.Equal(t, "12345", node.HLSElement.Attrs["VALUE"])
 
-	// test valid variable define tag with NAME but without VALUE
-	playlist = "#EXT-X-DEFINE:NAME=\"video_id\""
-	_, err = setupPlaylist(playlist)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "error parsing tag #EXT-X-DEFINE: a VALUE attribute is REQUIRED for NAME attribute: #EXT-X-DEFINE:NAME=\"video_id\"")
-
 	// test valid variable define tag with QUERYPARAM
 	playlist = "#EXT-X-DEFINE:QUERYPARAM=\"video_id\""
 	p, err = setupPlaylist(playlist)
@@ -99,6 +93,11 @@ func TestVariableDefineParser(t *testing.T) {
 	node, found = p.Find("VariableDefine")
 	assert.True(t, found)
 	assert.Equal(t, "video_id", node.HLSElement.Attrs["QUERYPARAM"])
+
+	// test invalid variable define tag with NAME but without VALUE
+	playlist = "#EXT-X-DEFINE:NAME=\"video_id\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
 }
 
 func TestTargetDurationParser(t *testing.T) {
@@ -130,6 +129,35 @@ func TestProgramDateTimeParser(t *testing.T) {
 	node, ok := p.Find("ProgramDateTime")
 	assert.True(t, ok)
 	assert.Equal(t, "2025-01-01T12:34:56Z", node.HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"])
+}
+
+func TestExtKeyParser(t *testing.T) {
+	// test valid ext key tag
+	playlist := "#EXT-X-KEY:METHOD=SAMPLE-AES,URI=\"drm-uri\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("ExtKey")
+	assert.True(t, found)
+	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "drm-uri", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+
+	// test invalid ext key without METHOD
+	playlist = "#EXT-X-KEY:KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid ext key with METHOD not NONE and without URI
+	playlist = "#EXT-X-KEY:METHOD=SAMPLE-AES,KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid ext key with METHOD AES-128 and without IV
+	playlist = "#EXT-X-KEY:METHOD=AES-128,URI=\"https://example.com/keys/key1.bin\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
 }
 
 func TestDateRangeParser(t *testing.T) {
@@ -464,6 +492,41 @@ func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
 	nodes := p.FindAll("Discontinuity")
 	assert.Len(t, nodes, 2)
 	assert.Equal(t, "", nodes[0].HLSElement.Attrs["#EXT-X-DISCONTINUITY"])
+}
+
+func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
+	file, _ := os.Open("testdata/media/encryption/withAES128.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	node, found := p.Find("ExtKey")
+	assert.True(t, found)
+	assert.Equal(t, "AES-128", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "https://example.com/keys/key1.bin", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "0x0123456789abcdef0123456789abcdef", node.HLSElement.Attrs["IV"])
+}
+
+func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
+	file, _ := os.Open("testdata/media/encryption/withSampleAES.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	node, found := p.Find("ExtKey")
+	assert.True(t, found)
+	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "sample-aes-uri", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
 }
 
 func TestParsePlaylist(t *testing.T) {

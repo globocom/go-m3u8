@@ -347,6 +347,34 @@ func TestVariableDefineEncoder(t *testing.T) {
 	assert.Equal(t, expectedPlaylist, p)
 }
 
+func TestExtKeyEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "ExtKey",
+			Attrs: map[string]string{
+				"METHOD":            "SAMPLE-AES",
+				"URI":               "sample-aes-uri",
+				"KEYFORMAT":         "com.apple.streamingkeydelivery",
+				"KEYFORMATVERSIONS": "1",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-KEY:METHOD=SAMPLE-AES,URI="sample-aes-uri",KEYFORMAT="com.apple.streamingkeydelivery",KEYFORMATVERSIONS="1"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
 func TestEncodeMasterPlaylist(t *testing.T) {
 	node1 := &internal.Node{
 		HLSElement: &internal.HLSElement{
