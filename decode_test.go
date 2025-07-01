@@ -485,11 +485,13 @@ func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 
 	node, found := p.Find("DiscontinuitySequence")
+
 	assert.True(t, found)
 	assert.Equal(t, "18", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
 	assert.Equal(t, p.DiscontinuitySequence, 18)
 
 	nodes := p.FindAll("Discontinuity")
+
 	assert.Len(t, nodes, 2)
 	assert.Equal(t, "", nodes[0].HLSElement.Attrs["#EXT-X-DISCONTINUITY"])
 }
@@ -505,6 +507,7 @@ func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 
 	node, found := p.Find("ExtKey")
+
 	assert.True(t, found)
 	assert.Equal(t, "AES-128", node.HLSElement.Attrs["METHOD"])
 	assert.Equal(t, "https://example.com/keys/key1.bin", node.HLSElement.Attrs["URI"])
@@ -522,11 +525,39 @@ func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 
 	node, found := p.Find("ExtKey")
+
 	assert.True(t, found)
 	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
 	assert.Equal(t, "sample-aes-uri", node.HLSElement.Attrs["URI"])
 	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
 	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+}
+
+func TestParseMediaPlaylistWithEncryptionAndCompleteAdBreak(t *testing.T) {
+	file, _ := os.Open("testdata/media/withEncryptionAndSCTE35.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	extKeyNodes := p.FindAll("ExtKey")
+	assert.Len(t, extKeyNodes, 3)
+
+	_, found1 := p.FindNodeInsideAdBreak(extKeyNodes[0])
+	assert.False(t, found1)
+
+	_, found2 := p.FindNodeInsideAdBreak(extKeyNodes[1])
+	assert.True(t, found2)
+
+	_, found3 := p.FindNodeInsideAdBreak(extKeyNodes[2])
+	assert.False(t, found3)
+
+	dateRangeNodes := p.Breaks()
+
+	assert.Len(t, dateRangeNodes, 1)
 }
 
 func TestParsePlaylist(t *testing.T) {
