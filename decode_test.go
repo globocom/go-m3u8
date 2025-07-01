@@ -118,6 +118,16 @@ func TestCueOutParser(t *testing.T) {
 	assert.Equal(t, "30", node.HLSElement.Attrs["#EXT-X-CUE-OUT"])
 }
 
+func TestCueOutParserWithoutDuration(t *testing.T) {
+	playlist := "#EXT-X-CUE-OUT"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, ok := p.Find("CueOut")
+	assert.True(t, ok)
+	assert.Equal(t, "0", node.HLSElement.Attrs["#EXT-X-CUE-OUT"])
+}
+
 func TestCueInParser(t *testing.T) {
 	playlist := strings.Join([]string{
 		"#EXT-X-DATERANGE:SCTE35-IN=0xFF0000,ID=\"break1\",START-DATE=\"2025-01-01T00:00:00Z\"",

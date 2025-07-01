@@ -12,6 +12,7 @@ import (
 	"github.com/dlclark/regexp2"
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -52,17 +53,23 @@ func (p USPTimestampMapParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
+	duration := "0"
 	parts := strings.SplitN(tag, ":", 2)
+
 	if len(parts) > 1 {
-		playlist.Insert(&internal.Node{
-			HLSElement: &internal.HLSElement{
-				Name:  "CueOut",
-				Attrs: map[string]string{EventCueOutTag: strings.TrimSpace(parts[1])},
-			},
-		})
-		return nil
+		duration = strings.TrimSpace(parts[1])
+	} else {
+		log.Error().Msgf("invalid cue out tag: %s", tag)
 	}
-	return fmt.Errorf("invalid cue out tag: %s", tag)
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "CueOut",
+			Attrs: map[string]string{EventCueOutTag: duration},
+		},
+	})
+
+	return nil
 }
 
 func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
