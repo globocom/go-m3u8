@@ -1,6 +1,6 @@
 #EXTM3U
 #EXT-X-VERSION:3
-## Created with Unified Streaming Platform  (version=1.14.4-30793) [80f2cc9c42c63cb3570f067d9b612d4977c118da499bdef624751958b42ce418]
+## Created with Unified Streaming Platform  (version=1.14.4-30793)
 #EXT-X-MEDIA-SEQUENCE:547311407
 #EXT-X-DISCONTINUITY-SEQUENCE:87498
 #EXT-X-INDEPENDENT-SEGMENTS
@@ -8,43 +8,43 @@
 #USP-X-TIMESTAMP-MAP:MPEGTS=386178799,LOCAL=2025-07-01T19:01:40.466600Z
 #EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:01:40.466666Z
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311407.ts
+channel-audio_1=96000-video=3442944-547311407.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311408.ts
+channel-audio_1=96000-video=3442944-547311408.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311409.ts
+channel-audio_1=96000-video=3442944-547311409.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311410.ts
+channel-audio_1=96000-video=3442944-547311410.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311411.ts
+channel-audio_1=96000-video=3442944-547311411.ts
 #EXTINF:4.0666, no desc
-coelhodai-audio_1=96000-video=3442944-547311412.ts
+channel-audio_1=96000-video=3442944-547311412.ts
 ## splice_insert(auto_return)
 #EXT-X-DISCONTINUITY
 #EXT-X-DATERANGE:ID="4026542460-1751396520",START-DATE="2025-07-01T19:02:00.533333Z",PLANNED-DURATION=20,SCTE35-OUT=0xFC3025000000000BB800FFF01405F000297C7FEFFE9458A930FE001B774000010101000027309A11
 #EXT-X-CUE-OUT:20
 #EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:02:00.533333Z
 #EXTINF:2.3333, no desc
-coelhodai-audio_1=96000-video=3442944-547311413.ts
+channel-audio_1=96000-video=3442944-547311413.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311414.ts
+channel-audio_1=96000-video=3442944-547311414.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311415.ts
+channel-audio_1=96000-video=3442944-547311415.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311416.ts
+channel-audio_1=96000-video=3442944-547311416.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311417.ts
+channel-audio_1=96000-video=3442944-547311417.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311418.ts
+channel-audio_1=96000-video=3442944-547311418.ts
 #EXTINF:1.6666, no desc
-coelhodai-audio_1=96000-video=3442944-547311419.ts
+channel-audio_1=96000-video=3442944-547311419.ts
 ## Auto Return Mode
 #EXT-X-DISCONTINUITY
 #EXT-X-CUE-IN
 #EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:02:20.533333Z
 #EXTINF:4.7333, no desc
-coelhodai-audio_1=96000-video=3442944-547311420.ts
+channel-audio_1=96000-video=3442944-547311420.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311421.ts
+channel-audio_1=96000-video=3442944-547311421.ts
 #EXTINF:3.2, no desc
-coelhodai-audio_1=96000-video=3442944-547311422.ts
+channel-audio_1=96000-video=3442944-547311422.ts
