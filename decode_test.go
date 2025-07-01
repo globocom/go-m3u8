@@ -379,7 +379,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing
 	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 }
 
-func TestParseMediaPlaylist_WithCompleteAdBreak_DateRangeStartDateDifferentThanFirstSegmentPDT(t *testing.T) {
+func TestParseMediaPlaylist_WithCompleteAdBreak_RoundUpTimePrecision(t *testing.T) {
 	file, _ := os.Open("testdata/media/scte35/withRoundUpTimePrecision.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
