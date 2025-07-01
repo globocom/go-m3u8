@@ -487,8 +487,8 @@ func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
 	node, found := p.Find("DiscontinuitySequence")
 
 	assert.True(t, found)
-	assert.Equal(t, "18", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
-	assert.Equal(t, p.DiscontinuitySequence, 18)
+	assert.Equal(t, "87498", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
+	assert.Equal(t, p.DiscontinuitySequence, 87498)
 
 	nodes := p.FindAll("Discontinuity")
 
@@ -596,8 +596,8 @@ func TestParsePlaylist(t *testing.T) {
 			name:           "Parse media playlist with EXT-X-DISCONTINUITY tag",
 			kind:           "media",
 			path:           "./testdata/media/withDiscontinuity.m3u8",
-			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
-			dvr:            76.7998,
+			pdt:            time.Date(2025, time.July, 1, 19, 1, 40, 466666000, time.UTC),
+			dvr:            51.1998,
 			segmentCounter: 16,
 		},
 		{
