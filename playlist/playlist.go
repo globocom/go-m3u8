@@ -114,8 +114,8 @@ func (p *Playlist) Breaks() []*internal.Node {
 	return result
 }
 
-// Returns true if media segment is inside ad break and false otherwise.
-// When true, method also returns de DateRange object for the segment Ad Break.
+// Returns true if node is inside ad break and false otherwise.
+// When true, method also returns the DateRange object for the Ad Break.
 //
 // For entering the Ad Break, we always have DateRange tag with SCTE-OUT and CueOutEvent tag.
 // However, for exiting the Ad Break, we have three possible manifests:
@@ -123,15 +123,15 @@ func (p *Playlist) Breaks() []*internal.Node {
 //   - DateRange SCTE-IN is ALWAYS present.
 //   - No DateRange SCTE-IN. Exit is ONLY marked by CueInEvent tag instead.
 //   - SOMETIMES DateRange SCTE-IN is present, alongside the CueInEvent tag.
-func (p *Playlist) FindSegmentAdBreak(segment *internal.Node) (*internal.Node, bool) {
-	current := segment
+func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, bool) {
+	current := node
 	for current != nil {
-		// segment is inside Ad Break if it is preceeded by a DateRange tag with attribute SCTE35-OUT
+		// node is inside Ad Break if it is preceeded by a DateRange tag with attribute SCTE35-OUT
 		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
 			return current, true
 		}
 
-		// segment is outside Ad Break if it is preceeded by a CueIn tag or a DateRange tag with attribute SCTE35-IN
+		// node is outside Ad Break if it is preceeded by a CueIn tag or a DateRange tag with attribute SCTE35-IN
 		if (current.HLSElement.Name == "CueIn") || (current.HLSElement.Name == "DateRange" && current.HLSElement.Attrs["SCTE35-IN"] != "") {
 			return nil, false
 		}
