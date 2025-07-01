@@ -9,6 +9,7 @@ package media
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -89,10 +90,15 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (str
 	// when date range tag exists, but we don't know if we have the break's first media segment yet
 	// we check if the break's start date comes later than the estimated next segment's PDT
 	nextSegmentEstimatedPDT := playlist.ProgramDateTime.Add(time.Duration(playlist.DVR * float64(time.Second)))
-	if (breakStartDate.Round(time.Second)).After(nextSegmentEstimatedPDT.Round(time.Second)) {
+	if (roundUpToSecond(breakStartDate)).After(roundUpToSecond(nextSegmentEstimatedPDT)) {
 		log.Debug().Msg("segments for ad break are not ready yet, media sequence will be zero")
 		return "0", BreakStatusNotReady
 	}
 
 	return currentMediaSequence, BreakStatusComplete
+}
+
+func roundUpToSecond(t time.Time) time.Time {
+	seconds := float64(t.UnixNano()) / float64(time.Second)
+	return time.Unix(int64(math.Ceil(seconds)), 0).UTC()
 }
