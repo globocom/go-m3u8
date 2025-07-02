@@ -379,6 +379,22 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing
 	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 }
 
+func TestParseMediaPlaylist_WithCompleteAdBreak_RoundUpTimePrecision(t *testing.T) {
+	file, _ := os.Open("testdata/media/scte35/withRoundUpTimePrecision.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	_, foundCueOut := p.Find("CueOut")
+	allBreaks := p.Breaks()
+	allPDTs := p.FindAll("ProgramDateTime")
+
+	assert.NoError(t, err)
+	assert.True(t, foundCueOut)
+	assert.Equal(t, len(allBreaks), 1)
+	assert.Equal(t, len(allPDTs), 3)
+	assert.Equal(t, allBreaks[0].HLSElement.Details["StartMediaSequence"], "547307194")
+	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
+}
+
 func TestParsePlaylist(t *testing.T) {
 	type testCaseParams struct {
 		name           string
