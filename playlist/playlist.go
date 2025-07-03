@@ -170,7 +170,11 @@ type StreamInfData struct {
 	AverageBandwidth string
 	Resolution       string
 	FrameRate        string
-	URI              string
+	VideoRange       string
+	Audio            string
+	Video            string
+	Subtitles        string
+	ClosedCaptions   string
 }
 
 // ExtInfData holds data for ExtInf HLS element, whose format in manifest is multi-line:
@@ -194,6 +198,11 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 		Codecs:           strings.Split(mappedAttr["CODECS"], ","),
 		Resolution:       mappedAttr["RESOLUTION"],
 		FrameRate:        mappedAttr["FRAME-RATE"],
+		VideoRange:       mappedAttr["VIDEO-RANGE"],
+		Audio:            mappedAttr["AUDIO"],
+		Video:            mappedAttr["VIDEO"],
+		Subtitles:        mappedAttr["SUBTITLES"],
+		ClosedCaptions:   mappedAttr["CLOSED-CAPTIONS"],
 	}
 }
 
@@ -251,6 +260,11 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 					"CODECS":            strings.Join(p.CurrentStreamInf.Codecs, ","),
 					"RESOLUTION":        p.CurrentStreamInf.Resolution,
 					"FRAME-RATE":        p.CurrentStreamInf.FrameRate,
+					"VIDEO-RANGE":       p.CurrentStreamInf.VideoRange,
+					"AUDIO":             p.CurrentStreamInf.Audio,
+					"VIDEO":             p.CurrentStreamInf.Video,
+					"SUBTITLES":         p.CurrentStreamInf.Subtitles,
+					"CLOSED-CAPTIONS":   p.CurrentStreamInf.ClosedCaptions,
 				},
 			},
 		})
