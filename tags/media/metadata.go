@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	DateRangeTag   = "#EXT-X-DATERANGE"    //todo: has attributes
+	DateRangeTag   = "#EXT-X-DATERANGE"
 	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
 	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
 )
@@ -61,8 +61,18 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	order := []string{"ID", "START-DATE", "PLANNED-DURATION", "END-DATE", "DURATION", "SCTE35-OUT", "SCTE35-IN"}
-	return pl.EncodeTagWithAttributes(builder, DateRangeTag, node.HLSElement.Attrs, order)
+	orderAttr := []string{"ID", "CLASS", "START-DATE", "END-DATE", "DURATION", "PLANNED-DURATION", "SCTE35-OUT", "SCTE35-IN"}
+	shouldQuoteAttr := map[string]bool{
+		"ID":               true,
+		"CLASS":            true,
+		"START-DATE":       true,
+		"END-DATE":         true,
+		"DURATION":         false,
+		"PLANNED-DURATION": false,
+		"SCTE35-OUT":       false,
+		"SCTE35-IN":        false,
+	}
+	return pl.EncodeTagWithAttributes(builder, DateRangeTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
 // Returns the Ad Break's media sequence (string) and status (string).

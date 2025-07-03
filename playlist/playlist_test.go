@@ -158,7 +158,7 @@ func TestFindSegmentInsideAdBreak(t *testing.T) {
 		},
 	}
 
-	adBreak, _ := playlist.FindSegmentAdBreak(adBreakSegment)
+	adBreak, _ := playlist.FindNodeInsideAdBreak(adBreakSegment)
 
 	assert.NotNil(t, adBreak)
 	assert.Equal(t, adBreak.HLSElement.Name, expectedAdBreak.HLSElement.Name)
@@ -183,8 +183,8 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 	beforeBreakSegment := playlist.Segments()[5]
 	assert.Equal(t, beforeBreakSegment.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042174.ts")
 
-	afterAdBreak, _ := playlist.FindSegmentAdBreak(afterBreakSegment)
-	beforeAdBreak, _ := playlist.FindSegmentAdBreak(beforeBreakSegment)
+	afterAdBreak, _ := playlist.FindNodeInsideAdBreak(afterBreakSegment)
+	beforeAdBreak, _ := playlist.FindNodeInsideAdBreak(beforeBreakSegment)
 
 	assert.Nil(t, afterAdBreak)
 	assert.Nil(t, beforeAdBreak)

@@ -16,6 +16,7 @@
 package exclusive
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/globocom/go-m3u8/internal"
@@ -24,13 +25,19 @@ import (
 
 const (
 	IndependentSegmentsTag = "#EXT-X-INDEPENDENT-SEGMENTS"
-	StartTag               = "#EXT-X-START"  //todo: has attributes
-	VariableDefineTag      = "#EXT-X-DEFINE" //todo: has attributes
+	VariableDefineTag      = "#EXT-X-DEFINE"
+	StartTag               = "#EXT-X-START" //todo: has attributes
 )
 
-type IndependentSegmentsParser struct{}
+type (
+	IndependentSegmentsParser struct{}
+	VariableDefineParser      struct{}
+)
 
-type IndependentSegmentsEncoder struct{}
+type (
+	IndependentSegmentsEncoder struct{}
+	VariableDefineEncoder      struct{}
+)
 
 func (p IndependentSegmentsParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
@@ -44,7 +51,39 @@ func (p IndependentSegmentsParser) Parse(tag string, playlist *pl.Playlist) erro
 	return nil
 }
 
+func (p VariableDefineParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid variable define tag: %s", tag)
+	}
+
+	// VALUE attribute is REQUIRED if the EXT-X-DEFINE tag has a NAME attribute
+	if params["NAME"] != "" && params["VALUE"] == "" {
+		return fmt.Errorf("VALUE attribute is required for NAME attribute: %s", tag)
+	}
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "VariableDefine",
+			Attrs: params,
+		},
+	})
+
+	return nil
+}
+
 func (e IndependentSegmentsEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	_, err := builder.WriteString(IndependentSegmentsTag + "\n")
 	return err
+}
+
+func (e VariableDefineEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	orderAttr := []string{"NAME", "VALUE", "IMPORT", "QUERYPARAM"}
+	shouldQuoteAttr := map[string]bool{
+		"NAME":       true,
+		"VALUE":      true,
+		"IMPORT":     true,
+		"QUERYPARAM": true,
+	}
+	return pl.EncodeTagWithAttributes(builder, VariableDefineTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }

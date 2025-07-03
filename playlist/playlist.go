@@ -21,23 +21,25 @@ var (
 
 type Playlist struct {
 	*internal.DoublyLinkedList
-	CurrentSegment   *ExtInfData
-	CurrentStreamInf *StreamInfData
-	ProgramDateTime  time.Time
-	MediaSequence    int
-	SegmentsCounter  int
-	DVR              float64
+	CurrentSegment        *ExtInfData
+	CurrentStreamInf      *StreamInfData
+	ProgramDateTime       time.Time
+	MediaSequence         int
+	DiscontinuitySequence int
+	SegmentsCounter       int
+	DVR                   float64
 }
 
 func NewPlaylist() *Playlist {
 	return &Playlist{
-		DoublyLinkedList: new(internal.DoublyLinkedList),
-		CurrentSegment:   nil,
-		CurrentStreamInf: nil,
-		ProgramDateTime:  *new(time.Time),
-		MediaSequence:    0,
-		SegmentsCounter:  0,
-		DVR:              0,
+		DoublyLinkedList:      new(internal.DoublyLinkedList),
+		CurrentSegment:        nil,
+		CurrentStreamInf:      nil,
+		ProgramDateTime:       *new(time.Time),
+		MediaSequence:         0,
+		DiscontinuitySequence: 0,
+		SegmentsCounter:       0,
+		DVR:                   0,
 	}
 }
 
@@ -81,6 +83,18 @@ func (p *Playlist) MediaSequenceTag() (*internal.Node, bool) {
 	return p.Find("MediaSequence")
 }
 
+func (p *Playlist) DiscontinuitySequenceTag() (*internal.Node, bool) {
+	return p.Find("DiscontinuitySequence")
+}
+
+func (p *Playlist) DiscontinuitySequenceValue() string {
+	node, found := p.Find("DiscontinuitySequence")
+	if !found {
+		return ""
+	}
+	return node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"]
+}
+
 func (p *Playlist) Variants() []*internal.Node {
 	return p.FindAll("StreamInf")
 }
@@ -100,8 +114,8 @@ func (p *Playlist) Breaks() []*internal.Node {
 	return result
 }
 
-// Returns true if media segment is inside ad break and false otherwise.
-// When true, method also returns de DateRange object for the segment Ad Break.
+// Returns true if node is inside ad break and false otherwise.
+// When true, method also returns the DateRange object for the Ad Break.
 //
 // For entering the Ad Break, we always have DateRange tag with SCTE-OUT and CueOutEvent tag.
 // However, for exiting the Ad Break, we have three possible manifests:
@@ -109,15 +123,15 @@ func (p *Playlist) Breaks() []*internal.Node {
 //   - DateRange SCTE-IN is ALWAYS present.
 //   - No DateRange SCTE-IN. Exit is ONLY marked by CueInEvent tag instead.
 //   - SOMETIMES DateRange SCTE-IN is present, alongside the CueInEvent tag.
-func (p *Playlist) FindSegmentAdBreak(segment *internal.Node) (*internal.Node, bool) {
-	current := segment
+func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, bool) {
+	current := node
 	for current != nil {
-		// segment is inside Ad Break if it is preceeded by a DateRange tag with attribute SCTE35-OUT
+		// node is inside Ad Break if it is preceeded by a DateRange tag with attribute SCTE35-OUT
 		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
 			return current, true
 		}
 
-		// segment is outside Ad Break if it is preceeded by a CueIn tag or a DateRange tag with attribute SCTE35-IN
+		// node is outside Ad Break if it is preceeded by a CueIn tag or a DateRange tag with attribute SCTE35-IN
 		if (current.HLSElement.Name == "CueIn") || (current.HLSElement.Name == "DateRange" && current.HLSElement.Attrs["SCTE35-IN"] != "") {
 			return nil, false
 		}
@@ -156,7 +170,11 @@ type StreamInfData struct {
 	AverageBandwidth string
 	Resolution       string
 	FrameRate        string
-	URI              string
+	VideoRange       string
+	Audio            string
+	Video            string
+	Subtitles        string
+	ClosedCaptions   string
 }
 
 // ExtInfData holds data for ExtInf HLS element, whose format in manifest is multi-line:
@@ -169,6 +187,7 @@ type ExtInfData struct {
 	ProgramDateTime time.Time
 	MediaSequence   int
 	URI             string
+	Title           string
 }
 
 // Internal parser returns new StreamInfData object
@@ -179,11 +198,16 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 		Codecs:           strings.Split(mappedAttr["CODECS"], ","),
 		Resolution:       mappedAttr["RESOLUTION"],
 		FrameRate:        mappedAttr["FRAME-RATE"],
+		VideoRange:       mappedAttr["VIDEO-RANGE"],
+		Audio:            mappedAttr["AUDIO"],
+		Video:            mappedAttr["VIDEO"],
+		Subtitles:        mappedAttr["SUBTITLES"],
+		ClosedCaptions:   mappedAttr["CLOSED-CAPTIONS"],
 	}
 }
 
 // Internal parser returns new ExtInfData object
-func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
+func GetExtInfData(duration, title string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
 	floatDuration, err := strconv.ParseFloat(duration, 64)
 	if err != nil {
 		log.Error().Err(err).Msgf("failed to parse duration for segment: %s", duration)
@@ -195,6 +219,7 @@ func GetExtInfData(duration string, playlistMediaSequence, playlistSegmentsCount
 
 	return &ExtInfData{
 		Duration:        floatDuration,
+		Title:           title,
 		MediaSequence:   playlistMediaSequence + playlistSegmentsCounter,
 		ProgramDateTime: segmentProgramDateTime,
 	}
@@ -212,6 +237,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 				URI:  line,
 				Attrs: map[string]string{
 					"Duration": strconv.FormatFloat(p.CurrentSegment.Duration, 'f', -1, 64),
+					"Title":    p.CurrentSegment.Title,
 				},
 				Details: map[string]string{
 					"MediaSequence":   fmt.Sprintf("%d", p.CurrentSegment.MediaSequence),
@@ -234,6 +260,11 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 					"CODECS":            strings.Join(p.CurrentStreamInf.Codecs, ","),
 					"RESOLUTION":        p.CurrentStreamInf.Resolution,
 					"FRAME-RATE":        p.CurrentStreamInf.FrameRate,
+					"VIDEO-RANGE":       p.CurrentStreamInf.VideoRange,
+					"AUDIO":             p.CurrentStreamInf.Audio,
+					"VIDEO":             p.CurrentStreamInf.Video,
+					"SUBTITLES":         p.CurrentStreamInf.Subtitles,
+					"CLOSED-CAPTIONS":   p.CurrentStreamInf.ClosedCaptions,
 				},
 			},
 		})
@@ -265,7 +296,7 @@ func RoundFloat(val float64, precision uint) float64 {
 //// AUXILIARY METHODS FOR ENCODING
 
 // Encodes tag with attributes into string object
-func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string) error {
+func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string, shouldQuote map[string]bool) error {
 	if len(attrs) == 0 {
 		_, err := builder.WriteString(tag + "\n")
 		return err
@@ -276,7 +307,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 
 	for _, key := range order {
 		if value, exists := attrs[key]; exists {
-			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value))
+			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value, shouldQuote))
 			processed[key] = true
 		}
 	}
@@ -289,7 +320,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	}
 	sort.Strings(unorderedKeys)
 	for _, key := range unorderedKeys {
-		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key]))
+		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key], shouldQuote))
 	}
 
 	attributes := fmt.Sprintf("%s:%s\n", tag, strings.Join(formattedAttrs, ","))
@@ -308,42 +339,16 @@ func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey
 	return fmt.Errorf("attribute %s not found for tag %s", attrKey, tag)
 }
 
-func FormatAttribute(key, value string) string {
-	if ShouldQuote(key, value) {
+func FormatAttribute(key, value string, shouldQuote map[string]bool) string {
+	shouldQuoteValue, exists := shouldQuote[key]
+
+	if !exists {
+		shouldQuoteValue = true // default to quoting if not specified
+	}
+
+	if shouldQuoteValue {
 		return fmt.Sprintf(`%s="%s"`, key, value)
 	}
+
 	return fmt.Sprintf(`%s=%s`, key, value)
-}
-
-func ShouldQuote(key, value string) bool {
-	numericAttrs := map[string]bool{
-		"BANDWIDTH":         true,
-		"AVERAGE-BANDWIDTH": true,
-		"FRAME-RATE":        true,
-		"RESOLUTION":        true,
-		"PLANNED-DURATION":  true,
-		"DURATION":          true,
-		"MPEGTS":            true,
-	}
-
-	hexAttrs := map[string]bool{
-		"SCTE35-OUT": true,
-		"SCTE35-IN":  true,
-	}
-
-	if numericAttrs[key] {
-		if _, err := strconv.ParseFloat(value, 64); err == nil {
-			return false
-		}
-	}
-
-	if hexAttrs[key] && strings.HasPrefix(value, "0x") {
-		return false
-	}
-
-	if key == "LOCAL" {
-		return false
-	}
-
-	return true
 }

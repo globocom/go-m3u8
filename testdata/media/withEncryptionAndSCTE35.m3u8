@@ -1,0 +1,58 @@
+#EXTM3U
+#EXT-X-VERSION:5
+## Created with Unified Streaming Platform  (version=1.14.4-30793)
+#EXT-X-MEDIA-SEQUENCE:547311999
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-TARGETDURATION:5
+#USP-X-TIMESTAMP-MAP:MPEGTS=556674799,LOCAL=2025-07-01T19:33:14.866600Z
+#EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:33:14.866666Z
+#EXT-X-KEY:METHOD=SAMPLE-AES,URI="encryption-url",KEYFORMAT="com.apple.streamingkeydelivery",KEYFORMATVERSIONS="1"
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547311999.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312000.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312001.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312002.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312003.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312004.ts
+#EXTINF:2.6666, no desc
+channel-audio_1=96000-video=2262976-547312005.ts
+## splice_insert(auto_return)
+#EXT-X-DATERANGE:ID="4026542493-1751398416",START-DATE="2025-07-01T19:33:36.733333Z",PLANNED-DURATION=35,SCTE35-OUT=0xFC3025000000000BB800FFF01405F000299D7FEFFE9E84B200FE003010B000010101000024202F7C
+#EXT-X-CUE-OUT:35
+#EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:33:36.733333Z
+#EXT-X-KEY:METHOD=SAMPLE-AES,URI="encryption-url",KEYFORMAT="com.apple.streamingkeydelivery",KEYFORMATVERSIONS="1"
+#EXTINF:3.7333, no desc
+channel-audio_1=96000-video=2262976-547312006.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312007.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312008.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312009.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312010.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312011.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312012.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312013.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312014.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312015.ts
+#EXTINF:2.4666, no desc
+channel-audio_1=96000-video=2262976-547312016.ts
+## Auto Return Mode
+#EXT-X-CUE-IN
+#EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:34:11.733333Z
+#EXT-X-KEY:METHOD=SAMPLE-AES,URI="encryption-url",KEYFORMAT="com.apple.streamingkeydelivery",KEYFORMATVERSIONS="1"
+#EXTINF:3.9333, no desc
+channel-audio_1=96000-video=2262976-547312017.ts
+#EXTINF:3.2, no desc
+channel-audio_1=96000-video=2262976-547312018.ts

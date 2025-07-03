@@ -99,8 +99,9 @@ func (p CommentParser) Parse(line string, playlist *pl.Playlist) error {
 }
 
 func (e USPTimestampMapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	order := []string{"MPEGTS", "LOCAL"}
-	return pl.EncodeTagWithAttributes(builder, USPTimestampMapTag, node.HLSElement.Attrs, order)
+	orderAttr := []string{"MPEGTS", "LOCAL"}
+	shouldQuoteAttr := map[string]bool{"MPEGTS": false, "LOCAL": false}
+	return pl.EncodeTagWithAttributes(builder, USPTimestampMapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
 func (e EventCueOutEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
