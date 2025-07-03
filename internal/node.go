@@ -32,6 +32,16 @@ type HLSElement struct {
 	Details map[string]string
 }
 
+func (l *DoublyLinkedList) NewNode(name, uri string, attrs map[string]string, details map[string]string) *Node {
+	element := &HLSElement{
+		Name:    name,
+		URI:     uri,
+		Attrs:   attrs,
+		Details: details,
+	}
+	return &Node{HLSElement: element}
+}
+
 // Insert adds a new node to the end of the doubly linked list
 func (l *DoublyLinkedList) Insert(node *Node) {
 	if l.Head == nil {
