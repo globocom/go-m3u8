@@ -59,6 +59,7 @@ func TestExtInfEncoder(t *testing.T) {
 			Name: "ExtInf",
 			Attrs: map[string]string{
 				"Duration": "4.8",
+				"Title":    " no desc",
 			},
 			URI: "1.ts",
 		},
@@ -74,7 +75,7 @@ func TestExtInfEncoder(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, p)
-	assert.Equal(t, "#EXTINF:4.8\n1.ts\n", p)
+	assert.Equal(t, "#EXTINF:4.8, no desc\n1.ts\n", p)
 }
 func TestStreamInfEncoder(t *testing.T) {
 	node := &internal.Node{
@@ -86,7 +87,7 @@ func TestStreamInfEncoder(t *testing.T) {
 				"CODECS":            "mp4a.40.2,avc1.64001F",
 				"RESOLUTION":        "1280x720",
 				"FRAME-RATE":        "30",
-				"CLOSED-CAPTIONS":   "cc",
+				"CLOSED-CAPTIONS":   "NONE",
 				"SUBTITLES":         "subtitle",
 				"AUDIO":             "audio",
 			},
@@ -100,7 +101,7 @@ func TestStreamInfEncoder(t *testing.T) {
 		},
 	}
 
-	expectedPlaylist := `#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION="1280x720",FRAME-RATE=30,AUDIO="audio",CLOSED-CAPTIONS="cc",SUBTITLES="subtitle"` + "\n" + "playlist.m3u8\n"
+	expectedPlaylist := `#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=1280x720,FRAME-RATE=30,AUDIO="audio",SUBTITLES="subtitle",CLOSED-CAPTIONS=NONE` + "\n" + "playlist.m3u8\n"
 
 	p, err := m3u8.EncodePlaylist(playlist)
 
@@ -297,6 +298,83 @@ func TestCueInEncoder(t *testing.T) {
 	assert.Equal(t, "#EXT-X-CUE-IN\n", p)
 }
 
+func TestDiscontinuitySequenceEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DiscontinuitySequence",
+			Attrs: map[string]string{
+				"#EXT-X-DISCONTINUITY-SEQUENCE": "18",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, "#EXT-X-DISCONTINUITY-SEQUENCE:18\n", p)
+}
+
+func TestVariableDefineEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "VariableDefine",
+			Attrs: map[string]string{
+				"NAME":  "video_id",
+				"VALUE": "12345",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-DEFINE:NAME="video_id",VALUE="12345"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestExtKeyEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "ExtKey",
+			Attrs: map[string]string{
+				"METHOD":            "SAMPLE-AES",
+				"URI":               "sample-aes-uri",
+				"KEYFORMAT":         "com.apple.streamingkeydelivery",
+				"KEYFORMATVERSIONS": "1",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-KEY:METHOD=SAMPLE-AES,URI="sample-aes-uri",KEYFORMAT="com.apple.streamingkeydelivery",KEYFORMATVERSIONS="1"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
 func TestEncodeMasterPlaylist(t *testing.T) {
 	node1 := &internal.Node{
 		HLSElement: &internal.HLSElement{
@@ -356,7 +434,7 @@ func TestEncodeMasterPlaylist(t *testing.T) {
 #EXT-X-VERSION:3
 ## Created with Unified Streaming Platform (version=1.11.23-28141)
 # variants
-#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION="1280x720",FRAME-RATE=30,AUDIO="audio",CLOSED-CAPTIONS="cc",SUBTITLES="subtitle"
+#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=1280x720,FRAME-RATE=30,AUDIO="audio",SUBTITLES="subtitle",CLOSED-CAPTIONS="cc"
 playlist.m3u8
 `
 
@@ -395,7 +473,6 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-
 	node4 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "MediaSequence",
@@ -406,13 +483,21 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 	}
 	node5 := &internal.Node{
 		HLSElement: &internal.HLSElement{
+			Name: "DiscontinuitySequence",
+			Attrs: map[string]string{
+				"#EXT-X-DISCONTINUITY-SEQUENCE": "18",
+			},
+		},
+	}
+	node6 := &internal.Node{
+		HLSElement: &internal.HLSElement{
 			Name: "IndependentSegments",
 			Attrs: map[string]string{
 				"#EXT-X-INDEPENDENT-SEGMENTS": "",
 			},
 		},
 	}
-	node6 := &internal.Node{
+	node7 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "TargetDuration",
 			Attrs: map[string]string{
@@ -420,7 +505,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-	node7 := &internal.Node{
+	node8 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "UspTimestampMap",
 			Attrs: map[string]string{
@@ -429,7 +514,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-	node8 := &internal.Node{
+	node9 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "ProgramDateTime",
 			Attrs: map[string]string{
@@ -437,11 +522,12 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 			},
 		},
 	}
-	node9 := &internal.Node{
+	node10 := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "ExtInf",
 			Attrs: map[string]string{
-				"Duration": "4.8, no desc",
+				"Duration": "4.8",
+				"Title":    " no desc",
 			},
 			URI: "1.ts",
 		},
@@ -458,6 +544,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 #EXT-X-VERSION:3
 ## Created with Unified Streaming Platform (version=1.11.23-28141)
 #EXT-X-MEDIA-SEQUENCE:360948012
+#EXT-X-DISCONTINUITY-SEQUENCE:18
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-TARGETDURATION:7
 #USP-X-TIMESTAMP-MAP:MPEGTS=5048974016,LOCAL=2024-11-25T16:00:53.200000Z
@@ -475,6 +562,7 @@ func TestEncodeMediaPlaylist(t *testing.T) {
 	playlist.Insert(node7)
 	playlist.Insert(node8)
 	playlist.Insert(node9)
+	playlist.Insert(node10)
 
 	p, err := m3u8.EncodePlaylist(playlist)
 

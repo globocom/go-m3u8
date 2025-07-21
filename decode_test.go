@@ -54,6 +54,16 @@ func TestMediaSequenceParser(t *testing.T) {
 	assert.Equal(t, "360948012", node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"])
 }
 
+func TestDiscontinuitySequenceParser(t *testing.T) {
+	playlist := "#EXT-X-DISCONTINUITY-SEQUENCE:18"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("DiscontinuitySequence")
+	assert.True(t, found)
+	assert.Equal(t, "18", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
+}
+
 func TestIndependentSegmentsParser(t *testing.T) {
 	playlist := "#EXT-X-INDEPENDENT-SEGMENTS"
 	p, err := setupPlaylist(playlist)
@@ -62,6 +72,32 @@ func TestIndependentSegmentsParser(t *testing.T) {
 	node, found := p.Find("IndependentSegments")
 	assert.True(t, found)
 	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-INDEPENDENT-SEGMENT"])
+}
+
+func TestVariableDefineParser(t *testing.T) {
+	// test valid variable define tag with NAME and VALUE
+	playlist := "#EXT-X-DEFINE:NAME=\"video_id\",VALUE=\"12345\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("VariableDefine")
+	assert.True(t, found)
+	assert.Equal(t, "video_id", node.HLSElement.Attrs["NAME"])
+	assert.Equal(t, "12345", node.HLSElement.Attrs["VALUE"])
+
+	// test valid variable define tag with QUERYPARAM
+	playlist = "#EXT-X-DEFINE:QUERYPARAM=\"video_id\""
+	p, err = setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found = p.Find("VariableDefine")
+	assert.True(t, found)
+	assert.Equal(t, "video_id", node.HLSElement.Attrs["QUERYPARAM"])
+
+	// test invalid variable define tag with NAME but without VALUE
+	playlist = "#EXT-X-DEFINE:NAME=\"video_id\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
 }
 
 func TestTargetDurationParser(t *testing.T) {
@@ -93,6 +129,35 @@ func TestProgramDateTimeParser(t *testing.T) {
 	node, ok := p.Find("ProgramDateTime")
 	assert.True(t, ok)
 	assert.Equal(t, "2025-01-01T12:34:56Z", node.HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"])
+}
+
+func TestExtKeyParser(t *testing.T) {
+	// test valid ext key tag
+	playlist := "#EXT-X-KEY:METHOD=SAMPLE-AES,URI=\"drm-uri\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("ExtKey")
+	assert.True(t, found)
+	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "drm-uri", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+
+	// test invalid ext key without METHOD
+	playlist = "#EXT-X-KEY:KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid ext key with METHOD not NONE and without URI
+	playlist = "#EXT-X-KEY:METHOD=SAMPLE-AES,KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid ext key with METHOD AES-128 and without IV
+	playlist = "#EXT-X-KEY:METHOD=AES-128,URI=\"https://example.com/keys/key1.bin\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
 }
 
 func TestDateRangeParser(t *testing.T) {
@@ -158,6 +223,7 @@ func TestExtInfParser(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 4.8, p.CurrentSegment.Duration)
+	assert.Equal(t, " no desc", p.CurrentSegment.Title)
 }
 
 func TestStreamInfParser(t *testing.T) {
@@ -197,6 +263,19 @@ func TestMultiLineHLSElements_Segments(t *testing.T) {
 	assert.True(t, found)
 	assert.Equal(t, "1.ts", node.HLSElement.URI)
 	assert.Equal(t, "4.8", node.HLSElement.Attrs["Duration"])
+	assert.Equal(t, " no desc", node.HLSElement.Attrs["Title"])
+
+	playlist = `#EXTINF:3.6
+              0.ts`
+	p, err = setupPlaylist(playlist)
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+
+	node, found = p.Find("ExtInf")
+	assert.True(t, found)
+	assert.Equal(t, "0.ts", node.HLSElement.URI)
+	assert.Equal(t, "3.6", node.HLSElement.Attrs["Duration"])
+	assert.Equal(t, "", node.HLSElement.Attrs["Title"])
 }
 
 func TestMultiLineHLSElements_StreamInf(t *testing.T) {
@@ -395,6 +474,92 @@ func TestParseMediaPlaylist_WithCompleteAdBreak_RoundUpTimePrecision(t *testing.
 	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], media.BreakStatusComplete)
 }
 
+func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
+	file, _ := os.Open("testdata/media/withDiscontinuity.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	node, found := p.Find("DiscontinuitySequence")
+
+	assert.True(t, found)
+	assert.Equal(t, "87498", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"])
+	assert.Equal(t, p.DiscontinuitySequence, 87498)
+
+	nodes := p.FindAll("Discontinuity")
+
+	assert.Len(t, nodes, 2)
+	assert.Equal(t, "", nodes[0].HLSElement.Attrs["#EXT-X-DISCONTINUITY"])
+}
+
+func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
+	file, _ := os.Open("testdata/media/encryption/withAES128.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	node, found := p.Find("ExtKey")
+
+	assert.True(t, found)
+	assert.Equal(t, "AES-128", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "https://example.com/keys/key1.bin", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "0x0123456789abcdef0123456789abcdef", node.HLSElement.Attrs["IV"])
+}
+
+func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
+	file, _ := os.Open("testdata/media/encryption/withSampleAES.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	node, found := p.Find("ExtKey")
+
+	assert.True(t, found)
+	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "sample-aes-uri", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+}
+
+func TestParseMediaPlaylistWithEncryptionAndCompleteAdBreak(t *testing.T) {
+	file, _ := os.Open("testdata/media/withEncryptionAndSCTE35.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	extKeyNodes := p.FindAll("ExtKey")
+	assert.Len(t, extKeyNodes, 3)
+
+	_, found1 := p.FindNodeInsideAdBreak(extKeyNodes[0])
+	assert.False(t, found1)
+
+	_, found2 := p.FindNodeInsideAdBreak(extKeyNodes[1])
+	assert.True(t, found2)
+
+	_, found3 := p.FindNodeInsideAdBreak(extKeyNodes[2])
+	assert.False(t, found3)
+
+	dateRangeNodes := p.Breaks()
+
+	assert.Len(t, dateRangeNodes, 1)
+}
+
 func TestParsePlaylist(t *testing.T) {
 	type testCaseParams struct {
 		name           string
@@ -431,8 +596,8 @@ func TestParsePlaylist(t *testing.T) {
 			name:           "Parse media playlist with EXT-X-DISCONTINUITY tag",
 			kind:           "media",
 			path:           "./testdata/media/withDiscontinuity.m3u8",
-			pdt:            time.Date(2024, 11, 25, 16, 0, 53, 200000000, time.UTC),
-			dvr:            76.7998,
+			pdt:            time.Date(2025, time.July, 1, 19, 1, 40, 466666000, time.UTC),
+			dvr:            51.1998,
 			segmentCounter: 16,
 		},
 		{

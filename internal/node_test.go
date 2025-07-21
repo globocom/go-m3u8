@@ -9,6 +9,7 @@ import (
 
 func TestDoublyLinkedListInsert(t *testing.T) {
 	list := internal.DoublyLinkedList{}
+
 	firstNode := &internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: "Version",
@@ -17,6 +18,7 @@ func TestDoublyLinkedListInsert(t *testing.T) {
 			},
 		},
 	}
+
 	list.Insert(firstNode)
 
 	assert.Equal(t, firstNode, list.Head)
@@ -40,6 +42,137 @@ func TestDoublyLinkedListInsert(t *testing.T) {
 	assert.Equal(t, firstNode, secondNode.Prev)
 	assert.Equal(t, secondNode, firstNode.Next)
 
+}
+
+func TestDoublyLinkedListInsertAfter(t *testing.T) {
+	list := internal.DoublyLinkedList{}
+
+	firstNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "M3u8Identifier",
+		},
+	}
+
+	secondNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Comment",
+			Attrs: map[string]string{
+				"Comment": "## Created with Unified Streaming Platform (version=1.11.23-28141)",
+			},
+		},
+	}
+
+	list.Insert(firstNode)
+	list.InsertAfter(firstNode, secondNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, secondNode, list.Tail)
+	assert.Equal(t, firstNode, secondNode.Prev)
+	assert.Equal(t, secondNode, firstNode.Next)
+
+	newNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Version",
+			Attrs: map[string]string{
+				"#EXT-X-VERSION": "3",
+			},
+		},
+	}
+
+	list.InsertAfter(firstNode, newNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, secondNode, list.Tail)
+	assert.Equal(t, newNode, firstNode.Next)
+	assert.Equal(t, newNode, secondNode.Prev)
+	assert.Equal(t, firstNode, newNode.Prev)
+	assert.Equal(t, secondNode, newNode.Next)
+}
+
+func TestDoublyLinkedListInsertBefore(t *testing.T) {
+	list := internal.DoublyLinkedList{}
+
+	firstNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "M3u8Identifier",
+		},
+	}
+
+	secondNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Comment",
+			Attrs: map[string]string{
+				"Comment": "## Created with Unified Streaming Platform (version=1.11.23-28141)",
+			},
+		},
+	}
+
+	list.Insert(secondNode)
+	list.InsertBefore(secondNode, firstNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, secondNode, list.Tail)
+	assert.Equal(t, firstNode, secondNode.Prev)
+	assert.Equal(t, secondNode, firstNode.Next)
+
+	newNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Version",
+			Attrs: map[string]string{
+				"#EXT-X-VERSION": "3",
+			},
+		},
+	}
+
+	list.InsertBefore(secondNode, newNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, secondNode, list.Tail)
+	assert.Equal(t, newNode, firstNode.Next)
+	assert.Equal(t, newNode, secondNode.Prev)
+	assert.Equal(t, firstNode, newNode.Prev)
+	assert.Equal(t, secondNode, newNode.Next)
+}
+
+func TestDoublyLinkedListInsertBetween(t *testing.T) {
+	list := internal.DoublyLinkedList{}
+
+	firstNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "M3u8Identifier",
+		},
+	}
+	secondNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Version",
+			Attrs: map[string]string{
+				"#EXT-X-VERSION": "3",
+			},
+		},
+	}
+	thirdNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Comment",
+			Attrs: map[string]string{
+				"Comment": "## Created with Unified Streaming Platform (version=1.11.23-28141)",
+			},
+		},
+	}
+
+	list.Insert(firstNode)
+	list.Insert(thirdNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, thirdNode, list.Tail)
+
+	list.InsertBetween(firstNode, thirdNode, secondNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, thirdNode, list.Tail)
+	assert.Equal(t, secondNode, firstNode.Next)
+	assert.Equal(t, secondNode, thirdNode.Prev)
+	assert.Equal(t, firstNode, secondNode.Prev)
+	assert.Equal(t, thirdNode, secondNode.Next)
 }
 
 func TestDoublyLinkedListFind(t *testing.T) {
