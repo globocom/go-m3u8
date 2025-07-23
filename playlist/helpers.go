@@ -157,7 +157,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 		return err
 	}
 
-	var formattedAttrs []string
+	formattedAttrs := make([]string, 0, len(attrs))
 	processed := make(map[string]bool)
 
 	for _, key := range order {
@@ -202,7 +202,7 @@ func FormatAttribute(key, value string, shouldQuote map[string]bool) string {
 	}
 
 	if shouldQuoteValue {
-		return fmt.Sprintf(`%s="%s"`, key, value)
+		return fmt.Sprintf(`%s=%q`, key, value)
 	}
 
 	return fmt.Sprintf(`%s=%s`, key, value)

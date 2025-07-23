@@ -79,7 +79,7 @@ func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 // Returns the Ad Break's media sequence (string) and status (string).
 //   - The Break's media sequence will be the media sequence of the first segment inside the break (or zero if Break is incomplete).
 //   - The Break's status will be: "complete" or incomplete ("leavingDVRLimit" or "segmentsNotReady").
-func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (string, string) {
+func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (value, status string) {
 	currentMediaSequence := fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter)
 	breakStartDate, _ := time.Parse(time.RFC3339Nano, dateRangeNode.HLSElement.Attrs["START-DATE"])
 

@@ -31,10 +31,10 @@ var (
 	DiscontinuityTag   = "#EXT-X-DISCONTINUITY"
 	ProgramDateTimeTag = "#EXT-X-PROGRAM-DATE-TIME"
 	KeyTag             = "#EXT-X-KEY"
-	ByteRangeTag       = "#EXT-X-BYTERANGE" //todo: has attributes
-	MapTag             = "#EXT-X-MAP"       //todo: has attributes
-	GapTag             = "#EXT-X-GAP"       //todo
-	PartTag            = "#EXT-X-PART"      //todo: has attributes
+	ByteRangeTag       = "#EXT-X-BYTERANGE" // todo: has attributes
+	MapTag             = "#EXT-X-MAP"       // todo: has attributes
+	GapTag             = "#EXT-X-GAP"       // todo
+	PartTag            = "#EXT-X-PART"      // todo: has attributes
 )
 
 type (

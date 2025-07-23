@@ -26,11 +26,11 @@ var (
 	TargetDurationTag        = "#EXT-X-TARGETDURATION"
 	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"
 	DiscontinuitySequenceTag = "#EXT-X-DISCONTINUITY-SEQUENCE"
-	EndlistTag               = "#EXT-X-ENDLIST"        //todo
-	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  //todo: has one attribute
-	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"  //todo
-	PartInfTag               = "#EXT-X-PART-INF"       //todo: has attributes
-	ServerControlTag         = "#EXT-X-SERVER-CONTROL" //todo: has attributes
+	EndlistTag               = "#EXT-X-ENDLIST"        // todo
+	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  // todo: has one attribute
+	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"  // todo
+	PartInfTag               = "#EXT-X-PART-INF"       // todo: has attributes
+	ServerControlTag         = "#EXT-X-SERVER-CONTROL" // todo: has attributes
 )
 
 type (

@@ -28,7 +28,7 @@ type HLSElement struct {
 	Details map[string]string
 }
 
-func (l *DoublyLinkedList) NewNode(name, uri string, attrs map[string]string, details map[string]string) *Node {
+func (l *DoublyLinkedList) NewNode(name, uri string, attrs, details map[string]string) *Node {
 	element := &HLSElement{
 		Name:    name,
 		URI:     uri,
@@ -53,7 +53,7 @@ func (l *DoublyLinkedList) Insert(node *Node) {
 // InsertAfter inserts newNode after node in the doubly linked list
 //
 //	node ---> newNode ---> node.Next
-func (l *DoublyLinkedList) InsertAfter(node *Node, newNode *Node) {
+func (l *DoublyLinkedList) InsertAfter(node, newNode *Node) {
 	if node == nil {
 		return
 	}
@@ -72,7 +72,7 @@ func (l *DoublyLinkedList) InsertAfter(node *Node, newNode *Node) {
 // InsertBefore inserts newNode before node in the doubly linked list
 //
 //	node.Prev ---> newNode ---> node
-func (l *DoublyLinkedList) InsertBefore(node *Node, newNode *Node) {
+func (l *DoublyLinkedList) InsertBefore(node, newNode *Node) {
 	if node == nil {
 		return
 	}
@@ -91,7 +91,7 @@ func (l *DoublyLinkedList) InsertBefore(node *Node, newNode *Node) {
 // InsertBetween inserts newNode between node1 and node2 in the doubly linked list
 //
 //	node1 ---> newNode ---> node2
-func (l *DoublyLinkedList) InsertBetween(node1 *Node, node2 *Node, newNode *Node) {
+func (l *DoublyLinkedList) InsertBetween(node1, node2, newNode *Node) {
 	if node1 == nil || node2 == nil {
 		return
 	}
