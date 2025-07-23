@@ -3,11 +3,7 @@ package playlist
 import (
 	"errors"
 	"fmt"
-	"math"
 	"regexp"
-	"sort"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/globocom/go-m3u8/internal"
@@ -30,6 +26,7 @@ type Playlist struct {
 	DVR                   float64
 }
 
+// Returns new Playlist instance with an empty doubly linked list
 func NewPlaylist() *Playlist {
 	return &Playlist{
 		DoublyLinkedList:      new(internal.DoublyLinkedList),
@@ -43,6 +40,7 @@ func NewPlaylist() *Playlist {
 	}
 }
 
+// Prints the playlist to stdout for debugging purposes
 func (p *Playlist) Print() {
 	if p.Head == nil || p.Tail == nil {
 		log.Warn().Msg("playlist is empty")
@@ -59,6 +57,7 @@ func (p *Playlist) Print() {
 	}
 }
 
+// Returns the Version tag's value as a string
 func (p *Playlist) VersionValue() string {
 	node, found := p.Find("Version")
 	if !found {
@@ -67,10 +66,12 @@ func (p *Playlist) VersionValue() string {
 	return node.HLSElement.Attrs["#EXT-X-VERSION"]
 }
 
-func (p *Playlist) Version() (*internal.Node, bool) {
+// Returns the Version tag as a Node if it exists, otherwise returns nil and false
+func (p *Playlist) VersionTag() (*internal.Node, bool) {
 	return p.Find("Version")
 }
 
+// Returns the MediaSequence tag's value as a string
 func (p *Playlist) MediaSequenceValue() string {
 	node, found := p.Find("MediaSequence")
 	if !found {
@@ -79,14 +80,12 @@ func (p *Playlist) MediaSequenceValue() string {
 	return node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"]
 }
 
+// Returns the MediaSequence tag as a Node if it exists, otherwise returns nil and false
 func (p *Playlist) MediaSequenceTag() (*internal.Node, bool) {
 	return p.Find("MediaSequence")
 }
 
-func (p *Playlist) DiscontinuitySequenceTag() (*internal.Node, bool) {
-	return p.Find("DiscontinuitySequence")
-}
-
+// Returns the DiscontinuitySequence tag's value as a string
 func (p *Playlist) DiscontinuitySequenceValue() string {
 	node, found := p.Find("DiscontinuitySequence")
 	if !found {
@@ -95,14 +94,22 @@ func (p *Playlist) DiscontinuitySequenceValue() string {
 	return node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"]
 }
 
+// Returns the DiscontinuitySequence tag as a Node if it exists, otherwise returns nil and false
+func (p *Playlist) DiscontinuitySequenceTag() (*internal.Node, bool) {
+	return p.Find("DiscontinuitySequence")
+}
+
+// Returns all StreamInf nodes in the playlist
 func (p *Playlist) Variants() []*internal.Node {
 	return p.FindAll("StreamInf")
 }
 
+// Returns all ExtInf nodes in the playlist
 func (p *Playlist) Segments() []*internal.Node {
 	return p.FindAll("ExtInf")
 }
 
+// Returns all DateRange nodes with SCTE35-OUT marking in the playlist
 func (p *Playlist) Breaks() []*internal.Node {
 	result := make([]*internal.Node, 0)
 	nodes := p.FindAll("DateRange")
@@ -140,215 +147,4 @@ func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, b
 	}
 
 	return nil, false
-}
-
-func (p *Playlist) ReplaceBreaksURI(transform func(string) string) error {
-	startCondition := func(node *internal.Node) bool {
-		return node.HLSElement.Name == "DateRange" && node.HLSElement.Attrs["SCTE35-OUT"] != ""
-	}
-	endCondition := func(node *internal.Node) bool {
-		return node.HLSElement.Name == "DateRange" && node.HLSElement.Attrs["SCTE35-IN"] != ""
-	}
-	transformFunc := func(node *internal.Node) {
-		if node.HLSElement.Name == "ExtInf" && node.HLSElement.URI != "" {
-			node.HLSElement.URI = transform(node.HLSElement.URI)
-		}
-	}
-	return p.ModifyNodesBetween(startCondition, endCondition, transformFunc)
-}
-
-//// METHODS FOR DECODING MULTI-LINE TAGS
-
-// StreamInfData holds data for StreamInf HLS Element, whose format in manifest is multi-line:
-//
-// #EXT-X-STREAM-INF:<attribute-list>
-//
-// <URI>
-type StreamInfData struct {
-	Codecs           []string
-	Bandwidth        string
-	AverageBandwidth string
-	Resolution       string
-	FrameRate        string
-	VideoRange       string
-	Audio            string
-	Video            string
-	Subtitles        string
-	ClosedCaptions   string
-}
-
-// ExtInfData holds data for ExtInf HLS element, whose format in manifest is multi-line:
-//
-// #EXTINF:<duration>,[<title>]
-//
-// <URI>
-type ExtInfData struct {
-	Duration        float64
-	ProgramDateTime time.Time
-	MediaSequence   int
-	URI             string
-	Title           string
-}
-
-// Internal parser returns new StreamInfData object
-func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
-	return &StreamInfData{
-		Bandwidth:        mappedAttr["BANDWIDTH"],
-		AverageBandwidth: mappedAttr["AVERAGE-BANDWIDTH"],
-		Codecs:           strings.Split(mappedAttr["CODECS"], ","),
-		Resolution:       mappedAttr["RESOLUTION"],
-		FrameRate:        mappedAttr["FRAME-RATE"],
-		VideoRange:       mappedAttr["VIDEO-RANGE"],
-		Audio:            mappedAttr["AUDIO"],
-		Video:            mappedAttr["VIDEO"],
-		Subtitles:        mappedAttr["SUBTITLES"],
-		ClosedCaptions:   mappedAttr["CLOSED-CAPTIONS"],
-	}
-}
-
-// Internal parser returns new ExtInfData object
-func GetExtInfData(duration, title string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
-	floatDuration, err := strconv.ParseFloat(duration, 64)
-	if err != nil {
-		log.Error().Err(err).Msgf("failed to parse duration for segment: %s", duration)
-		return &ExtInfData{}
-	}
-
-	currentDVRInNanoseconds := int(playlistDVR * float64(time.Second))
-	segmentProgramDateTime := playlistPDT.Add(time.Duration(currentDVRInNanoseconds))
-
-	return &ExtInfData{
-		Duration:        floatDuration,
-		Title:           title,
-		MediaSequence:   playlistMediaSequence + playlistSegmentsCounter,
-		ProgramDateTime: segmentProgramDateTime,
-	}
-}
-
-// Handles HLS Elements whose format in manifest are multi-line: tag + uri.
-// The URI line that follows the EXT-X-STREAM-INF and EXTINF tags is REQUIRED.
-func HandleMultiLineHLSElements(line string, p *Playlist) error {
-	switch {
-	// Handle EXTINF
-	case p.CurrentSegment != nil:
-		p.Insert(&internal.Node{
-			HLSElement: &internal.HLSElement{
-				Name: "ExtInf",
-				URI:  line,
-				Attrs: map[string]string{
-					"Duration": strconv.FormatFloat(p.CurrentSegment.Duration, 'f', -1, 64),
-					"Title":    p.CurrentSegment.Title,
-				},
-				Details: map[string]string{
-					"MediaSequence":   fmt.Sprintf("%d", p.CurrentSegment.MediaSequence),
-					"ProgramDateTime": p.CurrentSegment.ProgramDateTime.Format(time.RFC3339Nano),
-				},
-			},
-		})
-		p.CurrentSegment = nil
-		return nil
-
-	// Handle EXT-X-STREAM-INF
-	case p.CurrentStreamInf != nil:
-		p.Insert(&internal.Node{
-			HLSElement: &internal.HLSElement{
-				Name: "StreamInf",
-				URI:  line,
-				Attrs: map[string]string{
-					"BANDWIDTH":         p.CurrentStreamInf.Bandwidth,
-					"AVERAGE-BANDWIDTH": p.CurrentStreamInf.AverageBandwidth,
-					"CODECS":            strings.Join(p.CurrentStreamInf.Codecs, ","),
-					"RESOLUTION":        p.CurrentStreamInf.Resolution,
-					"FRAME-RATE":        p.CurrentStreamInf.FrameRate,
-					"VIDEO-RANGE":       p.CurrentStreamInf.VideoRange,
-					"AUDIO":             p.CurrentStreamInf.Audio,
-					"VIDEO":             p.CurrentStreamInf.Video,
-					"SUBTITLES":         p.CurrentStreamInf.Subtitles,
-					"CLOSED-CAPTIONS":   p.CurrentStreamInf.ClosedCaptions,
-				},
-			},
-		})
-		p.CurrentStreamInf = nil
-		return nil
-	default:
-		return nil
-	}
-}
-
-//// AUXILIARY METHODS FOR DECODING
-
-// https://regex101.com/r/0A2ulC/1
-func TagsToMap(line string) map[string]string {
-	m := make(map[string]string)
-	for _, kv := range ParamRegex.FindAllStringSubmatch(line, -1) {
-		k, v := kv[1], kv[2]
-		m[strings.ToUpper(k)] = strings.Trim(v, "\"")
-	}
-
-	return m
-}
-
-func RoundFloat(val float64, precision uint) float64 {
-	ratio := math.Pow(10, float64(precision))
-	return math.Round(val*ratio) / ratio
-}
-
-//// AUXILIARY METHODS FOR ENCODING
-
-// Encodes tag with attributes into string object
-func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string, shouldQuote map[string]bool) error {
-	if len(attrs) == 0 {
-		_, err := builder.WriteString(tag + "\n")
-		return err
-	}
-
-	var formattedAttrs []string
-	processed := make(map[string]bool)
-
-	for _, key := range order {
-		if value, exists := attrs[key]; exists {
-			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value, shouldQuote))
-			processed[key] = true
-		}
-	}
-
-	unorderedKeys := make([]string, 0, len(attrs))
-	for key := range attrs {
-		if !processed[key] {
-			unorderedKeys = append(unorderedKeys, key)
-		}
-	}
-	sort.Strings(unorderedKeys)
-	for _, key := range unorderedKeys {
-		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key], shouldQuote))
-	}
-
-	attributes := fmt.Sprintf("%s:%s\n", tag, strings.Join(formattedAttrs, ","))
-
-	_, err := builder.WriteString(attributes)
-	return err
-}
-
-// Encodes tag without attributes into string object
-func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey string) error {
-	if value, exists := node.HLSElement.Attrs[attrKey]; exists {
-		attr := fmt.Sprintf("%s:%s\n", tag, value)
-		_, err := builder.WriteString(attr)
-		return err
-	}
-	return fmt.Errorf("attribute %s not found for tag %s", attrKey, tag)
-}
-
-func FormatAttribute(key, value string, shouldQuote map[string]bool) string {
-	shouldQuoteValue, exists := shouldQuote[key]
-
-	if !exists {
-		shouldQuoteValue = true // default to quoting if not specified
-	}
-
-	if shouldQuoteValue {
-		return fmt.Sprintf(`%s="%s"`, key, value)
-	}
-
-	return fmt.Sprintf(`%s=%s`, key, value)
 }

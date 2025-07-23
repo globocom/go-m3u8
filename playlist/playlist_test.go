@@ -1,13 +1,11 @@
 package playlist_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
-	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,12 +18,12 @@ func TestVersionValue(t *testing.T) {
 	assert.Equal(t, version, "3")
 }
 
-func TestVersion(t *testing.T) {
+func TestVersionTag(t *testing.T) {
 	file, _ := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	node, found := playlist.Version()
+	node, found := playlist.VersionTag()
 	assert.True(t, found)
 	assert.NotNil(t, node)
 	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-VERSION"], "3")
@@ -40,7 +38,7 @@ func TestMediaSequenceValue(t *testing.T) {
 	assert.Equal(t, mediaSequence, "364042169")
 }
 
-func TestMediaSequence(t *testing.T) {
+func TestMediaSequenceTag(t *testing.T) {
 	file, _ := os.Open("./../testdata/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
@@ -51,17 +49,24 @@ func TestMediaSequence(t *testing.T) {
 	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"], "364042169")
 }
 
-func TestBreaks(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+func TestDiscontinuitySequenceValue(t *testing.T) {
+	file, _ := os.Open("./../testdata/media/withDiscontinuity.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	nodes := playlist.Breaks()
-	assert.NotNil(t, nodes)
-	assert.Len(t, nodes, 1)
-	for _, node := range nodes {
-		assert.Equal(t, node.HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5")
-	}
+	discSequence := playlist.DiscontinuitySequenceValue()
+	assert.Equal(t, discSequence, "87498")
+}
+
+func TestDiscontinuitySequenceTag(t *testing.T) {
+	file, _ := os.Open("./../testdata/media/withDiscontinuity.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node, found := playlist.DiscontinuitySequenceTag()
+	assert.True(t, found)
+	assert.NotNil(t, node)
+	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"], "87498")
 }
 
 func TestVariants(t *testing.T) {
@@ -84,55 +89,17 @@ func TestSegments(t *testing.T) {
 	assert.Len(t, nodes, 27)
 }
 
-func TestReplaceBreaksURI(t *testing.T) {
-	playlist := &pl.Playlist{
-		DoublyLinkedList: &internal.DoublyLinkedList{},
-	}
-
-	node1 := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "DateRange",
-			Attrs: map[string]string{
-				"SCTE35-OUT": "0xFFFF",
-			},
-		},
-	}
-	node2 := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "ExtInf",
-			URI:  "1.ts",
-		},
-	}
-	node3 := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "ExtInf",
-			URI:  "2.ts",
-		},
-	}
-	node4 := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "DateRange",
-			Attrs: map[string]string{
-				"SCTE35-IN": "0xFFFD",
-			},
-		},
-	}
-
-	playlist.Insert(node1)
-	playlist.Insert(node2)
-	playlist.Insert(node3)
-	playlist.Insert(node4)
-
-	transform := func(uri string) string {
-		return fmt.Sprintf("ad-server-bucket-%s", uri)
-	}
-
-	err := playlist.ReplaceBreaksURI(transform)
+func TestBreaks(t *testing.T) {
+	file, _ := os.Open("./../testdata/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
-	assert.Equal(t, "ad-server-bucket-1.ts", node2.HLSElement.URI)
-	assert.Equal(t, "ad-server-bucket-2.ts", node3.HLSElement.URI)
-	assert.Equal(t, "0xFFFF", node1.HLSElement.Attrs["SCTE35-OUT"])
-	assert.Equal(t, "0xFFFD", node4.HLSElement.Attrs["SCTE35-IN"])
+
+	nodes := playlist.Breaks()
+	assert.NotNil(t, nodes)
+	assert.Len(t, nodes, 1)
+	for _, node := range nodes {
+		assert.Equal(t, node.HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5")
+	}
 }
 
 func TestFindSegmentInsideAdBreak(t *testing.T) {
