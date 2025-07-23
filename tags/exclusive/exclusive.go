@@ -24,6 +24,11 @@ import (
 )
 
 const (
+	IndependentSegmentsName = "IndependentSegments"
+	VariableDefineName      = "VariableDefine"
+)
+
+var (
 	IndependentSegmentsTag = "#EXT-X-INDEPENDENT-SEGMENTS"
 	VariableDefineTag      = "#EXT-X-DEFINE"
 	StartTag               = "#EXT-X-START" //todo: has attributes
@@ -42,7 +47,7 @@ type (
 func (p IndependentSegmentsParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name: "IndependentSegments",
+			Name: IndependentSegmentsName,
 			Attrs: map[string]string{
 				IndependentSegmentsTag: "",
 			},
@@ -64,7 +69,7 @@ func (p VariableDefineParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "VariableDefine",
+			Name:  VariableDefineName,
 			Attrs: params,
 		},
 	})

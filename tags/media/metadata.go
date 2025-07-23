@@ -18,16 +18,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-	DateRangeTag   = "#EXT-X-DATERANGE"
-	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
-	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
-)
-
 const (
 	BreakStatusLeavingDVR = "leavingDVRLimit"
 	BreakStatusNotReady   = "segmentsNotReady"
 	BreakStatusComplete   = "complete"
+	DateRangeName         = "DateRange"
+)
+
+var (
+	DateRangeTag   = "#EXT-X-DATERANGE"
+	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
+	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
 )
 
 type DateRangeParser struct{}
@@ -42,7 +43,7 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	dateRangeNode := &internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "DateRange",
+			Name:  DateRangeName,
 			Attrs: params,
 		},
 	}

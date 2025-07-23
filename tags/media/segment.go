@@ -19,6 +19,13 @@ import (
 	pl "github.com/globocom/go-m3u8/playlist"
 )
 
+const (
+	ExtInfName          = "ExtInf"
+	DiscontinuityName   = "Discontinuity"
+	ProgramDateTimeName = "ProgramDateTime"
+	ExtKeyName          = "ExtKey"
+)
+
 var (
 	ExtInfTag          = "#EXTINF"
 	DiscontinuityTag   = "#EXT-X-DISCONTINUITY"
@@ -69,7 +76,7 @@ func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
 func (p DiscontinuityParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name: "Discontinuity",
+			Name: DiscontinuityName,
 			Attrs: map[string]string{
 				DiscontinuityTag: "",
 			},
@@ -88,7 +95,7 @@ func (p ProgramDateTimeParser) Parse(tag string, playlist *pl.Playlist) error {
 	dateTimeValue := strings.TrimSpace(parts[1])
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "ProgramDateTime",
+			Name:  ProgramDateTimeName,
 			Attrs: map[string]string{ProgramDateTimeTag: dateTimeValue},
 		},
 	})
@@ -129,7 +136,7 @@ func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "ExtKey",
+			Name:  ExtKeyName,
 			Attrs: params,
 		},
 	})
