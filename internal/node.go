@@ -1,9 +1,5 @@
 package internal
 
-import (
-	"fmt"
-)
-
 // A HLS Playlist is a doubly-linked list of of Node objects.
 // Each Node represents a HLSElement of the Playlist, amounting to one or more lines of the m3u8 file.
 // For example, a Media Segment Node will be comprised of two lines: the #EXTINF tag + the segment URI below it.
@@ -134,46 +130,4 @@ func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 		current = current.Next
 	}
 	return result
-}
-
-// ModifyNodesBetween modifies nodes in the doubly linked list between start and end conditions
-func (l *DoublyLinkedList) ModifyNodesBetween(
-	startCondition func(*Node) bool,
-	endCondition func(*Node) bool,
-	transform func(*Node),
-) error {
-	var startNode, endNode *Node
-	current := l.Head
-
-	for current != nil {
-		if startCondition(current) {
-			startNode = current
-			break
-		}
-		current = current.Next
-	}
-
-	if startNode == nil {
-		return fmt.Errorf("start node not found")
-	}
-
-	current = startNode.Next
-	for current != nil {
-		if endCondition(current) {
-			endNode = current
-			break
-		}
-		current = current.Next
-	}
-
-	if endNode == nil {
-		return fmt.Errorf("end node not found")
-	}
-
-	current = startNode.Next
-	for current != nil && current != endNode {
-		transform(current)
-		current = current.Next
-	}
-	return nil
 }
