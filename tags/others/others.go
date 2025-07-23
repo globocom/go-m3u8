@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	USPTimestampMapName = "USPTimestampMap"
+	USPTimestampMapName = "UspTimestampMap"
 	EventCueOutName     = "CueOut"
 	EventCueInName      = "CueIn"
 	CommentLineName     = "Comment"
