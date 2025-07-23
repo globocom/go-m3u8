@@ -43,7 +43,7 @@ func NewPlaylist() *Playlist {
 // Prints the playlist to stdout for debugging purposes
 func (p *Playlist) Print() {
 	if p.Head == nil || p.Tail == nil {
-		log.Warn().Msg("playlist is empty")
+		log.Warn().Str("service", "go-m3u8/playlist.go").Msg("playlist is empty")
 		return
 	}
 

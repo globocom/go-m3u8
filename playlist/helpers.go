@@ -65,7 +65,7 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 func GetExtInfData(duration, title string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
 	floatDuration, err := strconv.ParseFloat(duration, 64)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to parse duration for segment: %s", duration)
+		log.Error().Str("service", "go-m3u8/playlist/helpers.go").Err(err).Msgf("failed to parse duration for segment: %s", duration)
 		return &ExtInfData{}
 	}
 

@@ -66,7 +66,7 @@ func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
 	if len(parts) > 1 {
 		duration = strings.TrimSpace(parts[1])
 	} else {
-		log.Error().Msgf("invalid cue out tag: %s", tag)
+		log.Error().Str("service", "go-m3u8/tags/others/others.go").Msgf("invalid cue out tag: %s", tag)
 	}
 
 	playlist.Insert(&internal.Node{
