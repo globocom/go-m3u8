@@ -10,7 +10,7 @@ import (
 )
 
 func TestVersionValue(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -19,7 +19,7 @@ func TestVersionValue(t *testing.T) {
 }
 
 func TestVersionTag(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -30,7 +30,7 @@ func TestVersionTag(t *testing.T) {
 }
 
 func TestMediaSequenceValue(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -39,7 +39,7 @@ func TestMediaSequenceValue(t *testing.T) {
 }
 
 func TestMediaSequenceTag(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -50,7 +50,7 @@ func TestMediaSequenceTag(t *testing.T) {
 }
 
 func TestDiscontinuitySequenceValue(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/withDiscontinuity.m3u8")
+	file, _ := os.Open("./../mocks/media/withDiscontinuity.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -59,7 +59,7 @@ func TestDiscontinuitySequenceValue(t *testing.T) {
 }
 
 func TestDiscontinuitySequenceTag(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/withDiscontinuity.m3u8")
+	file, _ := os.Open("./../mocks/media/withDiscontinuity.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -70,7 +70,7 @@ func TestDiscontinuitySequenceTag(t *testing.T) {
 }
 
 func TestVariants(t *testing.T) {
-	file, _ := os.Open("./../testdata/multivariant/multivariant.m3u8")
+	file, _ := os.Open("./../mocks/multivariant/multivariant.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -80,7 +80,7 @@ func TestVariants(t *testing.T) {
 }
 
 func TestSegments(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -90,7 +90,7 @@ func TestSegments(t *testing.T) {
 }
 
 func TestBreaks(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -103,7 +103,7 @@ func TestBreaks(t *testing.T) {
 }
 
 func TestFindSegmentInsideAdBreak(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -134,7 +134,7 @@ func TestFindSegmentInsideAdBreak(t *testing.T) {
 }
 
 func TestFindSegmentOutsideAdBreak(t *testing.T) {
-	file, _ := os.Open("./../testdata/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 

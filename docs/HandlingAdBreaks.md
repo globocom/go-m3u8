@@ -21,7 +21,7 @@ This leaves us with two possible Ad Break scenarios to handle, when parsing the 
 
 Most manifests will contain *complete* Ad Breaks (one or more) that have clear start and finish markings and all Break segments present inside it.
 
-**Test File:** `/testdata/media/scte35/withCompleteAdBreak.m3u8`
+**Test File:** `/mocks/media/scte35/withCompleteAdBreak.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:11
@@ -68,7 +68,7 @@ It is possible that when the client requests the playlist, there will be an Ad B
 
 In the example below, the `EXT-X-DATERANGE` (`SCTE-OUT`) tag is already on the manifest (as might be the `EXT-X-CUE-OUT` tag) but we don't have the next media segment yet.
 
-**Test File:** `/testdata/media/scte35/withAdBreakNewNotReady.m3u8`
+**Test File:** `/mocks/media/scte35/withAdBreakNewNotReady.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:3
@@ -91,13 +91,13 @@ We need to confirm if the Ad Break is ready or not - that is, if the next media 
 To do this, we estimate the next media segment's PDT (playlist DVR + playlist PDT) and check if it equals the `EXT-X-DATERANGE`'s `START-DATE`.
 
 - If yes, the next media segment is inside the Ad Break. The Break's *Start Media Sequence* is the segment's media sequence and *Status* is `"complete"`.
-  - **Test File:** `/testdata/media/scte35/withAdBreakNewReady.m3u8`
+  - **Test File:** `/mocks/media/scte35/withAdBreakNewReady.m3u8`
 - If no, we *cannot* assume the next media segment is inside the Break. The Break's *Start Media Sequence* is `"0"` and *Status* is `"segmentsNotReady"`.
-  - **Test File:** `/testdata/media/scte35/withAdBreakNewNotReady.m3u8`
+  - **Test File:** `/mocks/media/scte35/withAdBreakNewNotReady.m3u8`
 
 Later, when the first segment for the Ad Break has been generated, we will have the `EXT-X-DATERANGE` (`SCTE-OUT`), `EXT-X-CUEOUT` and `EXT-X-PROGRAM-DATE-TIME` tags, followed by the first Break segment `EXTINF`. As normally, the Break's *Start Media Sequence* is the newest segment's media sequence and *Status* is `"complete"`.
 
-**Test File:** `/testdata/media/scte35/withAdBreakNewReadyWithSegment.m3u8`
+**Test File:** `/mocks/media/scte35/withAdBreakNewReadyWithSegment.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:3
@@ -126,7 +126,7 @@ It is possible that when the client requests the playlist, there is an Ad Break 
 
 In the example below, the Ad Break is just about to leave the DVR, with only two non-Break segments remaining.
 
-**Test File:** `/testdata/media/scte35/withAdBreakBeforeDVRLimit.m3u8`
+**Test File:** `/mocks/media/scte35/withAdBreakBeforeDVRLimit.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:11
@@ -170,7 +170,7 @@ We have two ways of confirming if the Break is about to leave the DVR limit.
 
 If either of these are true, then we set the Break's *Start Media Sequence* as `"0"` and *Status* as `"leavingDVRLimit"`.
 
-**Test File:** `/testdata/media/scte35/withAdBreakOutsideDVRLimit.m3u8`
+**Test File:** `/mocks/media/scte35/withAdBreakOutsideDVRLimit.m3u8`
 ```
 #EXTM3U
 #EXT-X-VERSION:11

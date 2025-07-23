@@ -317,7 +317,7 @@ func TestParseMultivariantPlaylist(t *testing.T) {
 }
 
 func TestParseMediaPlaylist(t *testing.T) {
-	file, _ := os.Open("testdata/media/media.m3u8")
+	file, _ := os.Open("mocks/media/media.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	assert.NoError(t, err)
@@ -331,7 +331,7 @@ func TestParseMediaPlaylist(t *testing.T) {
 }
 
 func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withCompleteAdBreak.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withCompleteAdBreak.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -349,7 +349,7 @@ func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withAdBreakBeforeDVRLimit.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withAdBreakBeforeDVRLimit.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -370,7 +370,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_BeforeDVRLimit(t *testing.T) {
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withAdBreakOnDVRLimit.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withAdBreakOnDVRLimit.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -390,7 +390,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OnDVRLimit(t *testing.T) {
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_OutsideDVRLimit(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withAdBreakOutsideDVRLimit.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withAdBreakOutsideDVRLimit.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -410,7 +410,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_OutsideDVRLimit(t *testing.T) {
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withAdBreakNewNotReady.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withAdBreakNewNotReady.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -426,7 +426,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewNotReady(t *testing.T) {
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButNoSegment(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withAdBreakNewReady.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withAdBreakNewReady.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -442,7 +442,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButNoSegment(t *testing.T
 }
 
 func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withAdBreakNewReadyWithSegment.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withAdBreakNewReadyWithSegment.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -459,7 +459,7 @@ func TestParseMediaPlaylist_WithPartialAdBreak_NewReadyButWithSegment(t *testing
 }
 
 func TestParseMediaPlaylist_WithCompleteAdBreak_RoundUpTimePrecision(t *testing.T) {
-	file, _ := os.Open("testdata/media/scte35/withRoundUpTimePrecision.m3u8")
+	file, _ := os.Open("mocks/media/scte35/withRoundUpTimePrecision.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	_, foundCueOut := p.Find("CueOut")
@@ -475,7 +475,7 @@ func TestParseMediaPlaylist_WithCompleteAdBreak_RoundUpTimePrecision(t *testing.
 }
 
 func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
-	file, _ := os.Open("testdata/media/withDiscontinuity.m3u8")
+	file, _ := os.Open("mocks/media/withDiscontinuity.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	assert.NoError(t, err)
@@ -497,7 +497,7 @@ func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
 }
 
 func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
-	file, _ := os.Open("testdata/media/encryption/withAES128.m3u8")
+	file, _ := os.Open("mocks/media/encryption/withAES128.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	assert.NoError(t, err)
@@ -515,7 +515,7 @@ func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
 }
 
 func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
-	file, _ := os.Open("testdata/media/encryption/withSampleAES.m3u8")
+	file, _ := os.Open("mocks/media/encryption/withSampleAES.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	assert.NoError(t, err)
@@ -534,7 +534,7 @@ func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
 }
 
 func TestParseMediaPlaylistWithEncryptionAndCompleteAdBreak(t *testing.T) {
-	file, _ := os.Open("testdata/media/withEncryptionAndSCTE35.m3u8")
+	file, _ := os.Open("mocks/media/withEncryptionAndSCTE35.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
 	assert.NoError(t, err)
@@ -581,13 +581,13 @@ func TestParsePlaylist(t *testing.T) {
 		{
 			name:  "Parse multivariant playlist without EXT-X-VERSION tag",
 			kind:  "multivariant",
-			path:  "./testdata/multivariant/missingVersion.m3u8",
+			path:  "./mocks/multivariant/missingVersion.m3u8",
 			error: true,
 		},
 		{
 			name:           "Parse media playlist",
 			kind:           "media",
-			path:           "./testdata/media/media.m3u8",
+			path:           "./mocks/media/media.m3u8",
 			pdt:            time.Date(2025, 05, 16, 13, 33, 27, 966666000, time.UTC),
 			dvr:            129.5999,
 			segmentCounter: 27,
@@ -595,7 +595,7 @@ func TestParsePlaylist(t *testing.T) {
 		{
 			name:           "Parse media playlist with EXT-X-DISCONTINUITY tag",
 			kind:           "media",
-			path:           "./testdata/media/withDiscontinuity.m3u8",
+			path:           "./mocks/media/withDiscontinuity.m3u8",
 			pdt:            time.Date(2025, time.July, 1, 19, 1, 40, 466666000, time.UTC),
 			dvr:            51.1998,
 			segmentCounter: 16,
@@ -603,7 +603,7 @@ func TestParsePlaylist(t *testing.T) {
 		{
 			name: "Parse multivariant playlist",
 			kind: "multivariant",
-			path: "./testdata/multivariant/multivariant.m3u8",
+			path: "./mocks/multivariant/multivariant.m3u8",
 		},
 	}
 
