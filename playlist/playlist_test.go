@@ -89,6 +89,41 @@ func TestSegments(t *testing.T) {
 	assert.Len(t, nodes, 27)
 }
 
+func TestEncryptionTags(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/encryption/withAES128.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	nodes := playlist.EncryptionTags()
+	assert.NotNil(t, nodes)
+	assert.Len(t, nodes, 1)
+	assert.Equal(t, nodes[0].HLSElement.Attrs["METHOD"], "AES-128")
+	assert.Equal(t, nodes[0].HLSElement.Attrs["URI"], "https://example.com/keys/key1.bin")
+	assert.Equal(t, nodes[0].HLSElement.Attrs["IV"], "0x0123456789abcdef0123456789abcdef")
+}
+
+func TestCueOutEvents(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/scte35/withCompleteAdBreak.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	nodes := playlist.CueOutEvents()
+	assert.NotNil(t, nodes)
+	assert.Len(t, nodes, 1)
+	assert.Equal(t, nodes[0].HLSElement.Attrs["#EXT-X-CUE-OUT"], "60.033333")
+}
+
+func TestCueInEvents(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/scte35/withCompleteAdBreak.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	nodes := playlist.CueInEvents()
+	assert.NotNil(t, nodes)
+	assert.Len(t, nodes, 1)
+	assert.Equal(t, nodes[0].HLSElement.Attrs["#EXT-X-CUE-IN"], "")
+}
+
 func TestBreaks(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -97,9 +132,18 @@ func TestBreaks(t *testing.T) {
 	nodes := playlist.Breaks()
 	assert.NotNil(t, nodes)
 	assert.Len(t, nodes, 1)
-	for _, node := range nodes {
-		assert.Equal(t, node.HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5")
-	}
+	assert.Equal(t, nodes[0].HLSElement.Attrs["SCTE35-OUT"], "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5")
+}
+
+func TestSCTE35InTags(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	nodes := playlist.SCTE35InTags()
+	assert.NotNil(t, nodes)
+	assert.Len(t, nodes, 1)
+	assert.Equal(t, nodes[0].HLSElement.Attrs["SCTE35-IN"], "0xFC3025000000000BB802FFF01405000000017F6FFFE8BF5AB07E00000000000100000000E7CF6C5A")
 }
 
 func TestFindSegmentInsideAdBreak(t *testing.T) {

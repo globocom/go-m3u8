@@ -109,12 +109,39 @@ func (p *Playlist) Segments() []*internal.Node {
 	return p.FindAll("ExtInf")
 }
 
+// Returns all ExtKey nodes in the playlist
+func (p *Playlist) EncryptionTags() []*internal.Node {
+	return p.FindAll("ExtKey")
+}
+
+// Returns all CueOut nodes in the playlist
+func (p *Playlist) CueOutEvents() []*internal.Node {
+	return p.FindAll("CueOut")
+}
+
+// Returns all CueIn nodes in the playlist
+func (p *Playlist) CueInEvents() []*internal.Node {
+	return p.FindAll("CueIn")
+}
+
 // Returns all DateRange nodes with SCTE35-OUT marking in the playlist
 func (p *Playlist) Breaks() []*internal.Node {
 	result := make([]*internal.Node, 0)
 	nodes := p.FindAll("DateRange")
 	for _, node := range nodes {
 		if node.HLSElement.Attrs["SCTE35-OUT"] != "" {
+			result = append(result, node)
+		}
+	}
+	return result
+}
+
+// Returns all DateRange nodes with SCTE35-IN marking in the playlist
+func (p *Playlist) SCTE35InTags() []*internal.Node {
+	result := make([]*internal.Node, 0)
+	nodes := p.FindAll("DateRange")
+	for _, node := range nodes {
+		if node.HLSElement.Attrs["SCTE35-IN"] != "" {
 			result = append(result, node)
 		}
 	}
