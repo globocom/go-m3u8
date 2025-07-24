@@ -8,6 +8,7 @@ import (
 	"github.com/globocom/go-m3u8/tags"
 )
 
+// Converts a Playlist object into an m3u8 formatted string.
 func EncodePlaylist(playlist *pl.Playlist) (string, error) {
 	if playlist == nil || playlist.Head == nil {
 		return "", fmt.Errorf("playlist is empty")

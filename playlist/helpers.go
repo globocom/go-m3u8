@@ -12,13 +12,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-//// METHODS FOR DECODING MULTI-LINE TAGS
+// METHODS FOR DECODING MULTI-LINE TAGS
 
 // StreamInfData holds data for StreamInf HLS Element, whose format in manifest is multi-line:
 //
-// #EXT-X-STREAM-INF:<attribute-list>
-//
-// <URI>
+//	#EXT-X-STREAM-INF:<attribute-list>
+//	<URI>
 type StreamInfData struct {
 	Codecs           []string
 	Bandwidth        string
@@ -34,9 +33,8 @@ type StreamInfData struct {
 
 // ExtInfData holds data for ExtInf HLS element, whose format in manifest is multi-line:
 //
-// #EXTINF:<duration>,[<title>]
-//
-// <URI>
+//	#EXTINF:<duration>,[<title>]
+//	<URI>
 type ExtInfData struct {
 	Duration        float64
 	ProgramDateTime time.Time
@@ -45,7 +43,7 @@ type ExtInfData struct {
 	Title           string
 }
 
-// Internal parser returns new StreamInfData object
+// Parser function that returns new StreamInfData object.
 func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 	return &StreamInfData{
 		Bandwidth:        mappedAttr["BANDWIDTH"],
@@ -61,7 +59,7 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 	}
 }
 
-// Internal parser returns new ExtInfData object
+// Parser function that returns new ExtInfData object.
 func GetExtInfData(duration, title string, playlistMediaSequence, playlistSegmentsCounter int, playlistDVR float64, playlistPDT time.Time) *ExtInfData {
 	floatDuration, err := strconv.ParseFloat(duration, 64)
 	if err != nil {
@@ -84,7 +82,7 @@ func GetExtInfData(duration, title string, playlistMediaSequence, playlistSegmen
 // The URI line that follows the EXT-X-STREAM-INF and EXTINF tags is REQUIRED.
 func HandleMultiLineHLSElements(line string, p *Playlist) error {
 	switch {
-	// Handle EXTINF
+	// handle EXTINF
 	case p.CurrentSegment != nil:
 		p.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
@@ -103,7 +101,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 		p.CurrentSegment = nil
 		return nil
 
-	// Handle EXT-X-STREAM-INF
+	// handle EXT-X-STREAM-INF
 	case p.CurrentStreamInf != nil:
 		p.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
@@ -130,8 +128,9 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 	}
 }
 
-//// AUXILIARY METHODS FOR DECODING
+// AUXILIARY METHODS FOR DECODING
 
+// Converts given tag's (line) attributes into a map of key-value pairs.
 // https://regex101.com/r/0A2ulC/1
 func TagsToMap(line string) map[string]string {
 	m := make(map[string]string)
@@ -143,14 +142,15 @@ func TagsToMap(line string) map[string]string {
 	return m
 }
 
+// Rounds a float64 value to a specified precision.
 func RoundFloat(val float64, precision uint) float64 {
 	ratio := math.Pow(10, float64(precision))
 	return math.Round(val*ratio) / ratio
 }
 
-//// AUXILIARY METHODS FOR ENCODING
+// AUXILIARY METHODS FOR ENCODING
 
-// Encodes tag with attributes into string object
+// Encodes a tag with key-value attributes into a string.
 func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[string]string, order []string, shouldQuote map[string]bool) error {
 	if len(attrs) == 0 {
 		_, err := builder.WriteString(tag + "\n")
@@ -184,7 +184,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	return err
 }
 
-// Encodes tag without attributes into string object
+// Encodes a tag without attributes into a string.
 func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey string) error {
 	if value, exists := node.HLSElement.Attrs[attrKey]; exists {
 		attr := fmt.Sprintf("%s:%s\n", tag, value)
@@ -194,6 +194,7 @@ func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey
 	return fmt.Errorf("attribute %s not found for tag %s", attrKey, tag)
 }
 
+// Formats a key-value tag attribute into a string, optionally quoting the value based on the shouldQuote map.
 func FormatAttribute(key, value string, shouldQuote map[string]bool) string {
 	shouldQuoteValue, exists := shouldQuote[key]
 

@@ -12,7 +12,7 @@ import (
 	"github.com/globocom/go-m3u8/tags/others"
 )
 
-// Parse tag from string to *Node in *Playlist
+// Parse string to *Playlist.
 type TagParser interface {
 	Parse(tag string, playlist *pl.Playlist) error
 }
@@ -37,7 +37,7 @@ var Parsers = map[string]TagParser{
 	others.CommentLineTag:            others.CommentParser{},
 }
 
-// Parse tag *Node in *Playlist to string
+// Parse *Playlist to string.
 type PlaylistEncoder interface {
 	Encode(node *internal.Node, builder *strings.Builder) error
 }

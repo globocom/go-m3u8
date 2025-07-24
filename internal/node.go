@@ -28,6 +28,7 @@ type HLSElement struct {
 	Details map[string]string
 }
 
+// Creates a new Node with the given HLSElement attributes.
 func (l *DoublyLinkedList) NewNode(name, uri string, attrs, details map[string]string) *Node {
 	element := &HLSElement{
 		Name:    name,
@@ -38,7 +39,7 @@ func (l *DoublyLinkedList) NewNode(name, uri string, attrs, details map[string]s
 	return &Node{HLSElement: element}
 }
 
-// Insert adds a new node to the end of the doubly linked list
+// Adds a new node to the end of the doubly linked list
 func (l *DoublyLinkedList) Insert(node *Node) {
 	if l.Head == nil {
 		l.Head = node
@@ -50,7 +51,7 @@ func (l *DoublyLinkedList) Insert(node *Node) {
 	}
 }
 
-// InsertAfter inserts newNode after node in the doubly linked list
+// Inserts newNode after node in the doubly linked list
 //
 //	node ---> newNode ---> node.Next
 func (l *DoublyLinkedList) InsertAfter(node, newNode *Node) {
@@ -69,7 +70,7 @@ func (l *DoublyLinkedList) InsertAfter(node, newNode *Node) {
 	}
 }
 
-// InsertBefore inserts newNode before node in the doubly linked list
+// Inserts newNode before node in the doubly linked list
 //
 //	node.Prev ---> newNode ---> node
 func (l *DoublyLinkedList) InsertBefore(node, newNode *Node) {
@@ -88,7 +89,7 @@ func (l *DoublyLinkedList) InsertBefore(node, newNode *Node) {
 	}
 }
 
-// InsertBetween inserts newNode between node1 and node2 in the doubly linked list
+// Inserts newNode between node1 and node2 in the doubly linked list
 //
 //	node1 ---> newNode ---> node2
 func (l *DoublyLinkedList) InsertBetween(node1, node2, newNode *Node) {
@@ -106,7 +107,7 @@ func (l *DoublyLinkedList) InsertBetween(node1, node2, newNode *Node) {
 	node2.Prev = newNode
 }
 
-// Find searches for a node with the specified element name in the doubly linked list
+// Searches for a node with the specified element name in the doubly linked list
 func (l *DoublyLinkedList) Find(elementName string) (*Node, bool) {
 	current := l.Head
 	for current != nil {
@@ -119,7 +120,7 @@ func (l *DoublyLinkedList) Find(elementName string) (*Node, bool) {
 	return nil, false
 }
 
-// FindAll searches for all nodes with the specified element name in the doubly linked list
+// Searches for all nodes with the specified element name in the doubly linked list
 func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 	current := l.Head
 	result := make([]*Node, 0)

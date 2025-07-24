@@ -109,6 +109,7 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 	return currentMediaSequence, BreakStatusComplete
 }
 
+// Rounds up the given time to the nearest second.
 func roundUpToSecond(t time.Time) time.Time {
 	seconds := float64(t.UnixNano()) / float64(time.Second)
 	return time.Unix(int64(math.Ceil(seconds)), 0).UTC()
