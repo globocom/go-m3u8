@@ -15,13 +15,13 @@ _There isn't a stable version for now. As this is currently a WIP, the API may h
 
 ## go-m3u8
 
-Parser for [m3u8](https://tools.ietf.org/html/rfc8216) to facilitate manifest manipulation.
+Parser library for [m3u8](https://tools.ietf.org/html/rfc8216) to facilitate manifest manipulation.
 
 _We currently only support Live Streaming manifests._
 
 ### 1. Doubly Linked List
 
-The m3u8 is represented by a doubly linked list. This data structure allows us to access the manifest in a sorted manner and apply operations (modify, add, remove) to its content.
+The m3u8 manifest is represented by a doubly linked list. This data structure allows us to access the manifest in a sorted manner and apply operations (modify, add, remove) to its content.
 
 Some available operations are:
 
@@ -64,8 +64,237 @@ The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS e
 - Packager specific tags.
 - In-manifest comments (begin with `#` and are NOT tags).
 
-## Getting started
+## Getting Started
+
+To import the library to your Go project, run:
 
 ```
 go install github.com/globocom/go-m3u8
+```
+
+The [testlocal](/testlocal/) folder contains instructions on how to test the library locally.
+
+## Usage Cases
+
+Below we have some examples for using this library.
+
+### Collecting Ad Break Data
+
+Collect information on ad breaks present on the manifest when SCTE-35 ad insertion is used.
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"strconv"
+	"time"
+
+	go_m3u8 "github.com/globocom/go-m3u8"
+	m3u8_pl "github.com/globocom/go-m3u8/playlist"
+	m3u8_media "github.com/globocom/go-m3u8/tags/media"
+)
+
+type AdBreak struct {
+	Timestamp     string
+	MediaSequence int
+	Status        string
+}
+
+func main() {
+	file, _ := os.Open("playlist.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+
+	if err != nil {
+		panic(err)
+	}
+
+	latestBreak := GetLatestBreakData(p)
+
+	fmt.Printf("%+v\n", latestBreak)
+}
+
+func GetLatestBreakData(manifest *m3u8_pl.Playlist) AdBreak {
+	adBreaks := manifest.Breaks()
+
+	if len(adBreaks) == 0 {
+		return AdBreak{}
+	}
+
+	latestAdBreak := adBreaks[len(adBreaks)-1]
+
+	breakStatus := latestAdBreak.HLSElement.Details["Status"]
+	if (breakStatus == m3u8_media.BreakStatusLeavingDVR) || (breakStatus == m3u8_media.BreakStatusNotReady) {
+		return AdBreak{}
+	}
+
+	if latestAdBreak.HLSElement.Attrs["PLANNED-DURATION"] == "" {
+		return AdBreak{Status: "invalid"}
+	}
+
+	startMediaSequence, err := strconv.Atoi(latestAdBreak.HLSElement.Details["StartMediaSequence"])
+	if err != nil {
+		return AdBreak{Status: "invalid"}
+	}
+
+	startDate, err := time.Parse(time.RFC3339Nano, latestAdBreak.HLSElement.Attrs["START-DATE"])
+	if err != nil {
+		return AdBreak{Status: "invalid"}
+	}
+
+	adBreak := AdBreak{
+		MediaSequence: startMediaSequence,
+		Timestamp:     fmt.Sprintf("%d", startDate.Unix()),
+		Status:        "valid",
+	}
+
+	return adBreak
+}
+```
+
+### Adding Ad Break Markers
+
+Insert SCTE-35 ad break markers at specific segments.
+
+```go
+package main
+
+import (
+	"os"
+
+	go_m3u8 "github.com/globocom/go-m3u8"
+	m3u8_media "github.com/globocom/go-m3u8/tags/media"
+	m3u8_others "github.com/globocom/go-m3u8/tags/others"
+)
+
+func main() {
+	file, _ := os.Open("playlist.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+	if err != nil {
+		panic(err)
+	}
+
+	// Find all segments from media playlist
+	// Suppose there are 12 segments, each with a duration of 3.2s
+	segments := p.Segments()
+
+	// Find a specific segment to insert ad break before
+	segmentNodeBreakStart := segments[2]
+
+	// Create date range tag with SCTE35
+	attrs := map[string]string{
+		"ID":               "1-1747402436",
+		"START-DATE":       "2025-05-16T13:33:56.266666Z",
+		"PLANNED-DURATION": "16.0",
+		"SCTE-OUT":         "0x123abc456def",
+	}
+	dateRangeNode := p.NewNode(m3u8_media.DateRangeName, "", attrs, nil)
+
+	// Create event cue out tag
+	cueOutNode := p.NewNode(m3u8_others.EventCueOutName, "", map[string]string{m3u8_others.EventCueOutTag: "16.0"}, nil)
+
+	// Insert ad break start
+	p.InsertBefore(segmentNodeBreakStart, dateRangeNode)
+	p.InsertAfter(dateRangeNode, cueOutNode)
+
+	// Find the last segment inside ad break
+	segmentNodeBreakEnd := segments[8]
+
+	// Create event cue in tag
+	cueInNode := p.NewNode(m3u8_others.EventCueInName, "", map[string]string{m3u8_others.EventCueInTag: ""}, nil)
+
+	// Insert ad break end
+	p.InsertAfter(segmentNodeBreakEnd, cueInNode)
+
+  // Encode the playlist back into manifest format
+	manifest, err := go_m3u8.EncodePlaylist(p)
+	if err != nil {
+		panic(err)
+	}
+
+	print(manifest)
+}
+```
+
+### Adding Discontinuity Information
+
+Insert discontinuity tags when SCTE-35 ad break markers are present.
+
+```go
+package main
+
+import (
+	"os"
+
+	go_m3u8 "github.com/globocom/go-m3u8"
+	m3u8_media "github.com/globocom/go-m3u8/tags/media"
+	m3u8_others "github.com/globocom/go-m3u8/tags/others"
+)
+
+func main() {
+	file, _ := os.Open("playlist.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+	if err != nil {
+		panic(err)
+	}
+
+	// Find all ad break markers (date range tags with scte-out & cue-in events)
+	dateRangeNodes := p.Breaks()
+	cueInNodes := p.CueInEvents()
+
+	// Insert discontinuity before each ad break start
+	for _, dateRangeNode := range dateRangeNodes {
+		discontinuityNode := p.NewNode(m3u8_media.DiscontinuityName, "", nil, nil)
+		p.InsertBefore(dateRangeNode, discontinuityNode)
+	}
+
+	// Insert discontinuity after each ad break end
+	for _, cueInNode := range cueInNodes {
+		discontinuityNode := p.NewNode(m3u8_media.DiscontinuityName, "", nil, nil)
+		p.InsertBefore(cueInNode, discontinuityNode)
+	}
+
+	// Encode the playlist back into manifest format
+	manifest, err := go_m3u8.EncodePlaylist(p)
+	if err != nil {
+		panic(err)
+	}
+
+	print(manifest)
+}
+```
+
+### Updating Encryption Keys
+
+Rotate encryption keys for enhanced security.
+
+```go
+package main
+
+import (
+	"os"
+	go_m3u8 "github.com/globocom/go-m3u8"
+)
+
+func main() {
+	file, _ := os.Open("playlist.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+	if err != nil {
+		panic(err)
+	}
+
+	// Find all encryption key tags
+	keyNodes := p.EncryptionTags()
+	
+	for _, keyNode := range keyNodes {
+		// Update the key URI with new key server
+		if keyNode.HLSElement.Attrs != nil {
+			keyNode.HLSElement.Attrs["URI"] = "https://new-key-server.com/key.bin"
+			keyNode.HLSElement.Attrs["IV"] = "0x12345678901234567890123456789012"
+		}
+	}
+
+	p.Print()
+}
 ```
