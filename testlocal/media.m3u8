@@ -1,0 +1,30 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:547311407
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-TARGETDURATION:5
+#EXT-X-PROGRAM-DATE-TIME:2025-07-01T19:01:40.466666Z
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311407.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311408.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311409.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311410.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311411.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311412.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311413.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311414.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311415.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311416.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311417.ts
+#EXTINF:3.2, no desc
+channel-audio=96000-video=3442944-547311418.ts
