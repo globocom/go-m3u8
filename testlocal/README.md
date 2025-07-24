@@ -6,13 +6,13 @@ You may use the contents of the current directory to experiment and test the lib
 
 1) On your machine, clone the project directory or download the zip.
 
-```
+```sh
 git clone https://github.com/globocom/go-m3u8.git
 ```
 
 2) Access the project root directory from your terminal, and then enter the `testlocal` folder.
 
-``` 
+```sh
 cd go-m3u8/testlocal/
 ```
 
@@ -43,7 +43,7 @@ func main() {
 
 4) Then, use the following Makefile commands to run it:
 
-```sh
+```Makefile
 make run      # Run the main.go code
 make output   # Run the main.go code and writes output to local output.txt file
 ```

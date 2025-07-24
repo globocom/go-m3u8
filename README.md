@@ -72,7 +72,14 @@ To import the library to your Go project, run:
 go install github.com/globocom/go-m3u8
 ```
 
-The [testlocal](/testlocal/) folder contains instructions on how to test the library locally.
+The following [Makefile](/Makefile) commands are available:
+
+```Makefile
+make test # Run test suites
+make lint # Run code linter using .golangci.yml configuration
+```
+
+The [testlocal](/testlocal/) folder contains instructions on how to run and test the library locally.
 
 ## Usage Cases
 
