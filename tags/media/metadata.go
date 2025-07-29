@@ -22,6 +22,7 @@ const (
 	BreakStatusNotReady   = "segmentsNotReady"
 	BreakStatusComplete   = "complete"
 	DateRangeName         = "DateRange"
+	breakNotReadyLimit    = 20 * time.Millisecond
 )
 
 var (
@@ -86,13 +87,13 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 	if playlist.ProgramDateTime.IsZero() {
 		// if the playlist's PDT tag was not parsed yet, we check if there are any media segments before the date range tag
 		if len(playlist.Segments()) == 0 {
-			log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("break is leaving dvr limit, media sequence will be zero")
+			log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("ad break leaving dvr limit")
 			return "0", BreakStatusLeavingDVR
 		}
 	} else {
 		// if the playlist's PDT tag was already parsed, we check if the playlist PDT is equal or higher than the break's start date
 		if playlist.ProgramDateTime.Equal(breakStartDate) || playlist.ProgramDateTime.After(breakStartDate) {
-			log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("break is leaving dvr limit, media sequence will be zero")
+			log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("ad break leaving dvr limit")
 			return "0", BreakStatusLeavingDVR
 		}
 	}
@@ -106,8 +107,8 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 	// between the break's start date and the next segment's estimated PDT
 	timeDifference := nextSegmentEstimatedPDT.Sub(breakStartDate)
 
-	if breakStartIsAfterNextSegment && timeDifference.Abs() > time.Millisecond {
-		log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("segments for ad break are not ready yet, media sequence will be zero")
+	if breakStartIsAfterNextSegment && timeDifference.Abs() > breakNotReadyLimit {
+		log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("ad break not ready yet")
 		return "0", BreakStatusNotReady
 	}
 
