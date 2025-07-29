@@ -12,7 +12,7 @@ import (
 	"github.com/globocom/go-m3u8/tags/others"
 )
 
-// Parse tag from string to *Node in *Playlist
+// Parse string to *Playlist.
 type TagParser interface {
 	Parse(tag string, playlist *pl.Playlist) error
 }
@@ -37,27 +37,27 @@ var Parsers = map[string]TagParser{
 	others.CommentLineTag:            others.CommentParser{},
 }
 
-// Parse tag *Node in *Playlist to string
+// Parse *Playlist to string.
 type PlaylistEncoder interface {
 	Encode(node *internal.Node, builder *strings.Builder) error
 }
 
 var Encoders = map[string]PlaylistEncoder{
-	"M3u8Identifier":        basic.M3u8IdentifierEncoder{},
-	"Version":               basic.VersionEncoder{},
-	"TargetDuration":        media.TargetDurationEncoder{},
-	"MediaSequence":         media.MediaSequenceEncoder{},
-	"DiscontinuitySequence": media.DiscontinuitySequenceEncoder{},
-	"ProgramDateTime":       media.ProgramDateTimeEncoder{},
-	"ExtKey":                media.ExtKeyEncoder{},
-	"DateRange":             media.DateRangeEncoder{},
-	"ExtInf":                media.ExtInfEncoder{},
-	"Discontinuity":         media.DiscontinuityEncoder{},
-	"StreamInf":             multivariant.StreamInfEncoder{},
-	"IndependentSegments":   exclusive.IndependentSegmentsEncoder{},
-	"VariableDefine":        exclusive.VariableDefineEncoder{},
-	"UspTimestampMap":       others.USPTimestampMapEncoder{},
-	"CueOut":                others.EventCueOutEncoder{},
-	"CueIn":                 others.EventCueInEncoder{},
-	"Comment":               others.CommentEncoder{},
+	basic.M3u8IdentifierName:          basic.M3u8IdentifierEncoder{},
+	basic.VersionName:                 basic.VersionEncoder{},
+	media.TargetDurationName:          media.TargetDurationEncoder{},
+	media.MediaSequenceName:           media.MediaSequenceEncoder{},
+	media.DiscontinuitySequenceName:   media.DiscontinuitySequenceEncoder{},
+	media.ProgramDateTimeName:         media.ProgramDateTimeEncoder{},
+	media.ExtKeyName:                  media.ExtKeyEncoder{},
+	media.DateRangeName:               media.DateRangeEncoder{},
+	media.ExtInfName:                  media.ExtInfEncoder{},
+	media.DiscontinuityName:           media.DiscontinuityEncoder{},
+	multivariant.StreamInfName:        multivariant.StreamInfEncoder{},
+	exclusive.IndependentSegmentsName: exclusive.IndependentSegmentsEncoder{},
+	exclusive.VariableDefineName:      exclusive.VariableDefineEncoder{},
+	others.USPTimestampMapName:        others.USPTimestampMapEncoder{},
+	others.EventCueOutName:            others.EventCueOutEncoder{},
+	others.EventCueInName:             others.EventCueInEncoder{},
+	others.CommentLineName:            others.CommentEncoder{},
 }

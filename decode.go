@@ -17,13 +17,15 @@ type Source interface {
 	io.ReadCloser
 }
 
+// Reads an m3u8 playlist from the provided source and returns a Playlist object.
+// It scans each line, identifies HLS elements, and applies the appropriate parser.
 func ParsePlaylist(src Source) (*pl.Playlist, error) {
 	playlist := pl.NewPlaylist()
 
 	scanner := bufio.NewScanner(src)
 	defer func() {
 		if err := src.Close(); err != nil {
-			log.Error().Err(err).Msg("error scanning playlist file")
+			log.Error().Str("service", "go-m3u8/decode.go").Err(err).Msg("error scanning playlist file")
 		}
 	}()
 
@@ -59,7 +61,7 @@ func extractPrefix(line string) string {
 	// check for comments
 	isComment, err := others.CommentLineRegex.MatchString(line)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to parse line: %s", line)
+		log.Error().Str("service", "go-m3u8/decode.go").Err(err).Msgf("failed to parse line: %s", line)
 		return ""
 	}
 

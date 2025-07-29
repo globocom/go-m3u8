@@ -15,6 +15,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	USPTimestampMapName = "UspTimestampMap"
+	EventCueOutName     = "CueOut"
+	EventCueInName      = "CueIn"
+	CommentLineName     = "Comment"
+)
+
 var (
 	USPTimestampMapTag = "#USP-X-TIMESTAMP-MAP"
 	EventCueOutTag     = "#EXT-X-CUE-OUT"
@@ -43,7 +50,7 @@ func (p USPTimestampMapParser) Parse(tag string, playlist *pl.Playlist) error {
 		params := pl.TagsToMap(parts[1])
 		playlist.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
-				Name:  "UspTimestampMap",
+				Name:  USPTimestampMapName,
 				Attrs: params,
 			},
 		})
@@ -59,12 +66,12 @@ func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
 	if len(parts) > 1 {
 		duration = strings.TrimSpace(parts[1])
 	} else {
-		log.Error().Msgf("invalid cue out tag: %s", tag)
+		log.Error().Str("service", "go-m3u8/tags/others/others.go").Msgf("invalid cue out tag: %s", tag)
 	}
 
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "CueOut",
+			Name:  EventCueOutName,
 			Attrs: map[string]string{EventCueOutTag: duration},
 		},
 	})
@@ -75,7 +82,7 @@ func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
 func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name: "CueIn",
+			Name: EventCueInName,
 			Attrs: map[string]string{
 				EventCueInTag: "",
 			},
@@ -88,9 +95,9 @@ func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 func (p CommentParser) Parse(line string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name: "Comment",
+			Name: CommentLineName,
 			Attrs: map[string]string{
-				"Comment": line,
+				CommentLineName: line,
 			},
 		},
 	})

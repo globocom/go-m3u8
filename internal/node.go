@@ -1,9 +1,5 @@
 package internal
 
-import (
-	"fmt"
-)
-
 // A HLS Playlist is a doubly-linked list of of Node objects.
 // Each Node represents a HLSElement of the Playlist, amounting to one or more lines of the m3u8 file.
 // For example, a Media Segment Node will be comprised of two lines: the #EXTINF tag + the segment URI below it.
@@ -32,7 +28,8 @@ type HLSElement struct {
 	Details map[string]string
 }
 
-func (l *DoublyLinkedList) NewNode(name, uri string, attrs map[string]string, details map[string]string) *Node {
+// Creates a new Node with the given HLSElement attributes.
+func (l *DoublyLinkedList) NewNode(name, uri string, attrs, details map[string]string) *Node {
 	element := &HLSElement{
 		Name:    name,
 		URI:     uri,
@@ -42,7 +39,7 @@ func (l *DoublyLinkedList) NewNode(name, uri string, attrs map[string]string, de
 	return &Node{HLSElement: element}
 }
 
-// Insert adds a new node to the end of the doubly linked list
+// Adds a new node to the end of the doubly linked list
 func (l *DoublyLinkedList) Insert(node *Node) {
 	if l.Head == nil {
 		l.Head = node
@@ -54,10 +51,10 @@ func (l *DoublyLinkedList) Insert(node *Node) {
 	}
 }
 
-// InsertAfter inserts newNode after node in the doubly linked list
+// Inserts newNode after node in the doubly linked list
 //
 //	node ---> newNode ---> node.Next
-func (l *DoublyLinkedList) InsertAfter(node *Node, newNode *Node) {
+func (l *DoublyLinkedList) InsertAfter(node, newNode *Node) {
 	if node == nil {
 		return
 	}
@@ -73,10 +70,10 @@ func (l *DoublyLinkedList) InsertAfter(node *Node, newNode *Node) {
 	}
 }
 
-// InsertBefore inserts newNode before node in the doubly linked list
+// Inserts newNode before node in the doubly linked list
 //
 //	node.Prev ---> newNode ---> node
-func (l *DoublyLinkedList) InsertBefore(node *Node, newNode *Node) {
+func (l *DoublyLinkedList) InsertBefore(node, newNode *Node) {
 	if node == nil {
 		return
 	}
@@ -92,10 +89,10 @@ func (l *DoublyLinkedList) InsertBefore(node *Node, newNode *Node) {
 	}
 }
 
-// InsertBetween inserts newNode between node1 and node2 in the doubly linked list
+// Inserts newNode between node1 and node2 in the doubly linked list
 //
 //	node1 ---> newNode ---> node2
-func (l *DoublyLinkedList) InsertBetween(node1 *Node, node2 *Node, newNode *Node) {
+func (l *DoublyLinkedList) InsertBetween(node1, node2, newNode *Node) {
 	if node1 == nil || node2 == nil {
 		return
 	}
@@ -110,7 +107,7 @@ func (l *DoublyLinkedList) InsertBetween(node1 *Node, node2 *Node, newNode *Node
 	node2.Prev = newNode
 }
 
-// Find searches for a node with the specified element name in the doubly linked list
+// Searches for a node with the specified element name in the doubly linked list
 func (l *DoublyLinkedList) Find(elementName string) (*Node, bool) {
 	current := l.Head
 	for current != nil {
@@ -123,7 +120,7 @@ func (l *DoublyLinkedList) Find(elementName string) (*Node, bool) {
 	return nil, false
 }
 
-// FindAll searches for all nodes with the specified element name in the doubly linked list
+// Searches for all nodes with the specified element name in the doubly linked list
 func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 	current := l.Head
 	result := make([]*Node, 0)
@@ -134,46 +131,4 @@ func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 		current = current.Next
 	}
 	return result
-}
-
-// ModifyNodesBetween modifies nodes in the doubly linked list between start and end conditions
-func (l *DoublyLinkedList) ModifyNodesBetween(
-	startCondition func(*Node) bool,
-	endCondition func(*Node) bool,
-	transform func(*Node),
-) error {
-	var startNode, endNode *Node
-	current := l.Head
-
-	for current != nil {
-		if startCondition(current) {
-			startNode = current
-			break
-		}
-		current = current.Next
-	}
-
-	if startNode == nil {
-		return fmt.Errorf("start node not found")
-	}
-
-	current = startNode.Next
-	for current != nil {
-		if endCondition(current) {
-			endNode = current
-			break
-		}
-		current = current.Next
-	}
-
-	if endNode == nil {
-		return fmt.Errorf("end node not found")
-	}
-
-	current = startNode.Next
-	for current != nil && current != endNode {
-		transform(current)
-		current = current.Next
-	}
-	return nil
 }

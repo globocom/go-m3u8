@@ -16,6 +16,10 @@ import (
 	pl "github.com/globocom/go-m3u8/playlist"
 )
 
+const (
+	StreamInfName = "StreamInf"
+)
+
 var (
 	StreamInfTag      = "#EXT-X-STREAM-INF"
 	MediaTag          = "#EXT-X-MEDIA"              //todo: has attributes

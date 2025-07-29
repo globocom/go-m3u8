@@ -9,7 +9,6 @@ package media
 
 import (
 	"fmt"
-	"math"
 	"strings"
 	"time"
 
@@ -18,16 +17,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-	DateRangeTag   = "#EXT-X-DATERANGE"
-	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
-	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
-)
-
 const (
 	BreakStatusLeavingDVR = "leavingDVRLimit"
 	BreakStatusNotReady   = "segmentsNotReady"
 	BreakStatusComplete   = "complete"
+	DateRangeName         = "DateRange"
+	breakNotReadyLimit    = 20 * time.Millisecond
+)
+
+var (
+	DateRangeTag   = "#EXT-X-DATERANGE"
+	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
+	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
 )
 
 type DateRangeParser struct{}
@@ -42,7 +43,7 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	dateRangeNode := &internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "DateRange",
+			Name:  DateRangeName,
 			Attrs: params,
 		},
 	}
@@ -78,7 +79,7 @@ func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 // Returns the Ad Break's media sequence (string) and status (string).
 //   - The Break's media sequence will be the media sequence of the first segment inside the break (or zero if Break is incomplete).
 //   - The Break's status will be: "complete" or incomplete ("leavingDVRLimit" or "segmentsNotReady").
-func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (string, string) {
+func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (value, status string) {
 	currentMediaSequence := fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter)
 	breakStartDate, _ := time.Parse(time.RFC3339Nano, dateRangeNode.HLSElement.Attrs["START-DATE"])
 
@@ -86,13 +87,13 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (str
 	if playlist.ProgramDateTime.IsZero() {
 		// if the playlist's PDT tag was not parsed yet, we check if there are any media segments before the date range tag
 		if len(playlist.Segments()) == 0 {
-			log.Debug().Msg("break is leaving dvr limit, media sequence will be zero")
+			log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("ad break leaving dvr limit")
 			return "0", BreakStatusLeavingDVR
 		}
 	} else {
 		// if the playlist's PDT tag was already parsed, we check if the playlist PDT is equal or higher than the break's start date
 		if playlist.ProgramDateTime.Equal(breakStartDate) || playlist.ProgramDateTime.After(breakStartDate) {
-			log.Debug().Msg("break is leaving dvr limit, media sequence will be zero")
+			log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("ad break leaving dvr limit")
 			return "0", BreakStatusLeavingDVR
 		}
 	}
@@ -100,15 +101,16 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (str
 	// when date range tag exists, but we don't know if we have the break's first media segment yet
 	// we check if the break's start date comes later than the estimated next segment's PDT
 	nextSegmentEstimatedPDT := playlist.ProgramDateTime.Add(time.Duration(playlist.DVR * float64(time.Second)))
-	if (roundUpToSecond(breakStartDate)).After(roundUpToSecond(nextSegmentEstimatedPDT)) {
-		log.Debug().Msg("segments for ad break are not ready yet, media sequence will be zero")
+	breakStartIsAfterNextSegment := breakStartDate.After(nextSegmentEstimatedPDT)
+
+	// due to precision issues, we accept a small time difference of +/- 1ms
+	// between the break's start date and the next segment's estimated PDT
+	timeDifference := nextSegmentEstimatedPDT.Sub(breakStartDate)
+
+	if breakStartIsAfterNextSegment && timeDifference.Abs() > breakNotReadyLimit {
+		log.Debug().Str("service", "go-m3u8/tags/media/metadata.go").Msg("ad break not ready yet")
 		return "0", BreakStatusNotReady
 	}
 
 	return currentMediaSequence, BreakStatusComplete
-}
-
-func roundUpToSecond(t time.Time) time.Time {
-	seconds := float64(t.UnixNano()) / float64(time.Second)
-	return time.Unix(int64(math.Ceil(seconds)), 0).UTC()
 }

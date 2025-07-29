@@ -16,15 +16,21 @@ import (
 	pl "github.com/globocom/go-m3u8/playlist"
 )
 
+const (
+	TargetDurationName        = "TargetDuration"
+	MediaSequenceName         = "MediaSequence"
+	DiscontinuitySequenceName = "DiscontinuitySequence"
+)
+
 var (
 	TargetDurationTag        = "#EXT-X-TARGETDURATION"
 	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"
 	DiscontinuitySequenceTag = "#EXT-X-DISCONTINUITY-SEQUENCE"
-	EndlistTag               = "#EXT-X-ENDLIST"        //todo
-	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  //todo: has one attribute
-	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"  //todo
-	PartInfTag               = "#EXT-X-PART-INF"       //todo: has attributes
-	ServerControlTag         = "#EXT-X-SERVER-CONTROL" //todo: has attributes
+	EndlistTag               = "#EXT-X-ENDLIST"        // todo
+	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  // todo: has one attribute
+	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"  // todo
+	PartInfTag               = "#EXT-X-PART-INF"       // todo: has attributes
+	ServerControlTag         = "#EXT-X-SERVER-CONTROL" // todo: has attributes
 )
 
 type (
@@ -44,7 +50,7 @@ func (p TargetDurationParser) Parse(tag string, playlist *pl.Playlist) error {
 	if len(parts) > 1 && parts[1] != "" {
 		playlist.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
-				Name:  "TargetDuration",
+				Name:  TargetDurationName,
 				Attrs: map[string]string{TargetDurationTag: strings.TrimSpace(parts[1])},
 			},
 		})
@@ -60,7 +66,7 @@ func (p MediaSequenceParser) Parse(tag string, playlist *pl.Playlist) error {
 		mediaSequence := strings.TrimSpace(parts[1])
 		playlist.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
-				Name:  "MediaSequence",
+				Name:  MediaSequenceName,
 				Attrs: map[string]string{MediaSequenceTag: mediaSequence},
 			},
 		})
@@ -83,7 +89,7 @@ func (p DiscontinuitySequenceParser) Parse(tag string, playlist *pl.Playlist) er
 		discontinuitySequence := strings.TrimSpace(parts[1])
 		playlist.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
-				Name:  "DiscontinuitySequence",
+				Name:  DiscontinuitySequenceName,
 				Attrs: map[string]string{DiscontinuitySequenceTag: discontinuitySequence},
 			},
 		})

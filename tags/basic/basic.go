@@ -12,6 +12,11 @@ import (
 )
 
 const (
+	M3u8IdentifierName = "M3u8Identifier"
+	VersionName        = "Version"
+)
+
+var (
 	M3u8IdentifierTag = "#EXTM3U"
 	VersionTag        = "#EXT-X-VERSION"
 )
@@ -21,7 +26,6 @@ type (
 	VersionParser        struct{}
 )
 
-// Encoder Types for each tag
 type (
 	M3u8IdentifierEncoder struct{}
 	VersionEncoder        struct{}
@@ -30,7 +34,7 @@ type (
 func (p M3u8IdentifierParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name: "M3u8Identifier",
+			Name: M3u8IdentifierName,
 			Attrs: map[string]string{
 				M3u8IdentifierTag: "",
 			},
@@ -44,7 +48,7 @@ func (p VersionParser) Parse(tag string, playlist *pl.Playlist) error {
 	if len(parts) > 1 && parts[1] != "" {
 		playlist.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{
-				Name:  "Version",
+				Name:  VersionName,
 				Attrs: map[string]string{VersionTag: strings.TrimSpace(parts[1])},
 			},
 		})
