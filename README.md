@@ -68,7 +68,7 @@ The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS e
 
 To import the library to your Go project, run:
 
-```
+```sh
 go install github.com/globocom/go-m3u8
 ```
 
@@ -80,6 +80,46 @@ make lint 		# Run code linter using .golangci.yml configuration
 ```
 
 The [testlocal](/testlocal/) folder contains instructions on how to run and test the library locally.
+
+### Decoding a Playlist
+
+The `ParsePlaylist` method receives a `io.ReadCloser` object as argument and returns a `Playlist` object.
+
+You can use it to decode a manifest that is in string format:
+```go
+manifest := `#EXTM3U
+#EXT-X-VERSION:3
+# variants
+#EXT-X-STREAM-INF:BANDWIDTH=479000,AVERAGE-BANDWIDTH=435000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=512x288,FRAME-RATE=30
+channel_01.m3u8`
+manifestReader := io.NopCloser(strings.NewReader(manifest))
+playlist, err := m3u8.ParsePlaylist(manifestReader)
+
+if err != nil {
+	panic(err)
+}
+```
+
+Or read the manifest file directly:
+```go
+file, _ := os.Open("multivariant.m3u8")
+playlist, err := go_m3u8.ParsePlaylist(file)
+
+if err != nil {
+	panic(err)
+}
+```
+
+### Encoding a Playlist
+
+The `EncodePlaylist` method parses a `Playlist` object back into string format.
+
+```go
+manifest, err := go_m3u8.EncodePlaylist(playlist)
+if err != nil {
+	panic(err)
+}
+```
 
 ## Usage Cases
 
