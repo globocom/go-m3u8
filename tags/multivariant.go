@@ -7,7 +7,7 @@
 // clients MUST fail to parse any Playlist that contains both a
 // Multivariant Playlist tag and either a Media Playlist tag or a Media
 // Segment tag.
-package multivariant
+package tags
 
 import (
 	"strings"

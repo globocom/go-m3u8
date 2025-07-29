@@ -9,7 +9,6 @@ import (
 
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
-	"github.com/globocom/go-m3u8/tags/others"
 	"github.com/rs/zerolog/log"
 )
 
@@ -59,14 +58,14 @@ func extractPrefix(line string) string {
 	}
 
 	// check for comments
-	isComment, err := others.CommentLineRegex.MatchString(line)
+	isComment, err := tags.CommentLineRegex.MatchString(line)
 	if err != nil {
 		log.Error().Str("service", "go-m3u8/decode.go").Err(err).Msgf("failed to parse line: %s", line)
 		return ""
 	}
 
 	if isComment {
-		return others.CommentLineTag
+		return tags.CommentLineTag
 	}
 
 	// check for tags and uri

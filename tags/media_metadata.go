@@ -5,7 +5,7 @@
 // one Media Metadata tag of each type in any Media Playlist.  The only
 // exception to this rule is EXT-X-SKIP, which MUST NOT appear more than
 // once.
-package media
+package tags
 
 import (
 	"fmt"

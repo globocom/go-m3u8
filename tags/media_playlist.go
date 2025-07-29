@@ -5,7 +5,7 @@
 // any Media Playlist.
 //
 // A Media Playlist tag MUST NOT appear in a Multivariant Playlist.
-package media
+package tags
 
 import (
 	"fmt"

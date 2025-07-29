@@ -13,7 +13,7 @@
 // If one does, clients MUST fail to parse the Playlist.  The only
 // exception to this rule is EXT-X-DEFINE, which MAY appear more than
 // once.
-package exclusive
+package tags
 
 import (
 	"fmt"

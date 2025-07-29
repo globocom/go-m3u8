@@ -8,7 +8,7 @@
 // A Media Segment tag MUST NOT appear in a Multivariant Playlist.
 // Clients MUST fail to parse Playlists that contain both Media Segment
 // tags and Multivariant Playlist tags
-package media
+package tags
 
 import (
 	"fmt"

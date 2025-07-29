@@ -1,7 +1,7 @@
 //	Basic Tags (Section 4.4.1 in RFC)
 //
 // These tags are allowed in both Media Playlists and Multivariant Playlists.
-package basic
+package tags
 
 import (
 	"fmt"

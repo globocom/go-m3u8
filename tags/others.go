@@ -3,7 +3,7 @@
 // The tags in this section are not traditional tags as described in the RFC.
 // An example are exclusive tags added to the manifest by the packaging service.
 // https://docs.unified-streaming.com/documentation/live/scte-35.html
-package others
+package tags
 
 import (
 	"fmt"
