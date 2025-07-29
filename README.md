@@ -33,7 +33,7 @@ Some available operations are:
 
 To guarantee scalibility, our lib considers a data structure for the HLS elements that follows the [RFC documentation](https://tools.ietf.org/html/rfc8216).
 
-The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS elements into sub-packages according to the [**Playlist Tags**](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4) section on the RFC.
+The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS elements into files according to the [**Playlist Tags**](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4) section on the RFC.
 
 (The tags listed below are the ones currently supported by the lib.)
 
@@ -75,8 +75,8 @@ go install github.com/globocom/go-m3u8
 The following [Makefile](/Makefile) commands are available:
 
 ```Makefile
-make test # Run test suites
-make lint # Run code linter using .golangci.yml configuration
+make test 		# Run test suites
+make lint 		# Run code linter using .golangci.yml configuration
 ```
 
 The [testlocal](/testlocal/) folder contains instructions on how to run and test the library locally.
@@ -100,7 +100,7 @@ import (
 
 	go_m3u8 "github.com/globocom/go-m3u8"
 	m3u8_pl "github.com/globocom/go-m3u8/playlist"
-	m3u8_media "github.com/globocom/go-m3u8/tags/media"
+	m3u8_tags "github.com/globocom/go-m3u8/tags"
 )
 
 type AdBreak struct {
@@ -132,7 +132,7 @@ func GetLatestBreakData(manifest *m3u8_pl.Playlist) AdBreak {
 	latestAdBreak := adBreaks[len(adBreaks)-1]
 
 	breakStatus := latestAdBreak.HLSElement.Details["Status"]
-	if (breakStatus == m3u8_media.BreakStatusLeavingDVR) || (breakStatus == m3u8_media.BreakStatusNotReady) {
+	if (breakStatus == m3u8_tags.BreakStatusLeavingDVR) || (breakStatus == m3u8_tags.BreakStatusNotReady) {
 		return AdBreak{}
 	}
 
@@ -171,8 +171,7 @@ import (
 	"os"
 
 	go_m3u8 "github.com/globocom/go-m3u8"
-	m3u8_media "github.com/globocom/go-m3u8/tags/media"
-	m3u8_others "github.com/globocom/go-m3u8/tags/others"
+	m3u8_tags "github.com/globocom/go-m3u8/tags"
 )
 
 func main() {
@@ -196,10 +195,10 @@ func main() {
 		"PLANNED-DURATION": "16.0",
 		"SCTE-OUT":         "0x123abc456def",
 	}
-	dateRangeNode := p.NewNode(m3u8_media.DateRangeName, "", attrs, nil)
+	dateRangeNode := p.NewNode(m3u8_tags.DateRangeName, "", attrs, nil)
 
 	// Create event cue out tag
-	cueOutNode := p.NewNode(m3u8_others.EventCueOutName, "", map[string]string{m3u8_others.EventCueOutTag: "16.0"}, nil)
+	cueOutNode := p.NewNode(m3u8_tags.EventCueOutName, "", map[string]string{m3u8_tags.EventCueOutTag: "16.0"}, nil)
 
 	// Insert ad break start
 	p.InsertBefore(segmentNodeBreakStart, dateRangeNode)
@@ -209,7 +208,7 @@ func main() {
 	segmentNodeBreakEnd := segments[8]
 
 	// Create event cue in tag
-	cueInNode := p.NewNode(m3u8_others.EventCueInName, "", map[string]string{m3u8_others.EventCueInTag: ""}, nil)
+	cueInNode := p.NewNode(m3u8_tags.EventCueInName, "", map[string]string{m3u8_tags.EventCueInTag: ""}, nil)
 
 	// Insert ad break end
 	p.InsertAfter(segmentNodeBreakEnd, cueInNode)
@@ -235,8 +234,7 @@ import (
 	"os"
 
 	go_m3u8 "github.com/globocom/go-m3u8"
-	m3u8_media "github.com/globocom/go-m3u8/tags/media"
-	m3u8_others "github.com/globocom/go-m3u8/tags/others"
+	m3u8_tags "github.com/globocom/go-m3u8/tags"
 )
 
 func main() {
@@ -252,13 +250,13 @@ func main() {
 
 	// Insert discontinuity before each ad break start
 	for _, dateRangeNode := range dateRangeNodes {
-		discontinuityNode := p.NewNode(m3u8_media.DiscontinuityName, "", nil, nil)
+		discontinuityNode := p.NewNode(m3u8_tags.DiscontinuityName, "", nil, nil)
 		p.InsertBefore(dateRangeNode, discontinuityNode)
 	}
 
 	// Insert discontinuity after each ad break end
 	for _, cueInNode := range cueInNodes {
-		discontinuityNode := p.NewNode(m3u8_media.DiscontinuityName, "", nil, nil)
+		discontinuityNode := p.NewNode(m3u8_tags.DiscontinuityName, "", nil, nil)
 		p.InsertBefore(cueInNode, discontinuityNode)
 	}
 
