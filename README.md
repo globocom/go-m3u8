@@ -9,33 +9,39 @@ go-m3u8
 </h1>
 
 
-### Work in Progress!
+### ⚠️ Work in Progress!
 
-_There isn't a stable version for now. As this is currently a WIP, the API may have changes._
+_This project is currently in pre-release and is subject to changes._
 
-## go-m3u8
+## About
 
-Parser library for [m3u8](https://tools.ietf.org/html/rfc8216) to facilitate manifest manipulation.
+A m3u8 parser library in Go to facilitate the manipulation of HTTP Live Streaming (HLS) manifests.
 
-_We currently only support Live Streaming manifests._
+The library provides:
 
-### 1. Doubly Linked List
+- **Doubly Linked List Architecture -** Efficient playlist representation with ordered element access and manipulation.
+- **RFC 8216 Compliance -** Support for HLS tags based on the official [RFC](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis) documentation.
+- **Live Streaming Support -** Optimized for live streaming manifests only (no VoD support yet).
 
-The m3u8 manifest is represented by a doubly linked list. This data structure allows us to access the manifest in a sorted manner and apply operations (modify, add, remove) to its content.
+## Architecture
+
+### Doubly Linked List
+
+The m3u8 manifest is parsed into a **doubly linked list**. Each node on the list represents an element of the original HLS playlist (e.g. a tag, a comment, etc).
+
+This data structure allows us to access the manifest in a sorted manner, to retrieve information and apply operations to its content.
 
 Some available operations are:
 
-- **Create** a new node to represent an HLS element of the m3u8 manifest (e.g. a tag, a comment).
-- **Insert** a new node into the playlist (append at the end OR insert before/after/between specific nodes).
-- **Find** a specific node or a list of nodes based on the HLS element name.
+- **Create** a new node, to represent an element of the playlist.
+- **Insert** a new node into the playlist, either at the end or before/after an existing node.
+- **Find** a specific node or a list of nodes, based on the element name.
 
-### 2. Tags
+### HLS Elements
 
-To guarantee scalibility, our lib considers a data structure for the HLS elements that follows the [RFC documentation](https://tools.ietf.org/html/rfc8216).
+To guarantee scalibility, our library considers a data structure for the HLS elements that follows the [RFC documentation](https://tools.ietf.org/html/rfc8216). 
 
-The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS elements into files according to the [**Playlist Tags**](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4) section on the RFC.
-
-(The tags listed below are the ones currently supported by the lib.)
+The [**tags**](/tags) package implements the currently supported [Playlist Tags](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4):
 
 1. **basic -** Basic Tags (Section 4.4.1).
 - `#EXTM3U`
@@ -58,7 +64,7 @@ The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS e
 4. **multivariant -** Multivariant Playlist Tags (Section 4.4.6).
 - `#EXT-X-STREAM-INF`
 
-5. **others -** The tags in this section are "non-official" and are not listed in the RFC, e.g. tags added to the manifest by the packaging service.
+5. **others -** The tags in this section are "non-official" and are not listed in the RFC, e.g. tags added to the manifest by the live stream packaging service.
 - `#EXT-X-CUE-OUT`
 - `#EXT-X-CUE-IN`
 - Packager specific tags.
@@ -66,35 +72,38 @@ The [**tags**](https://github.com/globocom/go-m3u8/tags) package separates HLS e
 
 ## Getting Started
 
+### Installation
+
 To import the library to your Go project, run:
 
 ```sh
 go install github.com/globocom/go-m3u8
 ```
 
-The following [Makefile](/Makefile) commands are available:
+The following [**Makefile**](/Makefile) commands are available:
 
 ```Makefile
 make test 		# Run test suites
-make lint 		# Run code linter using .golangci.yml configuration
+make lint 		# Run code linter
 ```
 
-The [testlocal](/testlocal/) folder contains instructions on how to run and test the library locally.
+The [**testlocal**](/testlocal/) folder contains instructions on how to setup and test the library for local experimentation.
 
 ### Decoding a Playlist
 
 The `ParsePlaylist` method receives a `io.ReadCloser` object as argument and returns a `Playlist` object.
 
-You can use it to decode a manifest that is in string format:
+You may decode a manifest that is in string format:
 ```go
 manifest := `#EXTM3U
 #EXT-X-VERSION:3
 # variants
 #EXT-X-STREAM-INF:BANDWIDTH=479000,AVERAGE-BANDWIDTH=435000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=512x288,FRAME-RATE=30
 channel_01.m3u8`
-manifestReader := io.NopCloser(strings.NewReader(manifest))
-playlist, err := m3u8.ParsePlaylist(manifestReader)
 
+manifestReader := io.NopCloser(strings.NewReader(manifest))
+
+playlist, err := m3u8.ParsePlaylist(manifestReader)
 if err != nil {
 	panic(err)
 }
@@ -103,8 +112,8 @@ if err != nil {
 Or read the manifest file directly:
 ```go
 file, _ := os.Open("multivariant.m3u8")
-playlist, err := go_m3u8.ParsePlaylist(file)
 
+playlist, err := go_m3u8.ParsePlaylist(file)
 if err != nil {
 	panic(err)
 }
@@ -121,9 +130,9 @@ if err != nil {
 }
 ```
 
-## Usage Cases
+## Usage 
 
-Below we have some examples for using this library.
+For complete details on the available methods, please read [the original release notes](https://github.com/globocom/go-m3u8/releases/tag/v0.1.0).
 
 ### Collecting Ad Break Data
 
@@ -343,3 +352,13 @@ func main() {
 	p.Print()
 }
 ```
+
+## Contributing
+
+As this is an open-source project, we encourage and support any community contributions!
+
+Feel free to report bugs, request features and recommend improvements. Multiple repository mantainers are keeping an eye on opened issues and pull requests.
+
+## License
+
+Released under the [MIT License](/LICENSE).
