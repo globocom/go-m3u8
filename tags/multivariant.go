@@ -10,6 +10,7 @@
 package tags
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/globocom/go-m3u8/internal"
@@ -18,6 +19,7 @@ import (
 
 const (
 	StreamInfName = "StreamInf"
+	MediaName     = "Media"
 )
 
 var (
@@ -27,12 +29,55 @@ var (
 	SessionKey        = "#EXT-X-SESSION-KEY"        //todo: has attributes
 )
 
-type StreamInfParser struct{}
+type (
+	StreamInfParser struct{}
+	MediaParser     struct{}
+)
 
-type StreamInfEncoder struct{}
+type (
+	StreamInfEncoder struct{}
+	MediaEncoder     struct{}
+)
 
 func (p StreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.CurrentStreamInf = pl.GetStreamInfData(pl.TagsToMap(tag))
+	return nil
+}
+
+func (p MediaParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid media tag: %s", tag)
+	}
+
+	// The TYPE attribute is REQUIRED by RFC
+	if params["TYPE"] == "" {
+		return fmt.Errorf("TYPE attribute is required: %s", tag)
+	}
+
+	// Valid strings for TYPE are AUDIO, VIDEO, SUBTITLES, and CLOSED-CAPTIONS.
+	if params["TYPE"] != "AUDIO" && params["TYPE"] != "VIDEO" && params["TYPE"] != "SUBTITLES" && params["TYPE"] != "CLOSED-CAPTIONS" {
+		return fmt.Errorf("invalid TYPE attribute value: %s", params["TYPE"])
+	}
+
+	// The GROUP-ID attribute is REQUIRED by RFC
+	if params["GROUP-ID"] == "" {
+		return fmt.Errorf("GROUP-ID attribute is required: %s", tag)
+	}
+
+	// If the TYPE is CLOSED-CAPTIONS, the URI attribute MUST NOT be present
+	if params["TYPE"] == "CLOSED-CAPTIONS" && params["URI"] != "" {
+		return fmt.Errorf("URI attribute is not allowed for CLOSED-CAPTIONS type: %s", tag)
+	}
+
+	mediaNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "Media",
+			Attrs: params,
+		},
+	}
+	playlist.Insert(mediaNode)
+
 	return nil
 }
 
@@ -48,6 +93,22 @@ func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 		return err
 	}
 	return nil
+}
+
+func (e MediaEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	orderAttr := []string{"TYPE", "GROUP-ID", "LANGUAGE", "NAME", "DEFAULT", "AUTOSELECT", "CHANNELS", "URI"}
+	shouldQuoteAttr := map[string]bool{
+		"TYPE":       false,
+		"GROUP-ID":   true,
+		"LANGUAGE":   true,
+		"NAME":       true,
+		"DEFAULT":    false,
+		"AUTOSELECT": false,
+		"CHANNELS":   true,
+		"URI":        true,
+	}
+
+	return pl.EncodeTagWithAttributes(builder, MediaTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
 func (e StreamInfEncoder) shouldQuoteStreamInf(node *internal.Node) map[string]bool {

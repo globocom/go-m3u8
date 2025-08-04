@@ -235,6 +235,38 @@ func TestStreamInfParser(t *testing.T) {
 	assert.Equal(t, "1280x720", p.CurrentStreamInf.Resolution)
 }
 
+func TestMediaParser(t *testing.T) {
+	playlist := "#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("Media")
+	assert.True(t, found)
+	assert.Equal(t, "audio-aacl-96", node.HLSElement.Attrs["GROUP-ID"])
+	assert.Equal(t, "qaa", node.HLSElement.Attrs["LANGUAGE"])
+	assert.Equal(t, "Reserved for local use", node.HLSElement.Attrs["NAME"])
+	assert.Equal(t, "YES", node.HLSElement.Attrs["DEFAULT"])
+	assert.Equal(t, "YES", node.HLSElement.Attrs["AUTOSELECT"])
+	assert.Equal(t, "2", node.HLSElement.Attrs["CHANNELS"])
+	assert.Equal(t, "mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "AUDIO", node.HLSElement.Attrs["TYPE"])
+
+	// test invalid media tag without TYPE
+	playlist = "#EXT-X-MEDIA:GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid media tag with invalid TYPE
+	playlist = "#EXT-X-MEDIA:TYPE=INVALID,GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test media tag with TYPE CLOSED-CAPTIONS and URI
+	playlist = "#EXT-X-MEDIA:TYPE=CLOSED-CAPTIONS,GROUP-ID=\"cc-group\",NAME=\"English CC\",DEFAULT=YES,AUTOSELECT=YES,URI=\"cc-uri.m3u8\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+}
+
 func TestCommentParser(t *testing.T) {
 	playlist := `#EXTM3U
 							#EXT-X-VERSION:4
