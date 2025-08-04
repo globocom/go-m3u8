@@ -267,6 +267,34 @@ func TestMediaParser(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestIFrameStreamInfParser(t *testing.T) {
+	playlist := "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,CODECS=\"avc1.64001F\",RESOLUTION=640x360,URI=\"keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("IFrameStreamInf")
+	assert.True(t, found)
+	assert.Equal(t, "82000", node.HLSElement.Attrs["BANDWIDTH"])
+	assert.Equal(t, "avc1.64001F", node.HLSElement.Attrs["CODECS"])
+	assert.Equal(t, "640x360", node.HLSElement.Attrs["RESOLUTION"])
+	assert.Equal(t, "keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120", node.HLSElement.Attrs["URI"])
+
+	// test invalid IFrameStreamInf tag without URI
+	playlist = "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,CODECS=\"avc1.64001F\",RESOLUTION=640x360"
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid IFrameStreamInf tag with missing BANDWIDTH
+	playlist = "#EXT-X-I-FRAME-STREAM-INF:CODECS=\"avc1.64001F\",RESOLUTION=640x360,URI=\"keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid IFrameStreamInf tag with missing CODECS
+	playlist = "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,RESOLUTION=640x360,URI=\"keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+}
+
 func TestCommentParser(t *testing.T) {
 	playlist := `#EXTM3U
 							#EXT-X-VERSION:4

@@ -18,25 +18,28 @@ import (
 )
 
 const (
-	StreamInfName = "StreamInf"
-	MediaName     = "Media"
+	StreamInfName       = "StreamInf"
+	MediaName           = "Media"
+	IFrameStreamInfName = "IFrameStreamInf"
 )
 
 var (
-	StreamInfTag      = "#EXT-X-STREAM-INF"
-	MediaTag          = "#EXT-X-MEDIA"              //todo: has attributes
-	IFrameStramInfTag = "#EXT-X-I-FRAME-STREAM-INF" //todo: has attributes
-	SessionKey        = "#EXT-X-SESSION-KEY"        //todo: has attributes
+	StreamInfTag       = "#EXT-X-STREAM-INF"
+	MediaTag           = "#EXT-X-MEDIA"
+	IFrameStreamInfTag = "#EXT-X-I-FRAME-STREAM-INF"
+	SessionKey         = "#EXT-X-SESSION-KEY" //todo: has attributes
 )
 
 type (
-	StreamInfParser struct{}
-	MediaParser     struct{}
+	StreamInfParser       struct{}
+	MediaParser           struct{}
+	IFrameStreamInfParser struct{}
 )
 
 type (
-	StreamInfEncoder struct{}
-	MediaEncoder     struct{}
+	StreamInfEncoder       struct{}
+	MediaEncoder           struct{}
+	IFrameStreamInfEncoder struct{}
 )
 
 func (p StreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -81,6 +84,37 @@ func (p MediaParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
+func (p IFrameStreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid IFrameStreamInf tag: %s", tag)
+	}
+
+	// The BANDWIDTH attribute is REQUIRED by RFC
+	if params["BANDWIDTH"] == "" {
+		return fmt.Errorf("BANDWIDTH attribute is required: %s", tag)
+	}
+
+	// The CODECS attribute is REQUIRED by RFC
+	if params["CODECS"] == "" {
+		return fmt.Errorf("CODECS attribute is required: %s", tag)
+	}
+
+	// The URI attribute is REQUIRED by RFC
+	if params["URI"] == "" {
+		return fmt.Errorf("URI attribute is required: %s", tag)
+	}
+
+	IFrameStreamInfNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "IFrameStreamInf",
+			Attrs: params,
+		},
+	}
+	playlist.Insert(IFrameStreamInfNode)
+	return nil
+}
+
 func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE", "VIDEO-RANGE", "AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
 	shouldQuoteAttr := e.shouldQuoteStreamInf(node)
@@ -109,6 +143,22 @@ func (e MediaEncoder) Encode(node *internal.Node, builder *strings.Builder) erro
 	}
 
 	return pl.EncodeTagWithAttributes(builder, MediaTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+}
+
+func (e IFrameStreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "URI", "VIDEO-RANGE", "VIDEO", "SCORE"}
+	shouldQuoteAttr := map[string]bool{
+		"BANDWIDTH":         false,
+		"AVERAGE-BANDWIDTH": false,
+		"CODECS":            true,
+		"RESOLUTION":        false,
+		"URI":               true,
+		"VIDEO-RANGE":       false,
+		"VIDEO":             true,
+		"SCORE":             false,
+	}
+
+	return pl.EncodeTagWithAttributes(builder, IFrameStreamInfTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
 func (e StreamInfEncoder) shouldQuoteStreamInf(node *internal.Node) map[string]bool {
