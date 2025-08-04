@@ -21,25 +21,28 @@ const (
 	StreamInfName       = "StreamInf"
 	MediaName           = "Media"
 	IFrameStreamInfName = "IFrameStreamInf"
+	SessionKeyName      = "SessionKey"
 )
 
 var (
 	StreamInfTag       = "#EXT-X-STREAM-INF"
 	MediaTag           = "#EXT-X-MEDIA"
 	IFrameStreamInfTag = "#EXT-X-I-FRAME-STREAM-INF"
-	SessionKey         = "#EXT-X-SESSION-KEY" //todo: has attributes
+	SessionKeyTag      = "#EXT-X-SESSION-KEY"
 )
 
 type (
 	StreamInfParser       struct{}
 	MediaParser           struct{}
 	IFrameStreamInfParser struct{}
+	SessionKeyParser      struct{}
 )
 
 type (
 	StreamInfEncoder       struct{}
 	MediaEncoder           struct{}
 	IFrameStreamInfEncoder struct{}
+	SessionKeyEncoder      struct{}
 )
 
 func (p StreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -53,7 +56,7 @@ func (p MediaParser) Parse(tag string, playlist *pl.Playlist) error {
 		return fmt.Errorf("invalid media tag: %s", tag)
 	}
 
-	// The TYPE attribute is REQUIRED by RFC
+	// TYPE attribute is REQUIRED by RFC
 	if params["TYPE"] == "" {
 		return fmt.Errorf("TYPE attribute is required: %s", tag)
 	}
@@ -63,7 +66,7 @@ func (p MediaParser) Parse(tag string, playlist *pl.Playlist) error {
 		return fmt.Errorf("invalid TYPE attribute value: %s", params["TYPE"])
 	}
 
-	// The GROUP-ID attribute is REQUIRED by RFC
+	// GROUP-ID attribute is REQUIRED by RFC
 	if params["GROUP-ID"] == "" {
 		return fmt.Errorf("GROUP-ID attribute is required: %s", tag)
 	}
@@ -90,17 +93,17 @@ func (p IFrameStreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
 		return fmt.Errorf("invalid IFrameStreamInf tag: %s", tag)
 	}
 
-	// The BANDWIDTH attribute is REQUIRED by RFC
+	// BANDWIDTH attribute is REQUIRED by RFC
 	if params["BANDWIDTH"] == "" {
 		return fmt.Errorf("BANDWIDTH attribute is required: %s", tag)
 	}
 
-	// The CODECS attribute is REQUIRED by RFC
+	// CODECS attribute is REQUIRED by RFC
 	if params["CODECS"] == "" {
 		return fmt.Errorf("CODECS attribute is required: %s", tag)
 	}
 
-	// The URI attribute is REQUIRED by RFC
+	// URI attribute is REQUIRED by RFC
 	if params["URI"] == "" {
 		return fmt.Errorf("URI attribute is required: %s", tag)
 	}
@@ -112,6 +115,42 @@ func (p IFrameStreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
 		},
 	}
 	playlist.Insert(IFrameStreamInfNode)
+	return nil
+}
+
+func (p SessionKeyParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid session key tag: %s", tag)
+	}
+
+	// METHOD attribute is REQUIRED by RFC
+	if params["METHOD"] == "" {
+		return fmt.Errorf("METHOD attribute is required: %s", tag)
+	}
+
+	// METHOD attribute MUST NOT be NONE
+	if params["METHOD"] == "NONE" {
+		return fmt.Errorf("METHOD attribute can't be NONE: %s", tag)
+	}
+
+	// URI attribute is REQUIRED
+	if params["URI"] == "" {
+		return fmt.Errorf("URI attribute is required: %s", tag)
+	}
+
+	// IV attribute is required if METHOD is AES-128
+	if (params["METHOD"] == "AES-128") && params["IV"] == "" {
+		return fmt.Errorf("IV attribute is required when METHOD is AES-128: %s", tag)
+	}
+
+	sessionKeyNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "SessionKey",
+			Attrs: params,
+		},
+	}
+	playlist.Insert(sessionKeyNode)
 	return nil
 }
 
@@ -159,6 +198,19 @@ func (e IFrameStreamInfEncoder) Encode(node *internal.Node, builder *strings.Bui
 	}
 
 	return pl.EncodeTagWithAttributes(builder, IFrameStreamInfTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+}
+
+func (e SessionKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	orderAttr := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
+	shouldQuoteAttr := map[string]bool{
+		"METHOD":            false,
+		"URI":               true,
+		"IV":                false,
+		"KEYFORMAT":         true,
+		"KEYFORMATVERSIONS": true,
+	}
+
+	return pl.EncodeTagWithAttributes(builder, SessionKeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
 func (e StreamInfEncoder) shouldQuoteStreamInf(node *internal.Node) map[string]bool {

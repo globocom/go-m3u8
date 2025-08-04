@@ -295,6 +295,39 @@ func TestIFrameStreamInfParser(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestSessionKeyParser(t *testing.T) {
+	playlist := "#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES,URI=\"skd://12345\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("SessionKey")
+	assert.True(t, found)
+	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "skd://12345", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+
+	// test invalid session key without METHOD
+	playlist = "#EXT-X-SESSION-KEY:URI=\"skd://12345\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid session key with METHOD NONE
+	playlist = "#EXT-X-SESSION-KEY:METHOD=NONE,URI=\"skd://12345\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid session key without URI
+	playlist = "#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES,KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+
+	// test invalid session key with METHOD AES-128 and without IV
+	playlist = "#EXT-X-SESSION-KEY:METHOD=AES-128,URI=\"skd://12345\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+}
+
 func TestCommentParser(t *testing.T) {
 	playlist := `#EXTM3U
 							#EXT-X-VERSION:4
