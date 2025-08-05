@@ -161,6 +161,15 @@ func (p *Playlist) USPCommentNode() *internal.Node {
 	return nil
 }
 
+// Returns the Variable Define tag as a Node if it exists, otherwise returns nil
+func (p *Playlist) VariableDefineNode() *internal.Node {
+	node, found := p.Find("VariableDefine")
+	if !found {
+		return nil
+	}
+	return node
+}
+
 // Returns true if node is inside ad break and false otherwise.
 // When true, method also returns the DateRange object for the Ad Break.
 //

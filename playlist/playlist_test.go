@@ -156,6 +156,16 @@ func TestUSPComment(t *testing.T) {
 	assert.Equal(t, node.HLSElement.Attrs["Comment"], "## Created with Unified Streaming Platform  (version=1.14.4-30793)")
 }
 
+func TestXDefineNode(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withSGAI.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node := playlist.VariableDefineNode()
+	assert.NotNil(t, node)
+	assert.Equal(t, node.HLSElement.Attrs["QUERYPARAM"], "stream_id")
+}
+
 func TestFindSegmentInsideAdBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
