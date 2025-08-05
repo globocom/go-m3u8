@@ -169,16 +169,17 @@ func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 }
 
 func (e MediaEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"TYPE", "GROUP-ID", "LANGUAGE", "NAME", "DEFAULT", "AUTOSELECT", "CHANNELS", "URI"}
+	orderAttr := []string{"TYPE", "GROUP-ID", "LANGUAGE", "NAME", "DEFAULT", "AUTOSELECT", "CHANNELS", "URI", "INSTREAM-ID"}
 	shouldQuoteAttr := map[string]bool{
-		"TYPE":       false,
-		"GROUP-ID":   true,
-		"LANGUAGE":   true,
-		"NAME":       true,
-		"DEFAULT":    false,
-		"AUTOSELECT": false,
-		"CHANNELS":   true,
-		"URI":        true,
+		"TYPE":        false,
+		"GROUP-ID":    true,
+		"LANGUAGE":    true,
+		"NAME":        true,
+		"DEFAULT":     false,
+		"AUTOSELECT":  false,
+		"CHANNELS":    true,
+		"URI":         true,
+		"INSTREAM-ID": true,
 	}
 
 	return pl.EncodeTagWithAttributes(builder, MediaTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
