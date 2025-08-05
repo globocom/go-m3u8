@@ -63,6 +63,9 @@ The [**tags**](/tags) package implements the currently supported [Playlist Tags]
 
 4. **multivariant -** Multivariant Playlist Tags (Section 4.4.6).
 - `#EXT-X-STREAM-INF`
+- `#EXT-X-MEDIA`
+- `#EXT-X-I-FRAME-STREAM-INF`
+- `#EXT-X-SESSION-KEY`
 
 5. **others -** The tags in this section are "non-official" and are not listed in the RFC, e.g. tags added to the manifest by the live stream packaging service.
 - `#EXT-X-CUE-OUT`

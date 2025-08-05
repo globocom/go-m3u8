@@ -26,9 +26,10 @@ const (
 )
 
 var (
-	DateRangeTag   = "#EXT-X-DATERANGE"
-	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
-	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
+	DateRangeTag       = "#EXT-X-DATERANGE"
+	SkipTag            = "#EXT-X-SKIP"             //todo: has attributes
+	PreLoadHintTag     = "#EXT-X-PRELOAD-HINT"     //todo: has attributes
+	RenditionReportTag = "#EXT-X-RENDITION-REPORT" //todo: has attributes
 )
 
 type DateRangeParser struct{}
