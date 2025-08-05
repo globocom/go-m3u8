@@ -161,7 +161,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	processed := make(map[string]bool)
 
 	for _, key := range order {
-		if value, exists := attrs[key]; exists {
+		if value, exists := attrs[key]; exists && value != "" {
 			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value, shouldQuote))
 			processed[key] = true
 		}
