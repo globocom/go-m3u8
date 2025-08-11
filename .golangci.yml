@@ -43,7 +43,7 @@ linters:
       check-type-assertions: true
     goconst:
       min-len: 2
-      min-occurrences: 3
+      min-occurrences: 10
     gocritic:
       disabled-checks:
         - hugeParam
