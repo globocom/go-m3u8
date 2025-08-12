@@ -1,0 +1,38 @@
+#EXTM3U
+#EXT-X-VERSION:4
+## Created with Unified Streaming Platform  (version=1.14.4-30793)
+#EXT-X-MEDIA-SEQUENCE:547957971
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-TARGETDURATION:3
+#USP-X-TIMESTAMP-MAP:MPEGTS=6207958207,LOCAL=2025-07-25T17:45:04.975900Z
+#EXT-X-PROGRAM-DATE-TIME:2025-07-25T17:45:04.975999Z
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957971.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957972.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957973.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957974.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957975.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957976.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957977.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957978.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957979.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957980.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957981.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957982.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957983.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957984.aac
+#EXTINF:3.2, no desc
+channel-audio_1=128000-547957985.aac
