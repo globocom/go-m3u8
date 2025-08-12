@@ -135,7 +135,7 @@ func TestProgramDateTimeParser(t *testing.T) {
 	assert.Equal(t, "2025-01-01T12:34:56Z", node.HLSElement.Attrs["#EXT-X-PROGRAM-DATE-TIME"])
 }
 
-func TestExtKeyParser(t *testing.T) {
+func TestKeyParser(t *testing.T) {
 	// test valid ext key tag
 	playlist := "#EXT-X-KEY:METHOD=SAMPLE-AES,URI=\"drm-uri\",KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
 	p, err := setupPlaylist(playlist)
@@ -161,6 +161,32 @@ func TestExtKeyParser(t *testing.T) {
 
 	// test invalid ext key with METHOD AES-128 and without IV
 	playlist = "#EXT-X-KEY:METHOD=AES-128,URI=\"https://example.com/keys/key1.bin\""
+	_, err = setupPlaylist(playlist)
+	assert.Error(t, err)
+}
+
+func TestMapParser(t *testing.T) {
+	// test valid ext map tag with URI and BYTERANGE
+	playlist := "#EXT-X-MAP:URI=\"hls/main.mp4\",BYTERANGE=\"560@0\""
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find("Map")
+	assert.True(t, found)
+	assert.Equal(t, "hls/main.mp4", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "560@0", node.HLSElement.Attrs["BYTERANGE"])
+
+	// test valid ext map tag with URI and no BYTERANGE
+	playlist = "#EXT-X-MAP:URI=\"hls/channel-hevc-hdr-video=18000000.m4s\""
+	p, err = setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found = p.Find("Map")
+	assert.True(t, found)
+	assert.Equal(t, "hls/channel-hevc-hdr-video=18000000.m4s", node.HLSElement.Attrs["URI"])
+
+	// test invalid map tag without URI
+	playlist = "#EXT-X-MAP:BYTERANGE=\"560@0\""
 	_, err = setupPlaylist(playlist)
 	assert.Error(t, err)
 }
