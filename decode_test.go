@@ -437,19 +437,20 @@ func TestParsePlaylist_Error_MissingVersion(t *testing.T) {
 }
 
 func TestParseMultivariantPlaylist(t *testing.T) {
-	playlist := `#EXTM3U
-							#EXT-X-VERSION:3
-							## Created with Unified Streaming Platform  (version=1.14.4-30793)
-
-							# variants
-							#EXT-X-STREAM-INF:BANDWIDTH=759000,AVERAGE-BANDWIDTH=690000,CODECS=\"mp4a.40.2,avc1.64001F\",RESOLUTION=640x360,FRAME-RATE=30
-							coelhodai-audio_1=96000-video=558976.m3u8?dvr_window_length=600
-							#EXT-X-STREAM-INF:BANDWIDTH=759000,AVERAGE-BANDWIDTH=690000,CODECS=\"mp4a.40.2,avc1.64001F\",RESOLUTION=720x480,FRAME-RATE=30
-							coelhodai-audio_1=96000-video=123456.m3u8?dvr_window_length=600`
-	p, err := setupPlaylist(playlist)
+	file, _ := os.Open("mocks/multivariant/multivariant.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
 	validatePlaylist(t, p, err)
 
-	assert.Equal(t, len(p.Variants()), 2)
+	variants := p.Variants()
+
+	assert.Len(t, variants, 8)
+	assert.Equal(t, p.Tail.HLSElement.Name, tags.StreamInfName)
+	assert.Equal(t, "channel-audio_1=96000-video=80000.m3u8", variants[0].HLSElement.URI)
+	assert.Equal(t, "206000", variants[0].HLSElement.Attrs["BANDWIDTH"])
+	assert.Equal(t, "187000", variants[0].HLSElement.Attrs["AVERAGE-BANDWIDTH"])
+	assert.Equal(t, "mp4a.40.2,avc1.64001F", variants[0].HLSElement.Attrs["CODECS"])
+	assert.Equal(t, "256x144", variants[0].HLSElement.Attrs["RESOLUTION"])
+	assert.Equal(t, "30", variants[0].HLSElement.Attrs["FRAME-RATE"])
 }
 
 func TestParseMediaPlaylist(t *testing.T) {
@@ -457,12 +458,11 @@ func TestParseMediaPlaylist(t *testing.T) {
 	p, err := m3u8.ParsePlaylist(file)
 	validatePlaylist(t, p, err)
 
-	assert.Equal(t, len(p.Segments()), 27)
-	assert.Equal(t, len(p.Breaks()), 1)
-	assert.Equal(t, len(p.Variants()), 0)
+	assert.Len(t, p.Segments(), 27)
+	assert.Len(t, p.Breaks(), 1)
+	assert.Equal(t, p.MediaSequence, 364042169)
 	assert.Equal(t, p.ProgramDateTime, time.Date(2025, 05, 16, 13, 33, 27, 966666000, time.UTC))
 	assert.Equal(t, p.DVR, 129.5999)
-	assert.Len(t, p.Segments(), 27)
 }
 
 func TestParseMediaPlaylist_WithCompleteAdBreak(t *testing.T) {
