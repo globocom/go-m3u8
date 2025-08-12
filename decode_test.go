@@ -624,8 +624,8 @@ func TestParseMediaPlaylist_WithCompleteAdBreak_UsingHLSInterstitials(t *testing
 	breaks := p.Breaks()
 
 	assert.Len(t, breaks, 1)
-	assert.Equal(t, breaks[0].HLSElement.Attrs["CLASS"], "com.apple.hls.interstitial")
-	assert.Equal(t, breaks[0].HLSElement.Attrs["X-ASSET-URI"], "https://dai.google.com/linear/pods/v1/hls/network/1234/custom_asset/abcd/ad_break_id/playlist.m3u8?stream_id={$stream_id}&pd=22000")
+	assert.Equal(t, "com.apple.hls.interstitial", breaks[0].HLSElement.Attrs["CLASS"])
+	assert.Equal(t, "https://dai.google.com/network/1234/ad_break_id/playlist.m3u8?stream_id={$stream_id}", breaks[0].HLSElement.Attrs["X-ASSET-URI"])
 	assert.Equal(t, p.VersionValue(), "11")
 }
 
@@ -679,16 +679,40 @@ func TestParseMediaPlaylist_WithEncryptionAndCompleteAdBreak(t *testing.T) {
 	p, err := m3u8.ParsePlaylist(file)
 	validatePlaylist(t, p, err)
 
+	dateRangeNodes := p.Breaks()
 	extKeyNodes := p.EncryptionTags()
-	assert.Len(t, extKeyNodes, 3)
-
 	_, found1 := p.FindNodeInsideAdBreak(extKeyNodes[0])
 	_, found2 := p.FindNodeInsideAdBreak(extKeyNodes[1])
 	_, found3 := p.FindNodeInsideAdBreak(extKeyNodes[2])
-	dateRangeNodes := p.Breaks()
 
+	assert.Len(t, dateRangeNodes, 1)
+	assert.Len(t, extKeyNodes, 3)
 	assert.False(t, found1)
 	assert.True(t, found2)
 	assert.False(t, found3)
-	assert.Len(t, dateRangeNodes, 1)
+}
+
+func TestMediaPlaylist_WithMediaSegmentFormat_FragmentedMP4(t *testing.T) {
+	// format Fragmented MPEG-4 (fmp4)
+	file, _ := os.Open("mocks/media/withFormatFMP4.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	mapTag, found := p.Find(tags.MapName)
+	segment := p.Segments()[0]
+
+	assert.True(t, found)
+	assert.Equal(t, "hls/channel-hevc-hdr-video=18000000.m4s", mapTag.HLSElement.Attrs["URI"])
+	assert.Contains(t, segment.HLSElement.URI, ".m4s")
+}
+
+func TestMediaPlaylist_WithMediaSegmentFormat_AudioAAC(t *testing.T) {
+	// format Packed Audio AAC (aac)
+	file, _ := os.Open("mocks/media/withFormatAudioAAC.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	segment := p.Segments()[0]
+
+	assert.Contains(t, segment.HLSElement.URI, ".aac")
 }
