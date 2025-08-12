@@ -23,8 +23,8 @@ const (
 	ExtInfName          = "ExtInf"
 	DiscontinuityName   = "Discontinuity"
 	ProgramDateTimeName = "ProgramDateTime"
-	ExtKeyName          = "ExtKey"
-	ExtMapName          = "ExtMap"
+	KeyName             = "Key"
+	MapName             = "Map"
 )
 
 var (
@@ -42,16 +42,16 @@ type (
 	ExtInfParser          struct{}
 	DiscontinuityParser   struct{}
 	ProgramDateTimeParser struct{}
-	ExtKeyParser          struct{}
-	ExtMapParser          struct{}
+	KeyParser             struct{}
+	MapParser             struct{}
 )
 
 type (
 	ExtInfEncoder          struct{}
 	DiscontinuityEncoder   struct{}
 	ProgramDateTimeEncoder struct{}
-	ExtKeyEncoder          struct{}
-	ExtMapEncoder          struct{}
+	KeyEncoder             struct{}
+	MapEncoder             struct{}
 )
 
 func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -116,7 +116,7 @@ func (p ProgramDateTimeParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
-func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
+func (p KeyParser) Parse(tag string, playlist *pl.Playlist) error {
 	params := pl.TagsToMap(tag)
 	if len(params) < 1 {
 		return fmt.Errorf("invalid ext key tag: %s", tag)
@@ -139,7 +139,7 @@ func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  ExtKeyName,
+			Name:  KeyName,
 			Attrs: params,
 		},
 	})
@@ -147,7 +147,7 @@ func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
-func (p ExtMapParser) Parse(tag string, playlist *pl.Playlist) error {
+func (p MapParser) Parse(tag string, playlist *pl.Playlist) error {
 	params := pl.TagsToMap(tag)
 	if len(params) < 1 {
 		return fmt.Errorf("invalid ext map tag: %s", tag)
@@ -160,7 +160,7 @@ func (p ExtMapParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  ExtMapName,
+			Name:  MapName,
 			Attrs: params,
 		},
 	})
@@ -192,7 +192,7 @@ func (e ProgramDateTimeEncoder) Encode(node *internal.Node, builder *strings.Bui
 	return pl.EncodeSimpleTag(node, builder, ProgramDateTimeTag, ProgramDateTimeTag)
 }
 
-func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+func (e KeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	orderAttr := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
 	shouldQuoteAttr := map[string]bool{
 		"METHOD":            false,
@@ -204,12 +204,11 @@ func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) err
 	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
-func (e ExtMapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+func (e MapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	orderAttr := []string{"URI", "BYTERANGE"}
 	shouldQuoteAttr := map[string]bool{
 		"URI":       true,
 		"BYTERANGE": true,
 	}
-
 	return pl.EncodeTagWithAttributes(builder, MapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }

@@ -76,13 +76,12 @@ func (p MediaParser) Parse(tag string, playlist *pl.Playlist) error {
 		return fmt.Errorf("URI attribute is not allowed for CLOSED-CAPTIONS type: %s", tag)
 	}
 
-	mediaNode := &internal.Node{
+	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "Media",
+			Name:  MediaName,
 			Attrs: params,
 		},
-	}
-	playlist.Insert(mediaNode)
+	})
 
 	return nil
 }
@@ -108,13 +107,13 @@ func (p IFrameStreamInfParser) Parse(tag string, playlist *pl.Playlist) error {
 		return fmt.Errorf("URI attribute is required: %s", tag)
 	}
 
-	IFrameStreamInfNode := &internal.Node{
+	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "IFrameStreamInf",
+			Name:  IFrameStreamInfName,
 			Attrs: params,
 		},
-	}
-	playlist.Insert(IFrameStreamInfNode)
+	})
+
 	return nil
 }
 
@@ -144,13 +143,13 @@ func (p SessionKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 		return fmt.Errorf("IV attribute is required when METHOD is AES-128: %s", tag)
 	}
 
-	sessionKeyNode := &internal.Node{
+	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  "SessionKey",
+			Name:  SessionKeyName,
 			Attrs: params,
 		},
-	}
-	playlist.Insert(sessionKeyNode)
+	})
+
 	return nil
 }
 
@@ -181,7 +180,6 @@ func (e MediaEncoder) Encode(node *internal.Node, builder *strings.Builder) erro
 		"URI":         true,
 		"INSTREAM-ID": true,
 	}
-
 	return pl.EncodeTagWithAttributes(builder, MediaTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
@@ -197,7 +195,6 @@ func (e IFrameStreamInfEncoder) Encode(node *internal.Node, builder *strings.Bui
 		"VIDEO":             true,
 		"SCORE":             false,
 	}
-
 	return pl.EncodeTagWithAttributes(builder, IFrameStreamInfTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
@@ -210,7 +207,6 @@ func (e SessionKeyEncoder) Encode(node *internal.Node, builder *strings.Builder)
 		"KEYFORMAT":         true,
 		"KEYFORMATVERSIONS": true,
 	}
-
 	return pl.EncodeTagWithAttributes(builder, SessionKeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
 
