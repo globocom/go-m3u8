@@ -612,6 +612,23 @@ func TestParseMediaPlaylist_WithCompleteAdBreak_BreakStartTimePrecision(t *testi
 	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], tags.BreakStatusComplete)
 }
 
+func TestParseMediaPlaylist_WithCompleteAdBreak_UsingHLSInterstitials(t *testing.T) {
+	file, _ := os.Open("mocks/media/scte35/withHLSInterstitials.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.NoError(t, err)
+	assert.Nil(t, p.CurrentSegment)
+	assert.Nil(t, p.CurrentStreamInf)
+	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
+	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
+
+	breaks := p.Breaks()
+	assert.Len(t, breaks, 1)
+	assert.Equal(t, breaks[0].HLSElement.Attrs["CLASS"], "com.apple.hls.interstitial")
+	assert.Equal(t, breaks[0].HLSElement.Attrs["X-ASSET-URI"], "https://dai.google.com/linear/pods/v1/hls/network/1234/custom_asset/abcd/ad_break_id/playlist.m3u8?stream_id={$stream_id}&pd=22000")
+	assert.Equal(t, p.VersionValue(), "11")
+}
+
 func TestParseMediaPlaylist_WithDiscontinuity(t *testing.T) {
 	file, _ := os.Open("mocks/media/withDiscontinuity.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
