@@ -24,6 +24,10 @@ func (f fakeSource) Close() error {
 	return nil
 }
 
+func setupPlaylist(input string) (*pl.Playlist, error) {
+	return m3u8.ParsePlaylist(io.NopCloser(strings.NewReader(input)))
+}
+
 func TestIdentifierParser(t *testing.T) {
 	playlist := "#EXTM3U"
 	p, err := setupPlaylist(playlist)
@@ -667,7 +671,7 @@ func TestParseMediaPlaylistWithEncryptionAndCompleteAdBreak(t *testing.T) {
 	assert.Len(t, dateRangeNodes, 1)
 }
 
-func TestParsePlaylist(t *testing.T) {
+func TestParsePlaylistMisc(t *testing.T) {
 	type testCaseParams struct {
 		name           string
 		kind           string
@@ -748,8 +752,4 @@ func TestParsePlaylist(t *testing.T) {
 			}
 		})
 	}
-}
-
-func setupPlaylist(input string) (*pl.Playlist, error) {
-	return m3u8.ParsePlaylist(io.NopCloser(strings.NewReader(input)))
 }
