@@ -24,6 +24,7 @@ const (
 	DiscontinuityName   = "Discontinuity"
 	ProgramDateTimeName = "ProgramDateTime"
 	ExtKeyName          = "ExtKey"
+	ExtMapName          = "ExtMap"
 )
 
 var (
@@ -31,8 +32,8 @@ var (
 	DiscontinuityTag   = "#EXT-X-DISCONTINUITY"
 	ProgramDateTimeTag = "#EXT-X-PROGRAM-DATE-TIME"
 	KeyTag             = "#EXT-X-KEY"
+	MapTag             = "#EXT-X-MAP"
 	ByteRangeTag       = "#EXT-X-BYTERANGE" // todo: has attributes
-	MapTag             = "#EXT-X-MAP"       // todo: has attributes
 	GapTag             = "#EXT-X-GAP"       // todo
 	PartTag            = "#EXT-X-PART"      // todo: has attributes
 )
@@ -42,6 +43,7 @@ type (
 	DiscontinuityParser   struct{}
 	ProgramDateTimeParser struct{}
 	ExtKeyParser          struct{}
+	ExtMapParser          struct{}
 )
 
 type (
@@ -49,6 +51,7 @@ type (
 	DiscontinuityEncoder   struct{}
 	ProgramDateTimeEncoder struct{}
 	ExtKeyEncoder          struct{}
+	ExtMapEncoder          struct{}
 )
 
 func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -144,6 +147,27 @@ func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
+func (p ExtMapParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid ext map tag: %s", tag)
+	}
+
+	// URI attribute is REQUIRED by RFC
+	if params["URI"] == "" {
+		return fmt.Errorf("URI attribute is required: %s", tag)
+	}
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  ExtMapName,
+			Attrs: params,
+		},
+	})
+
+	return nil
+}
+
 func (e ExtInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	duration := node.HLSElement.Attrs["Duration"]
 	title := node.HLSElement.Attrs["Title"]
@@ -178,4 +202,14 @@ func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) err
 		"KEYFORMATVERSIONS": true,
 	}
 	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+}
+
+func (e ExtMapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	orderAttr := []string{"URI", "BYTERANGE"}
+	shouldQuoteAttr := map[string]bool{
+		"URI":       true,
+		"BYTERANGE": true,
+	}
+
+	return pl.EncodeTagWithAttributes(builder, MapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }
