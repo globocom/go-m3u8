@@ -585,7 +585,7 @@ func TestParseMediaPlaylist_WithCompleteAdBreak_BreakStartTimePrecision(t *testi
 	assert.Equal(t, allBreaks[0].HLSElement.Details["Status"], tags.BreakStatusComplete)
 }
 
-func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
+func TestParseMediaPlaylist_WithDiscontinuity(t *testing.T) {
 	file, _ := os.Open("mocks/media/withDiscontinuity.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
@@ -607,7 +607,7 @@ func TestParseMediaPlaylistWithDiscontinuity(t *testing.T) {
 	assert.Equal(t, "", nodes[0].HLSElement.Attrs["#EXT-X-DISCONTINUITY"])
 }
 
-func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
+func TestParseMediaPlaylist_WithEncryption_AES128(t *testing.T) {
 	file, _ := os.Open("mocks/media/encryption/withAES128.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
@@ -625,7 +625,7 @@ func TestParseMediaPlaylistWithEncryption_AES128(t *testing.T) {
 	assert.Equal(t, "0x0123456789abcdef0123456789abcdef", node.HLSElement.Attrs["IV"])
 }
 
-func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
+func TestParseMediaPlaylist_WithEncryption_SampleAES(t *testing.T) {
 	file, _ := os.Open("mocks/media/encryption/withSampleAES.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
@@ -644,7 +644,7 @@ func TestParseMediaPlaylistWithEncryption_SampleAES(t *testing.T) {
 	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
 }
 
-func TestParseMediaPlaylistWithEncryptionAndCompleteAdBreak(t *testing.T) {
+func TestParseMediaPlaylist_WithEncryptionAndCompleteAdBreak(t *testing.T) {
 	file, _ := os.Open("mocks/media/withEncryptionAndSCTE35.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 
