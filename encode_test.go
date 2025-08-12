@@ -350,7 +350,7 @@ func TestVariableDefineEncoder(t *testing.T) {
 func TestExtKeyEncoder(t *testing.T) {
 	node := &internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name: "ExtKey",
+			Name: "Key",
 			Attrs: map[string]string{
 				"METHOD":            "SAMPLE-AES",
 				"URI":               "sample-aes-uri",

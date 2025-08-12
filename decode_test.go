@@ -141,12 +141,13 @@ func TestExtKeyParser(t *testing.T) {
 	p, err := setupPlaylist(playlist)
 	assert.NoError(t, err)
 
-	node, found := p.Find("ExtKey")
-	assert.True(t, found)
-	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
-	assert.Equal(t, "drm-uri", node.HLSElement.Attrs["URI"])
-	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
-	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+	keys := p.EncryptionTags()
+
+	assert.Len(t, keys, 1)
+	assert.Equal(t, "SAMPLE-AES", keys[0].HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "drm-uri", keys[0].HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", keys[0].HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", keys[0].HLSElement.Attrs["KEYFORMATVERSIONS"])
 
 	// test invalid ext key without METHOD
 	playlist = "#EXT-X-KEY:KEYFORMAT=\"com.apple.streamingkeydelivery\",KEYFORMATVERSIONS=\"1\""
@@ -617,12 +618,12 @@ func TestParseMediaPlaylist_WithEncryption_AES128(t *testing.T) {
 	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 
-	node, found := p.Find("ExtKey")
+	keys := p.EncryptionTags()
 
-	assert.True(t, found)
-	assert.Equal(t, "AES-128", node.HLSElement.Attrs["METHOD"])
-	assert.Equal(t, "https://example.com/keys/key1.bin", node.HLSElement.Attrs["URI"])
-	assert.Equal(t, "0x0123456789abcdef0123456789abcdef", node.HLSElement.Attrs["IV"])
+	assert.Len(t, keys, 1)
+	assert.Equal(t, "AES-128", keys[0].HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "https://example.com/keys/key1.bin", keys[0].HLSElement.Attrs["URI"])
+	assert.Equal(t, "0x0123456789abcdef0123456789abcdef", keys[0].HLSElement.Attrs["IV"])
 }
 
 func TestParseMediaPlaylist_WithEncryption_SampleAES(t *testing.T) {
@@ -635,13 +636,13 @@ func TestParseMediaPlaylist_WithEncryption_SampleAES(t *testing.T) {
 	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 
-	node, found := p.Find("ExtKey")
+	keys := p.EncryptionTags()
 
-	assert.True(t, found)
-	assert.Equal(t, "SAMPLE-AES", node.HLSElement.Attrs["METHOD"])
-	assert.Equal(t, "sample-aes-uri", node.HLSElement.Attrs["URI"])
-	assert.Equal(t, "com.apple.streamingkeydelivery", node.HLSElement.Attrs["KEYFORMAT"])
-	assert.Equal(t, "1", node.HLSElement.Attrs["KEYFORMATVERSIONS"])
+	assert.Len(t, keys, 1)
+	assert.Equal(t, "SAMPLE-AES", keys[0].HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "sample-aes-uri", keys[0].HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", keys[0].HLSElement.Attrs["KEYFORMAT"])
+	assert.Equal(t, "1", keys[0].HLSElement.Attrs["KEYFORMATVERSIONS"])
 }
 
 func TestParseMediaPlaylist_WithEncryptionAndCompleteAdBreak(t *testing.T) {
@@ -654,7 +655,7 @@ func TestParseMediaPlaylist_WithEncryptionAndCompleteAdBreak(t *testing.T) {
 	assert.Equal(t, p.Head.HLSElement.Name, "M3u8Identifier")
 	assert.Equal(t, p.Tail.HLSElement.Name, "ExtInf")
 
-	extKeyNodes := p.FindAll("ExtKey")
+	extKeyNodes := p.EncryptionTags()
 	assert.Len(t, extKeyNodes, 3)
 
 	_, found1 := p.FindNodeInsideAdBreak(extKeyNodes[0])

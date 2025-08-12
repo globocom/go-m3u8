@@ -110,9 +110,9 @@ func (p *Playlist) Segments() []*internal.Node {
 	return p.FindAll("ExtInf")
 }
 
-// Returns all ExtKey nodes in the playlist
+// Returns all Key nodes in the playlist
 func (p *Playlist) EncryptionTags() []*internal.Node {
-	return p.FindAll("ExtKey")
+	return p.FindAll("Key")
 }
 
 // Returns all CueOut nodes in the playlist
