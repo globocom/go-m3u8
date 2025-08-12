@@ -157,7 +157,7 @@ func TestUSPComment(t *testing.T) {
 }
 
 func TestXDefineNode(t *testing.T) {
-	file, _ := os.Open("./../mocks/multivariant/withSGAI.m3u8")
+	file, _ := os.Open("./../mocks/multivariant/withQueryParam.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
