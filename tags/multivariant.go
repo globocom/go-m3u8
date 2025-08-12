@@ -155,7 +155,7 @@ func (p SessionKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE", "VIDEO-RANGE", "AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
+	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE", "HDCP-LEVEL", "VIDEO-RANGE", "AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
 	shouldQuoteAttr := e.shouldQuoteStreamInf(node)
 
 	if err := pl.EncodeTagWithAttributes(builder, StreamInfTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr); err != nil {
@@ -221,6 +221,7 @@ func (e StreamInfEncoder) shouldQuoteStreamInf(node *internal.Node) map[string]b
 		"CODECS":            true,
 		"RESOLUTION":        false,
 		"FRAME-RATE":        false,
+		"HDCP-LEVEL":        false,
 		"VIDEO-RANGE":       false,
 		"AUDIO":             true,
 		"VIDEO":             true,
