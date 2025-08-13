@@ -274,7 +274,7 @@ func TestStreamInfParser(t *testing.T) {
 }
 
 func TestMediaParser(t *testing.T) {
-	playlist := "#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120\""
+	playlist := "#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"channel-video_1=96000.m3u8?dvr_window_length=120\""
 	p, err := setupPlaylist(playlist)
 	assert.NoError(t, err)
 
@@ -286,16 +286,16 @@ func TestMediaParser(t *testing.T) {
 	assert.Equal(t, "YES", node.HLSElement.Attrs["DEFAULT"])
 	assert.Equal(t, "YES", node.HLSElement.Attrs["AUTOSELECT"])
 	assert.Equal(t, "2", node.HLSElement.Attrs["CHANNELS"])
-	assert.Equal(t, "mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "channel-video_1=96000.m3u8?dvr_window_length=120", node.HLSElement.Attrs["URI"])
 	assert.Equal(t, "AUDIO", node.HLSElement.Attrs["TYPE"])
 
 	// test invalid media tag without TYPE
-	playlist = "#EXT-X-MEDIA:GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120\""
+	playlist = "#EXT-X-MEDIA:GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"channel-video_1=96000.m3u8?dvr_window_length=120\""
 	_, err = setupPlaylist(playlist)
 	assert.Error(t, err)
 
 	// test invalid media tag with invalid TYPE
-	playlist = "#EXT-X-MEDIA:TYPE=INVALID,GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"mosaicoaudios-video_1=96000.m3u8?dvr_window_length=120\""
+	playlist = "#EXT-X-MEDIA:TYPE=INVALID,GROUP-ID=\"audio-aacl-96\",LANGUAGE=\"qaa\",NAME=\"Reserved for local use\",DEFAULT=YES,AUTOSELECT=YES,CHANNELS=\"2\",URI=\"channel-video_1=96000.m3u8?dvr_window_length=120\""
 	_, err = setupPlaylist(playlist)
 	assert.Error(t, err)
 
@@ -306,7 +306,7 @@ func TestMediaParser(t *testing.T) {
 }
 
 func TestIFrameStreamInfParser(t *testing.T) {
-	playlist := "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,CODECS=\"avc1.64001F\",RESOLUTION=640x360,URI=\"keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120\""
+	playlist := "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,CODECS=\"avc1.64001F\",RESOLUTION=640x360,URI=\"keyframes/channel-video=558976.m3u8?dvr_window_length=120\""
 	p, err := setupPlaylist(playlist)
 	assert.NoError(t, err)
 
@@ -315,7 +315,7 @@ func TestIFrameStreamInfParser(t *testing.T) {
 	assert.Equal(t, "82000", node.HLSElement.Attrs["BANDWIDTH"])
 	assert.Equal(t, "avc1.64001F", node.HLSElement.Attrs["CODECS"])
 	assert.Equal(t, "640x360", node.HLSElement.Attrs["RESOLUTION"])
-	assert.Equal(t, "keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120", node.HLSElement.Attrs["URI"])
+	assert.Equal(t, "keyframes/channel-video=558976.m3u8?dvr_window_length=120", node.HLSElement.Attrs["URI"])
 
 	// test invalid IFrameStreamInf tag without URI
 	playlist = "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,CODECS=\"avc1.64001F\",RESOLUTION=640x360"
@@ -323,12 +323,12 @@ func TestIFrameStreamInfParser(t *testing.T) {
 	assert.Error(t, err)
 
 	// test invalid IFrameStreamInf tag with missing BANDWIDTH
-	playlist = "#EXT-X-I-FRAME-STREAM-INF:CODECS=\"avc1.64001F\",RESOLUTION=640x360,URI=\"keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120\""
+	playlist = "#EXT-X-I-FRAME-STREAM-INF:CODECS=\"avc1.64001F\",RESOLUTION=640x360,URI=\"keyframes/channel-video=558976.m3u8?dvr_window_length=120\""
 	_, err = setupPlaylist(playlist)
 	assert.Error(t, err)
 
 	// test invalid IFrameStreamInf tag with missing CODECS
-	playlist = "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,RESOLUTION=640x360,URI=\"keyframes/mosaicoaudios-video=558976.m3u8?dvr_window_length=120\""
+	playlist = "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,RESOLUTION=640x360,URI=\"keyframes/channel-video=558976.m3u8?dvr_window_length=120\""
 	_, err = setupPlaylist(playlist)
 	assert.Error(t, err)
 }
