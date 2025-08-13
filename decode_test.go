@@ -11,6 +11,7 @@ import (
 	m3u8 "github.com/globocom/go-m3u8"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -451,6 +452,112 @@ func TestParseMultivariantPlaylist(t *testing.T) {
 	assert.Equal(t, "mp4a.40.2,avc1.64001F", variants[0].HLSElement.Attrs["CODECS"])
 	assert.Equal(t, "256x144", variants[0].HLSElement.Attrs["RESOLUTION"])
 	assert.Equal(t, "30", variants[0].HLSElement.Attrs["FRAME-RATE"])
+}
+
+func TestParseMultivariantPlaylist_WithMediaGroups_ValidMedia(t *testing.T) {
+	// manifest with AUDIO groups and CLOSED-CAPTIONS groups
+	file, _ := os.Open("mocks/multivariant/withClosedCaptionGroups.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	mediaGroups := p.MediaGroups()
+	variants := p.Variants()
+	closedCaptionsNodeURI := mediaGroups[3].HLSElement.Attrs["URI"]
+
+	assert.Len(t, mediaGroups, 4)
+	assert.Len(t, variants, 1)
+	assert.Empty(t, closedCaptionsNodeURI)
+	assert.Equal(t, "AUDIO", mediaGroups[1].HLSElement.Attrs["TYPE"])
+	assert.Equal(t, "channel-audio_2=96000.m3u8", mediaGroups[1].HLSElement.Attrs["URI"])
+
+	// mandatory attributes for media groups
+	for _, media := range mediaGroups {
+		assert.NotEmpty(t, media.HLSElement.Attrs["TYPE"])
+		assert.NotEmpty(t, media.HLSElement.Attrs["GROUP-ID"])
+		assert.Condition(t, func() bool {
+			acceptableTypes := []string{"AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
+			return lo.Contains(acceptableTypes, media.HLSElement.Attrs["TYPE"])
+		})
+	}
+
+	// if a EXT-X-STREAM-INF tag has media attributes (e.g. AUDIO, VIDEO, etc)
+	// they MUST match the GROUP-ID of an existing EXT-X-MEDIA tag
+	variantAudio := variants[0].HLSElement.Attrs["AUDIO"]
+	variantClosedCaption := variants[0].HLSElement.Attrs["CLOSED-CAPTIONS"]
+	audioGroupID := mediaGroups[0].HLSElement.Attrs["GROUP-ID"]
+	closedCaptionsGroupID := mediaGroups[3].HLSElement.Attrs["GROUP-ID"]
+
+	assert.Equal(t, variantAudio, audioGroupID)
+	assert.Equal(t, variantClosedCaption, closedCaptionsGroupID)
+}
+
+func TestParseMultivariantPlaylist_WithMediaGroups_ValidKeyframes(t *testing.T) {
+	// manifest with AUDIO groups
+	file, _ := os.Open("mocks/multivariant/withAudioGroups.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	mediaGroups := p.MediaGroups()
+	variants := p.Variants()
+	keyframes := p.Keyframes()
+
+	assert.Len(t, mediaGroups, 3)
+	assert.Len(t, variants, 4)
+	assert.Len(t, keyframes, 4)
+
+	// mandatory attributes for keyframes
+	for _, media := range keyframes {
+		assert.NotEmpty(t, media.HLSElement.Attrs["BANDWIDTH"])
+		assert.NotEmpty(t, media.HLSElement.Attrs["CODECS"])
+		assert.NotEmpty(t, media.HLSElement.Attrs["URI"])
+	}
+}
+
+func TestParseMultivariantPlaylist_WithEncryption(t *testing.T) {
+	file, _ := os.Open("mocks/multivariant/withEncryption.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	sessionKeyNode, found := p.Find(tags.SessionKeyName)
+
+	assert.True(t, found)
+	assert.Equal(t, "SAMPLE-AES", sessionKeyNode.HLSElement.Attrs["METHOD"])
+	assert.Equal(t, "sample-aes-uri", sessionKeyNode.HLSElement.Attrs["URI"])
+	assert.Equal(t, "com.apple.streamingkeydelivery", sessionKeyNode.HLSElement.Attrs["KEYFORMAT"])
+}
+
+func TestParseMultivariantPlaylist_WithFragmentedMP4(t *testing.T) {
+	file, _ := os.Open("mocks/multivariant/withHEVCAndFMP4.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	// CMAF Segments can’t contain multiple media types
+	// EXT-X-MEDIA tags need to be used to associate audio and subtitle playlists with video
+	mediaGroups := p.MediaGroups()
+	variants := p.Variants()
+
+	assert.True(t, len(mediaGroups) > 0)
+
+	audioAACGroupID := mediaGroups[0].HLSElement.Attrs["GROUP-ID"]
+	audioEC3GroupID := mediaGroups[1].HLSElement.Attrs["GROUP-ID"]
+	variantWithAACAudio := variants[0].HLSElement.Attrs["AUDIO"]
+	variantWithEC3Audio := variants[8].HLSElement.Attrs["AUDIO"]
+
+	assert.Equal(t, variantWithAACAudio, audioAACGroupID)
+	assert.Equal(t, variantWithEC3Audio, audioEC3GroupID)
+}
+
+func TestParseMultivariantPlaylist_WithQueryParam(t *testing.T) {
+	file, _ := os.Open("mocks/multivariant/withQueryParam.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	variableDefineNode, found := p.VariableDefineTag()
+	variants := p.Variants()
+
+	assert.True(t, found)
+	assert.Equal(t, "stream_id", variableDefineNode.HLSElement.Attrs["QUERYPARAM"])
+	assert.Contains(t, variants[0].HLSElement.URI, fmt.Sprintf("{$%s}", variableDefineNode.HLSElement.Attrs["QUERYPARAM"]))
 }
 
 func TestParseMediaPlaylist(t *testing.T) {
