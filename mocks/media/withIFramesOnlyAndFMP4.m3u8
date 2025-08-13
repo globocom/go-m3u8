@@ -1,0 +1,19 @@
+#EXTM3U
+#EXT-X-VERSION:6
+## Created with Unified Streaming Platform  (version=1.14.4-30793)
+#EXT-X-MEDIA-SEQUENCE:548470842
+#EXT-X-I-FRAMES-ONLY
+#EXT-X-TARGETDURATION:3
+#USP-X-TIMESTAMP-MAP:MPEGTS=7885944303,LOCAL=2025-08-13T17:38:12.466600Z
+#EXT-X-MAP:URI="hls/channel-hevc-hdr-video=18000000.m4s"
+#EXT-X-PROGRAM-DATE-TIME:2025-08-13T17:38:12.466666Z
+#EXTINF:3.2, no desc
+hls/channel-hevc-hdr-video=18000000-548470842.m4s
+#EXTINF:3.2, no desc
+hls/channel-hevc-hdr-video=18000000-548470843.m4s
+#EXTINF:3.2, no desc
+hls/channel-hevc-hdr-video=18000000-548470844.m4s
+#EXTINF:3.2, no desc
+hls/channel-hevc-hdr-video=18000000-548470845.m4s
+#EXTINF:3.2, no desc
+hls/channel-hevc-hdr-video=18000000-548470846.m4s

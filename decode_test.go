@@ -823,3 +823,32 @@ func TestMediaPlaylist_WithMediaSegmentFormat_AudioAAC(t *testing.T) {
 
 	assert.Contains(t, segment.HLSElement.URI, ".aac")
 }
+
+func TestMediaPlaylist_WithIFramesOnly(t *testing.T) {
+	// test IFramesOnly with invalid HLS version (needs >= HLSv4)
+	file, _ := os.Open("mocks/media/withIFramesOnlyAndInvalidVersion.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+
+	assert.Error(t, err)
+
+	// test IFramesOnly with valid HLS version
+	file, _ = os.Open("mocks/media/withIFramesOnly.m3u8")
+	p, err = m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	_, found := p.Find(tags.IFramesOnlyName)
+	assert.True(t, found)
+
+	// test IFramesOnly with FMP4 segments
+	file, _ = os.Open("mocks/media/withIFramesOnlyAndFMP4.m3u8")
+	p, err = m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	framesOnlyTag, _ := p.Find(tags.IFramesOnlyName)
+	mapTag, _ := p.Find(tags.MapName)
+	segment := p.Segments()[0]
+
+	assert.NotNil(t, framesOnlyTag)
+	assert.Equal(t, "hls/channel-hevc-hdr-video=18000000.m4s", mapTag.HLSElement.Attrs["URI"])
+	assert.Contains(t, segment.HLSElement.URI, ".m4s")
+}
