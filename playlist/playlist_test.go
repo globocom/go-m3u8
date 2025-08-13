@@ -90,6 +90,28 @@ func TestVariants(t *testing.T) {
 	assert.Len(t, nodes, 8)
 }
 
+func TestMediaGroups(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withClosedCaptionGroups.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	mediaGroups := playlist.MediaGroups()
+	assert.Len(t, mediaGroups, 4)
+	assert.Equal(t, mediaGroups[0].HLSElement.Attrs["TYPE"], "AUDIO")
+	assert.Equal(t, mediaGroups[3].HLSElement.Attrs["TYPE"], "CLOSED-CAPTIONS")
+}
+
+func TestKeyframes(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withAudioGroups.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	keyframes := playlist.Keyframes()
+	assert.Len(t, keyframes, 4)
+	assert.Equal(t, keyframes[0].HLSElement.Attrs["URI"], "keyframes/channel-video=558976.m3u8?dvr_window_length=120")
+	assert.Equal(t, keyframes[3].HLSElement.Attrs["URI"], "keyframes/channel-video=3442944.m3u8?dvr_window_length=120")
+}
+
 func TestSegments(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)

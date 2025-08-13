@@ -110,6 +110,16 @@ func (p *Playlist) Variants() []*internal.Node {
 	return p.FindAll("StreamInf")
 }
 
+// Returns all Media nodes in the playlist (i.e. AUDIO groups, CLOSED-CAPTIONS groups, etc.)
+func (p *Playlist) MediaGroups() []*internal.Node {
+	return p.FindAll("Media")
+}
+
+// Returns all IFrameStreamInf nodes in the playlist (i.e. keyframes)
+func (p *Playlist) Keyframes() []*internal.Node {
+	return p.FindAll("IFrameStreamInf")
+}
+
 // Returns all ExtInf nodes in the playlist
 func (p *Playlist) Segments() []*internal.Node {
 	return p.FindAll("ExtInf")
