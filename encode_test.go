@@ -401,6 +401,194 @@ func TestMapEncoder(t *testing.T) {
 	assert.Equal(t, expectedPlaylist, p)
 }
 
+func TestTargetDurationEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "TargetDuration",
+			Attrs: map[string]string{
+				"#EXT-X-TARGETDURATION": "7",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-TARGETDURATION:7` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestMediaSequenceEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "MediaSequence",
+			Attrs: map[string]string{
+				"#EXT-X-MEDIA-SEQUENCE": "360948012",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-MEDIA-SEQUENCE:360948012` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestIFramesOnlyEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "IFramesOnly",
+			Attrs: map[string]string{
+				"#EXT-X-I-FRAMES-ONLY": "",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-I-FRAMES-ONLY` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestProgramDateTimeEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "ProgramDateTime",
+			Attrs: map[string]string{
+				"#EXT-X-PROGRAM-DATE-TIME": "2024-11-25T16:00:53.200000Z",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-PROGRAM-DATE-TIME:2024-11-25T16:00:53.200000Z` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestMediaEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Media",
+			Attrs: map[string]string{
+				"TYPE":       "AUDIO",
+				"GROUP-ID":   "audio-aacl-96",
+				"LANGUAGE":   "qaa",
+				"NAME":       "Reserved for local use",
+				"DEFAULT":    "YES",
+				"AUTOSELECT": "YES",
+				"CHANNELS":   "2",
+				"URI":        "channel-video_1=96000.m3u8?dvr_window_length=120",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-aacl-96",LANGUAGE="qaa",NAME="Reserved for local use",DEFAULT=YES,AUTOSELECT=YES,CHANNELS="2",URI="channel-video_1=96000.m3u8?dvr_window_length=120"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestIFrameStreamInfEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "IFrameStreamInf",
+			Attrs: map[string]string{
+				"BANDWIDTH":  "82000",
+				"CODECS":     "avc1.64001F",
+				"RESOLUTION": "640x360",
+				"URI":        "keyframes/channel-video=558976.m3u8?dvr_window_length=120",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=82000,CODECS="avc1.64001F",RESOLUTION=640x360,URI="keyframes/channel-video=558976.m3u8?dvr_window_length=120"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
+func TestSessionKeyEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "SessionKey",
+			Attrs: map[string]string{
+				"METHOD":            "SAMPLE-AES",
+				"URI":               "sample-aes-uri",
+				"KEYFORMAT":         "com.apple.streamingkeydelivery",
+				"KEYFORMATVERSIONS": "1",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	expectedPlaylist := `#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES,URI="sample-aes-uri",KEYFORMAT="com.apple.streamingkeydelivery",KEYFORMATVERSIONS="1"` + "\n"
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, expectedPlaylist, p)
+}
+
 func TestEncodeMasterPlaylist(t *testing.T) {
 	node1 := &internal.Node{
 		HLSElement: &internal.HLSElement{
