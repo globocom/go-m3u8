@@ -69,6 +69,17 @@ func TestDiscontinuitySequenceTag(t *testing.T) {
 	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"], "87498")
 }
 
+func TestVariableDefineTag(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withQueryParam.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node, found := playlist.VariableDefineTag()
+	assert.True(t, found)
+	assert.NotNil(t, node)
+	assert.Equal(t, node.HLSElement.Attrs["QUERYPARAM"], "stream_id")
+}
+
 func TestVariants(t *testing.T) {
 	file, _ := os.Open("./../mocks/multivariant/multivariant.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -151,19 +162,9 @@ func TestUSPComment(t *testing.T) {
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	node := playlist.USPCommentNode()
+	node := playlist.USPComment()
 	assert.NotNil(t, node)
 	assert.Equal(t, node.HLSElement.Attrs["Comment"], "## Created with Unified Streaming Platform  (version=1.14.4-30793)")
-}
-
-func TestXDefineNode(t *testing.T) {
-	file, _ := os.Open("./../mocks/multivariant/withQueryParam.m3u8")
-	playlist, err := m3u8.ParsePlaylist(file)
-	assert.NoError(t, err)
-
-	node := playlist.VariableDefineNode()
-	assert.NotNil(t, node)
-	assert.Equal(t, node.HLSElement.Attrs["QUERYPARAM"], "stream_id")
 }
 
 func TestFindSegmentInsideAdBreak(t *testing.T) {

@@ -100,6 +100,11 @@ func (p *Playlist) DiscontinuitySequenceTag() (*internal.Node, bool) {
 	return p.Find("DiscontinuitySequence")
 }
 
+// Returns the Variable Define tag as a Node if it exists, otherwise returns nil and false
+func (p *Playlist) VariableDefineTag() (*internal.Node, bool) {
+	return p.Find("VariableDefine")
+}
+
 // Returns all StreamInf nodes in the playlist
 func (p *Playlist) Variants() []*internal.Node {
 	return p.FindAll("StreamInf")
@@ -151,7 +156,7 @@ func (p *Playlist) SCTE35InTags() []*internal.Node {
 
 // Returns USP comment node in the playlist
 // Example: `## Created with Unified Streaming Platform  (version=1.14.4-30793)`
-func (p *Playlist) USPCommentNode() *internal.Node {
+func (p *Playlist) USPComment() *internal.Node {
 	nodes := p.FindAll("Comment")
 	for _, node := range nodes {
 		if strings.Contains(node.HLSElement.Attrs["Comment"], "## Created with Unified Streaming Platform") {
@@ -159,15 +164,6 @@ func (p *Playlist) USPCommentNode() *internal.Node {
 		}
 	}
 	return nil
-}
-
-// Returns the Variable Define tag as a Node if it exists, otherwise returns nil
-func (p *Playlist) VariableDefineNode() *internal.Node {
-	node, found := p.Find("VariableDefine")
-	if !found {
-		return nil
-	}
-	return node
 }
 
 // Returns true if node is inside ad break and false otherwise.
