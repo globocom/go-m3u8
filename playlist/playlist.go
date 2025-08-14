@@ -164,12 +164,12 @@ func (p *Playlist) SCTE35InTags() []*internal.Node {
 	return result
 }
 
-// Returns USP comment node in the playlist
+// Returns specific Comment node in the playlist
 // Example: `## Created with Unified Streaming Platform  (version=1.14.4-30793)`
-func (p *Playlist) USPComment() *internal.Node {
+func (p *Playlist) Comment(matchString string) *internal.Node {
 	nodes := p.FindAll("Comment")
 	for _, node := range nodes {
-		if strings.Contains(node.HLSElement.Attrs["Comment"], "## Created with Unified Streaming Platform") {
+		if strings.Contains(node.HLSElement.Attrs["Comment"], matchString) {
 			return node
 		}
 	}
