@@ -164,8 +164,9 @@ func (p *Playlist) SCTE35InTags() []*internal.Node {
 	return result
 }
 
-// Returns specific Comment node in the playlist
-// Example: `## Created with Unified Streaming Platform  (version=1.14.4-30793)`
+// Returns the first Comment node in the playlist whose value contains the given matchString.
+//
+//	Example: "# variants", "# AUDIO groups", etc
 func (p *Playlist) Comment(matchString string) *internal.Node {
 	nodes := p.FindAll("Comment")
 	for _, node := range nodes {
