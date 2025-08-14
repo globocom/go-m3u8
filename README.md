@@ -56,13 +56,18 @@ The [**tags**](/tags) package implements the currently supported [Playlist Tags]
 - `#EXT-X-TARGETDURATION`
 - `#EXT-X-MEDIA-SEQUENCE`
 - `#EXT-X-DISCONTINUITY-SEQUENCE`
+- `#EXT-X-I-FRAMES-ONLY`
 - `#EXTINF`
 - `#EXT-X-DISCONTINUITY`
 - `#EXT-X-PROGRAM-DATE-TIME`
 - `#EXT-X-KEY`
+- `#EXT-X-MAP`
 
 4. **multivariant -** Multivariant Playlist Tags (Section 4.4.6).
 - `#EXT-X-STREAM-INF`
+- `#EXT-X-MEDIA`
+- `#EXT-X-I-FRAME-STREAM-INF`
+- `#EXT-X-SESSION-KEY`
 
 5. **others -** The tags in this section are "non-official" and are not listed in the RFC, e.g. tags added to the manifest by the live stream packaging service.
 - `#EXT-X-CUE-OUT`

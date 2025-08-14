@@ -69,6 +69,17 @@ func TestDiscontinuitySequenceTag(t *testing.T) {
 	assert.Equal(t, node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"], "87498")
 }
 
+func TestVariableDefineTag(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withQueryParam.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node, found := playlist.VariableDefineTag()
+	assert.True(t, found)
+	assert.NotNil(t, node)
+	assert.Equal(t, node.HLSElement.Attrs["QUERYPARAM"], "stream_id")
+}
+
 func TestVariants(t *testing.T) {
 	file, _ := os.Open("./../mocks/multivariant/multivariant.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -77,6 +88,28 @@ func TestVariants(t *testing.T) {
 	nodes := playlist.Variants()
 	assert.NotNil(t, nodes)
 	assert.Len(t, nodes, 8)
+}
+
+func TestMediaGroups(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withClosedCaptionGroups.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	mediaGroups := playlist.MediaGroups()
+	assert.Len(t, mediaGroups, 4)
+	assert.Equal(t, mediaGroups[0].HLSElement.Attrs["TYPE"], "AUDIO")
+	assert.Equal(t, mediaGroups[3].HLSElement.Attrs["TYPE"], "CLOSED-CAPTIONS")
+}
+
+func TestKeyframes(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/withAudioGroups.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	keyframes := playlist.Keyframes()
+	assert.Len(t, keyframes, 4)
+	assert.Equal(t, keyframes[0].HLSElement.Attrs["URI"], "keyframes/channel-video=558976.m3u8?dvr_window_length=120")
+	assert.Equal(t, keyframes[3].HLSElement.Attrs["URI"], "keyframes/channel-video=3442944.m3u8?dvr_window_length=120")
 }
 
 func TestSegments(t *testing.T) {
@@ -144,6 +177,16 @@ func TestSCTE35InTags(t *testing.T) {
 	assert.NotNil(t, nodes)
 	assert.Len(t, nodes, 1)
 	assert.Equal(t, nodes[0].HLSElement.Attrs["SCTE35-IN"], "0xFC3025000000000BB802FFF01405000000017F6FFFE8BF5AB07E00000000000100000000E7CF6C5A")
+}
+
+func TestComment(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node := playlist.Comment("## Created with Unified Streaming Platform")
+	assert.NotNil(t, node)
+	assert.Equal(t, node.HLSElement.Attrs["Comment"], "## Created with Unified Streaming Platform  (version=1.14.4-30793)")
 }
 
 func TestFindSegmentInsideAdBreak(t *testing.T) {

@@ -1,0 +1,21 @@
+#EXTM3U
+#EXT-X-DEFINE:QUERYPARAM="stream_id"
+#EXT-X-VERSION:11
+## Created with Unified Streaming Platform (version=1.11.23-28141)
+# variants
+#EXT-X-STREAM-INF:BANDWIDTH=206000,AVERAGE-BANDWIDTH=187000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=256x144,FRAME-RATE=30
+channel-audio_1=96000-video=80000.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=299000,AVERAGE-BANDWIDTH=272000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=384x216,FRAME-RATE=30
+channel-audio_1=96000-video=160000.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=479000,AVERAGE-BANDWIDTH=435000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=512x288,FRAME-RATE=30
+channel-audio_1=96000-video=313984.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=764000,AVERAGE-BANDWIDTH=695000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=640x360,FRAME-RATE=30
+channel-audio_1=96000-video=558976.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=1224000,AVERAGE-BANDWIDTH=1112000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=768x432,FRAME-RATE=30
+channel-audio_1=96000-video=952960.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=1835000,AVERAGE-BANDWIDTH=1668000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=1280x720,FRAME-RATE=30
+channel-audio_1=96000-video=1476992.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=2751000,AVERAGE-BANDWIDTH=2501000,CODECS="mp4a.40.2,avc1.64001F",RESOLUTION=1280x720,FRAME-RATE=30
+channel-audio_1=96000-video=2262976.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}
+#EXT-X-STREAM-INF:BANDWIDTH=4127000,AVERAGE-BANDWIDTH=3752000,CODECS="mp4a.40.2,avc1.640029",RESOLUTION=1920x1080,FRAME-RATE=30
+channel-audio_1=96000-video=3442944.m3u8?custom_asset_key=abcd&network_code=1234&stream_id={$stream_id}

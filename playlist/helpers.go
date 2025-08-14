@@ -24,6 +24,7 @@ type StreamInfData struct {
 	AverageBandwidth string
 	Resolution       string
 	FrameRate        string
+	HDCPLevel        string
 	VideoRange       string
 	Audio            string
 	Video            string
@@ -51,6 +52,7 @@ func GetStreamInfData(mappedAttr map[string]string) *StreamInfData {
 		Codecs:           strings.Split(mappedAttr["CODECS"], ","),
 		Resolution:       mappedAttr["RESOLUTION"],
 		FrameRate:        mappedAttr["FRAME-RATE"],
+		HDCPLevel:        mappedAttr["HDCP-LEVEL"],
 		VideoRange:       mappedAttr["VIDEO-RANGE"],
 		Audio:            mappedAttr["AUDIO"],
 		Video:            mappedAttr["VIDEO"],
@@ -113,6 +115,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 					"CODECS":            strings.Join(p.CurrentStreamInf.Codecs, ","),
 					"RESOLUTION":        p.CurrentStreamInf.Resolution,
 					"FRAME-RATE":        p.CurrentStreamInf.FrameRate,
+					"HDCP-LEVEL":        p.CurrentStreamInf.HDCPLevel,
 					"VIDEO-RANGE":       p.CurrentStreamInf.VideoRange,
 					"AUDIO":             p.CurrentStreamInf.Audio,
 					"VIDEO":             p.CurrentStreamInf.Video,
@@ -161,7 +164,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	processed := make(map[string]bool)
 
 	for _, key := range order {
-		if value, exists := attrs[key]; exists {
+		if value, exists := attrs[key]; exists && value != "" {
 			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value, shouldQuote))
 			processed[key] = true
 		}
@@ -169,7 +172,7 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 
 	unorderedKeys := make([]string, 0, len(attrs))
 	for key := range attrs {
-		if !processed[key] {
+		if !processed[key] && attrs[key] != "" {
 			unorderedKeys = append(unorderedKeys, key)
 		}
 	}

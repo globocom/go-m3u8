@@ -26,9 +26,10 @@ const (
 )
 
 var (
-	DateRangeTag   = "#EXT-X-DATERANGE"
-	SkipTag        = "#EXT-X-SKIP"         //todo: has attributes
-	PreLoadHintTag = "#EXT-X-PRELOAD-HINT" //todo: has attributes
+	DateRangeTag       = "#EXT-X-DATERANGE"
+	SkipTag            = "#EXT-X-SKIP"             //todo: has attributes
+	PreLoadHintTag     = "#EXT-X-PRELOAD-HINT"     //todo: has attributes
+	RenditionReportTag = "#EXT-X-RENDITION-REPORT" //todo: has attributes
 )
 
 type DateRangeParser struct{}
@@ -62,7 +63,8 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"ID", "CLASS", "START-DATE", "END-DATE", "DURATION", "PLANNED-DURATION", "SCTE35-OUT", "SCTE35-IN"}
+	// Attribute X-<client-attribute> is a client-specific attribute and new ones must be added manually below (e.g., X-ASSET-URI)
+	orderAttr := []string{"ID", "CLASS", "START-DATE", "END-DATE", "DURATION", "PLANNED-DURATION", "X-ASSET-URI", "SCTE35-OUT", "SCTE35-IN"}
 	shouldQuoteAttr := map[string]bool{
 		"ID":               true,
 		"CLASS":            true,
@@ -70,6 +72,7 @@ func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 		"END-DATE":         true,
 		"DURATION":         false,
 		"PLANNED-DURATION": false,
+		"X-ASSET-URI":      true,
 		"SCTE35-OUT":       false,
 		"SCTE35-IN":        false,
 	}

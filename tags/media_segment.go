@@ -23,7 +23,8 @@ const (
 	ExtInfName          = "ExtInf"
 	DiscontinuityName   = "Discontinuity"
 	ProgramDateTimeName = "ProgramDateTime"
-	ExtKeyName          = "ExtKey"
+	KeyName             = "Key"
+	MapName             = "Map"
 )
 
 var (
@@ -31,8 +32,8 @@ var (
 	DiscontinuityTag   = "#EXT-X-DISCONTINUITY"
 	ProgramDateTimeTag = "#EXT-X-PROGRAM-DATE-TIME"
 	KeyTag             = "#EXT-X-KEY"
+	MapTag             = "#EXT-X-MAP"
 	ByteRangeTag       = "#EXT-X-BYTERANGE" // todo: has attributes
-	MapTag             = "#EXT-X-MAP"       // todo: has attributes
 	GapTag             = "#EXT-X-GAP"       // todo
 	PartTag            = "#EXT-X-PART"      // todo: has attributes
 )
@@ -41,14 +42,16 @@ type (
 	ExtInfParser          struct{}
 	DiscontinuityParser   struct{}
 	ProgramDateTimeParser struct{}
-	ExtKeyParser          struct{}
+	KeyParser             struct{}
+	MapParser             struct{}
 )
 
 type (
 	ExtInfEncoder          struct{}
 	DiscontinuityEncoder   struct{}
 	ProgramDateTimeEncoder struct{}
-	ExtKeyEncoder          struct{}
+	KeyEncoder             struct{}
+	MapEncoder             struct{}
 )
 
 func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -113,7 +116,7 @@ func (p ProgramDateTimeParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
-func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
+func (p KeyParser) Parse(tag string, playlist *pl.Playlist) error {
 	params := pl.TagsToMap(tag)
 	if len(params) < 1 {
 		return fmt.Errorf("invalid ext key tag: %s", tag)
@@ -136,7 +139,28 @@ func (p ExtKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
-			Name:  ExtKeyName,
+			Name:  KeyName,
+			Attrs: params,
+		},
+	})
+
+	return nil
+}
+
+func (p MapParser) Parse(tag string, playlist *pl.Playlist) error {
+	params := pl.TagsToMap(tag)
+	if len(params) < 1 {
+		return fmt.Errorf("invalid ext map tag: %s", tag)
+	}
+
+	// URI attribute is REQUIRED by RFC
+	if params["URI"] == "" {
+		return fmt.Errorf("URI attribute is required: %s", tag)
+	}
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  MapName,
 			Attrs: params,
 		},
 	})
@@ -168,7 +192,7 @@ func (e ProgramDateTimeEncoder) Encode(node *internal.Node, builder *strings.Bui
 	return pl.EncodeSimpleTag(node, builder, ProgramDateTimeTag, ProgramDateTimeTag)
 }
 
-func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+func (e KeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	orderAttr := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
 	shouldQuoteAttr := map[string]bool{
 		"METHOD":            false,
@@ -178,4 +202,13 @@ func (e ExtKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) err
 		"KEYFORMATVERSIONS": true,
 	}
 	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+}
+
+func (e MapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	orderAttr := []string{"URI", "BYTERANGE"}
+	shouldQuoteAttr := map[string]bool{
+		"URI":       true,
+		"BYTERANGE": true,
+	}
+	return pl.EncodeTagWithAttributes(builder, MapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
 }

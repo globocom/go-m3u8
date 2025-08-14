@@ -14,21 +14,23 @@ import (
 
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
+	"github.com/rs/zerolog/log"
 )
 
 const (
 	TargetDurationName        = "TargetDuration"
 	MediaSequenceName         = "MediaSequence"
 	DiscontinuitySequenceName = "DiscontinuitySequence"
+	IFramesOnlyName           = "IFramesOnly"
 )
 
 var (
 	TargetDurationTag        = "#EXT-X-TARGETDURATION"
 	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"
 	DiscontinuitySequenceTag = "#EXT-X-DISCONTINUITY-SEQUENCE"
+	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"
 	EndlistTag               = "#EXT-X-ENDLIST"        // todo
 	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  // todo: has one attribute
-	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"  // todo
 	PartInfTag               = "#EXT-X-PART-INF"       // todo: has attributes
 	ServerControlTag         = "#EXT-X-SERVER-CONTROL" // todo: has attributes
 )
@@ -37,12 +39,14 @@ type (
 	TargetDurationParser        struct{}
 	MediaSequenceParser         struct{}
 	DiscontinuitySequenceParser struct{}
+	IFramesOnlyParser           struct{}
 )
 
 type (
 	TargetDurationEncoder        struct{}
 	MediaSequenceEncoder         struct{}
 	DiscontinuitySequenceEncoder struct{}
+	IFramesOnlyEncoder           struct{}
 )
 
 func (p TargetDurationParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -104,6 +108,27 @@ func (p DiscontinuitySequenceParser) Parse(tag string, playlist *pl.Playlist) er
 	return fmt.Errorf("invalid discontinuity sequence tag: %s", tag)
 }
 
+func (p IFramesOnlyParser) Parse(tag string, playlist *pl.Playlist) error {
+	hlsVersion, err := strconv.Atoi(playlist.VersionValue())
+	if err != nil {
+		log.Warn().Str("service", "go-m3u8/tags/media_playlist.go").Msg("could not parse playlist version")
+	}
+
+	if hlsVersion < 4 {
+		return fmt.Errorf("use of %s REQUIRES a compatibility version number of 4 or greater, but playlist version is %d", tag, hlsVersion)
+	}
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: IFramesOnlyName,
+			Attrs: map[string]string{
+				IFramesOnlyTag: "",
+			},
+		},
+	})
+	return nil
+}
+
 func (e TargetDurationEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	return pl.EncodeSimpleTag(node, builder, TargetDurationTag, TargetDurationTag)
 }
@@ -114,4 +139,9 @@ func (e MediaSequenceEncoder) Encode(node *internal.Node, builder *strings.Build
 
 func (e DiscontinuitySequenceEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	return pl.EncodeSimpleTag(node, builder, DiscontinuitySequenceTag, DiscontinuitySequenceTag)
+}
+
+func (e IFramesOnlyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	_, err := builder.WriteString(IFramesOnlyTag + "\n")
+	return err
 }
