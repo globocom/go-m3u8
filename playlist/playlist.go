@@ -187,7 +187,7 @@ func (p *Playlist) Comment(matchString string) *internal.Node {
 //   - No DateRange SCTE-IN. Exit is ONLY marked by CueIn (#EXT-X-CUE-IN) tag instead.
 //   - SOMETIMES DateRange SCTE-IN is present, alongside the CueIn tag.
 func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, bool) {
-	current := node
+	current := node.Prev
 	for current != nil {
 		// node is inside Ad Break if it is preceded by a DateRange tag with attribute SCTE35-OUT
 		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
