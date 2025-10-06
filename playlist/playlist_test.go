@@ -243,3 +243,63 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 	assert.Nil(t, afterAdBreak)
 	assert.Nil(t, beforeAdBreak)
 }
+
+func TestFindBreakInsideAdBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withBreakInsideBreak.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// #EXT-X-DATERANGE:ID="3221225473-1759410641",START-DATE="2025-10-02T13:10:41.833333Z",PLANNED-DURATION=30.1,SCTE35-OUT=0xFC3025000000000BB800FFF01405C00000017FEFFE985E1280FE00295608C96700020000B3EA4CB2
+	adBreakNode := playlist.Breaks()[1]
+
+	// #EXT-X-DATERANGE:ID="3221225472-1759410611",START-DATE="2025-10-02T13:10:11.633333Z",PLANNED-DURATION=120.6,SCTE35-OUT=0xFC3025000000000BB800FFF01405C00000007FEFFE983499507E00A59E70C93D00020000DCB63D42
+	previousAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"ID":               "3221225472-1759410611",
+				"START-DATE":       "2025-10-02T13:10:11.633333Z",
+				"PLANNED-DURATION": "120.6",
+				"SCTE35-OUT":       "0xFC3025000000000BB800FFF01405C00000007FEFFE983499507E00A59E70C93D00020000DCB63D42",
+			},
+		},
+	}
+
+	// The AD Break returned must be the previous one, not the same as the provided node
+	adBreak, found := playlist.FindNodeInsideAdBreak(adBreakNode)
+
+	assert.True(t, found)
+	assert.NotNil(t, adBreak)
+	assert.Equal(t, adBreak.HLSElement.Name, previousAdBreak.HLSElement.Name)
+	assert.Equal(t, adBreak.HLSElement.Attrs["START-DATE"], previousAdBreak.HLSElement.Attrs["START-DATE"])
+}
+
+func TestFindPreviousSegment(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// #EXTINF:5.3, no desc
+	// channel-audio_1=96000-video=3442944-364042175.ts
+	segment := playlist.Segments()[6]
+	assert.Equal(t, segment.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042175.ts")
+
+	// previous segment
+	// #EXTINF:4.3, no desc
+	// channel-audio_1=96000-video=3442944-364042174.ts
+	expectedPreviousSegment := playlist.Segments()[5]
+	assert.Equal(t, expectedPreviousSegment.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042174.ts")
+
+	previousSegment := playlist.FindPreviousSegment(segment)
+	assert.NotNil(t, previousSegment)
+	assert.Equal(t, previousSegment.HLSElement.Name, expectedPreviousSegment.HLSElement.Name)
+	assert.Equal(t, previousSegment.HLSElement.URI, expectedPreviousSegment.HLSElement.URI)
+
+	// Test previous segment for a CueIn event
+	cueInNode := playlist.CueInEvents()[0]
+	previousSegmentToCueIn := playlist.FindPreviousSegment(cueInNode)
+	assert.NotNil(t, previousSegmentToCueIn)
+	assert.Equal(t, previousSegmentToCueIn.HLSElement.Name, "ExtInf")
+	assert.Equal(t, previousSegmentToCueIn.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042186.ts")
+	assert.Equal(t, previousSegmentToCueIn.HLSElement.Attrs["Duration"], "6.7333")
+}

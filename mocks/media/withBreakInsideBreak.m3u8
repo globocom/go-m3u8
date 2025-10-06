@@ -1,0 +1,69 @@
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543876.ts
+#EXTINF:5.5333, no desc
+coelhodai-audio_1=96000-video=558976-366543877.ts
+## splice_insert()
+#EXT-X-DATERANGE:ID="3221225472-1759410611",START-DATE="2025-10-02T13:10:11.633333Z",PLANNED-DURATION=120.6,SCTE35-OUT=0xFC3025000000000BB800FFF01405C00000007FEFFE983499507E00A59E70C93D00020000DCB63D42
+#EXT-X-CUE-OUT:120.6
+#EXT-X-PROGRAM-DATE-TIME:2025-10-02T13:10:11.633333Z
+#EXTINF:4.0666, no desc
+coelhodai-audio_1=96000-video=558976-366543878.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543879.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543880.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543881.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543882.ts
+#EXTINF:6.9333, no desc
+coelhodai-audio_1=96000-video=558976-366543883.ts
+## splice_insert(auto_return)
+#EXT-X-DATERANGE:ID="3221225473-1759410641",START-DATE="2025-10-02T13:10:41.833333Z",PLANNED-DURATION=30.1,SCTE35-OUT=0xFC3025000000000BB800FFF01405C00000017FEFFE985E1280FE00295608C96700020000B3EA4CB2
+#EXT-X-CUE-OUT:30.1
+#EXT-X-PROGRAM-DATE-TIME:2025-10-02T13:10:41.833333Z
+#EXTINF:2.6666, no desc
+coelhodai-audio_1=96000-video=558976-366543884.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543885.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543886.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543887.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543888.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543889.ts
+#EXTINF:3.4333, no desc
+coelhodai-audio_1=96000-video=558976-366543890.ts
+## Auto Return Mode
+#EXT-X-CUE-IN
+#EXT-X-PROGRAM-DATE-TIME:2025-10-02T13:11:11.933333Z
+#EXTINF:6.1666, no desc
+coelhodai-audio_1=96000-video=558976-366543891.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543892.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543893.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543894.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543895.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543896.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543897.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543898.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543899.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543900.ts
+#EXTINF:4.8, no desc
+coelhodai-audio_1=96000-video=558976-366543901.ts
+#EXTINF:6.1333, no desc
+coelhodai-audio_1=96000-video=558976-366543902.ts
+#EXT-X-CUE-IN
+#EXT-X-PROGRAM-DATE-TIME:2025-10-02T13:12:12.233333Z
+#EXTINF:3.4666, no desc
+coelhodai-audio_1=96000-video=558976-366543903.ts
