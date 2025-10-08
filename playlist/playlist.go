@@ -204,3 +204,25 @@ func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, b
 
 	return nil, false
 }
+
+// Returns the last DateRange (#EXT-X-DATERANGE) node with SCTE35-OUT marking (i.e. the last Ad Break) in the playlist
+func (p *Playlist) FindLastAdBreak() (*internal.Node, bool) {
+	adBreaks := p.Breaks()
+	if len(adBreaks) == 0 {
+		return nil, false
+	}
+	return adBreaks[len(adBreaks)-1], true
+}
+
+// IsDuplicateAdBreak checks if two ad breaks have the same START-DATE, indicating a duplicate.
+func (p *Playlist) IsDuplicateAdBreak() bool {
+	adBreaks := p.Breaks()
+	if len(adBreaks) < 2 {
+		return false
+	}
+
+	last := adBreaks[len(adBreaks)-1]
+	previous := adBreaks[len(adBreaks)-2]
+
+	return last.HLSElement.Attrs["START-DATE"] == previous.HLSElement.Attrs["START-DATE"]
+}

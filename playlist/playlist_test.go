@@ -243,3 +243,40 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 	assert.Nil(t, afterAdBreak)
 	assert.Nil(t, beforeAdBreak)
 }
+
+func TestFindLastAdBreak(t *testing.T) {
+	file, err := os.Open("./../mocks/media/media.m3u8")
+	assert.NoError(t, err)
+	defer file.Close()
+
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	lastAdBreak, found := playlist.FindLastAdBreak()
+	assert.True(t, found)
+	assert.NotNil(t, lastAdBreak)
+
+	assert.Equal(t, lastAdBreak.HLSElement.Name, "DateRange")
+	assert.NotEmpty(t, lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
+}
+func TestIsDuplicateAdBreak(t *testing.T) {
+	file, err := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
+	assert.NoError(t, err)
+	defer file.Close()
+
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// sanity check: precisamos de pelo menos dois ad breaks
+	adBreaks := playlist.Breaks()
+	assert.GreaterOrEqual(t, len(adBreaks), 2)
+
+	// verifique se são considerados duplicados
+	isDuplicate := playlist.IsDuplicateAdBreak()
+	assert.True(t, isDuplicate)
+
+	// e se os START-DATEs realmente são iguais
+	startDate1 := adBreaks[len(adBreaks)-1].HLSElement.Attrs["START-DATE"]
+	startDate2 := adBreaks[len(adBreaks)-2].HLSElement.Attrs["START-DATE"]
+	assert.Equal(t, startDate1, startDate2)
+}
