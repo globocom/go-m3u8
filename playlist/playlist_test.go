@@ -272,7 +272,7 @@ func TestIsDuplicateAdBreak(t *testing.T) {
 	assert.GreaterOrEqual(t, len(adBreaks), 2)
 
 	// verifique se são considerados duplicados
-	isDuplicate := playlist.IsDuplicateAdBreak()
+	isDuplicate := playlist.DuplicateAdBreak()
 	assert.True(t, isDuplicate)
 
 	// e se os START-DATEs realmente são iguais
