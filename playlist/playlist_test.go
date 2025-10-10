@@ -245,38 +245,57 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 }
 
 func TestFindLastAdBreak(t *testing.T) {
-	file, err := os.Open("./../mocks/media/media.m3u8")
-	assert.NoError(t, err)
-	defer file.Close()
-
+	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
+
+	// Expected: last Ad Break present in the manifest
+	expectedAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"START-DATE":       "2025-05-16T13:33:56.266666Z",
+				"PLANNED-DURATION": "60.033333",
+				"SCTE35-OUT":       "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5",
+			},
+		},
+	}
 
 	lastAdBreak, found := playlist.FindLastAdBreak()
+
 	assert.True(t, found)
 	assert.NotNil(t, lastAdBreak)
-
-	assert.Equal(t, lastAdBreak.HLSElement.Name, "DateRange")
-	assert.NotEmpty(t, lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Name, lastAdBreak.HLSElement.Name)
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], lastAdBreak.HLSElement.Attrs["START-DATE"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], lastAdBreak.HLSElement.Attrs["PLANNED-DURATION"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
 }
-func TestIsDuplicateAdBreak(t *testing.T) {
-	file, err := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
-	assert.NoError(t, err)
-	defer file.Close()
 
+func TestFindDuplicateAdBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	// sanity check: precisamos de pelo menos dois ad breaks
 	adBreaks := playlist.Breaks()
 	assert.GreaterOrEqual(t, len(adBreaks), 2)
 
-	// verifique se são considerados duplicados
-	isDuplicate := playlist.DuplicateAdBreak()
+	// Expected: Last two Ad Breaks are duplicated
+	last := adBreaks[len(adBreaks)-1]
+	previous := adBreaks[len(adBreaks)-2]
+
+	expectedAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"START-DATE":       last.HLSElement.Attrs["START-DATE"],
+				"PLANNED-DURATION": last.HLSElement.Attrs["PLANNED-DURATION"],
+			},
+		},
+	}
+
+	isDuplicate := playlist.FindDuplicateAdBreak()
 	assert.True(t, isDuplicate)
 
-	// e se os START-DATEs realmente são iguais
-	startDate1 := adBreaks[len(adBreaks)-1].HLSElement.Attrs["START-DATE"]
-	startDate2 := adBreaks[len(adBreaks)-2].HLSElement.Attrs["START-DATE"]
-	assert.Equal(t, startDate1, startDate2)
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], previous.HLSElement.Attrs["START-DATE"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], previous.HLSElement.Attrs["PLANNED-DURATION"])
 }
