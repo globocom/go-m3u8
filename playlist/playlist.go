@@ -214,8 +214,10 @@ func (p *Playlist) FindLastAdBreak() (*internal.Node, bool) {
 	return adBreaks[len(adBreaks)-1], true
 }
 
-// IsDuplicateAdBreak checks if two ad breaks have the same START-DATE, indicating a duplicate.
-func (p *Playlist) DuplicateAdBreak() bool {
+// DuplicateAdBreak checks if two ad breaks have the same START-DATE, indicating a duplicate.
+// Two ad breaks are considered duplicates if they share the same START-DATE
+// and the same PLANNED-DURATION.
+func (p *Playlist) FindDuplicateAdBreak() bool {
 	adBreaks := p.Breaks()
 	if len(adBreaks) < 2 {
 		return false
@@ -224,5 +226,11 @@ func (p *Playlist) DuplicateAdBreak() bool {
 	last := adBreaks[len(adBreaks)-1]
 	previous := adBreaks[len(adBreaks)-2]
 
-	return last.HLSElement.Attrs["START-DATE"] == previous.HLSElement.Attrs["START-DATE"]
+	startDate1 := last.HLSElement.Attrs["START-DATE"]
+	startDate2 := previous.HLSElement.Attrs["START-DATE"]
+
+	duration1 := last.HLSElement.Attrs["PLANNED-DURATION"]
+	duration2 := previous.HLSElement.Attrs["PLANNED-DURATION"]
+
+	return startDate1 == startDate2 && duration1 == duration2
 }
