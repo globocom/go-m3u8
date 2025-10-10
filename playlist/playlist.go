@@ -223,14 +223,14 @@ func (p *Playlist) FindDuplicateAdBreak() bool {
 		return false
 	}
 
-	last := adBreaks[len(adBreaks)-1]
-	previous := adBreaks[len(adBreaks)-2]
+	lastBreak := adBreaks[len(adBreaks)-1]
+	previousBreak := adBreaks[len(adBreaks)-2]
 
-	startDate1 := last.HLSElement.Attrs["START-DATE"]
-	startDate2 := previous.HLSElement.Attrs["START-DATE"]
+	lastBreakStartDate := lastBreak.HLSElement.Attrs["START-DATE"]
+	previousBreakStartDate := previousBreak.HLSElement.Attrs["START-DATE"]
 
-	duration1 := last.HLSElement.Attrs["PLANNED-DURATION"]
-	duration2 := previous.HLSElement.Attrs["PLANNED-DURATION"]
+	lastBreakDuration := lastBreak.HLSElement.Attrs["PLANNED-DURATION"]
+	previousBreakDuration := previousBreak.HLSElement.Attrs["PLANNED-DURATION"]
 
-	return startDate1 == startDate2 && duration1 == duration2
+	return lastBreakStartDate == previousBreakStartDate && lastBreakDuration == previousBreakDuration
 }

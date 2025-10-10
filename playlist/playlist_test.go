@@ -245,7 +245,7 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 }
 
 func TestFindLastAdBreak(t *testing.T) {
-	file, _ := os.Open("./../mocks/media/media.m3u8")
+	file, _ := os.Open("./../mocks/media/withMultipleBreaks.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
@@ -254,9 +254,9 @@ func TestFindLastAdBreak(t *testing.T) {
 		HLSElement: &internal.HLSElement{
 			Name: "DateRange",
 			Attrs: map[string]string{
-				"START-DATE":       "2025-05-16T13:33:56.266666Z",
-				"PLANNED-DURATION": "60.033333",
-				"SCTE35-OUT":       "0xFC3025000000000BB802FFF01405000000017FEFFFE86CE9387E0052717800010000000097E91FE5",
+				"START-DATE":       "2025-05-23T19:28:34.299999Z",
+				"PLANNED-DURATION": "20",
+				"SCTE35-OUT":       "0xFC3025000000000BB800FFF01405F000A7E57FEFFED43025D0FE001B7740000101010000CE90B6B7",
 			},
 		},
 	}
