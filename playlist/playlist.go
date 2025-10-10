@@ -324,15 +324,4 @@ func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
 	}
 
 	p.Remove(adBreak)
-// IsDuplicateAdBreak checks if two ad breaks have the same START-DATE, indicating a duplicate.
-func (p *Playlist) IsDuplicateAdBreak() bool {
-	adBreaks := p.Breaks()
-	if len(adBreaks) < 2 {
-		return false
-	}
-
-	last := adBreaks[len(adBreaks)-1]
-	previous := adBreaks[len(adBreaks)-2]
-
-	return last.HLSElement.Attrs["START-DATE"] == previous.HLSElement.Attrs["START-DATE"]
 }
