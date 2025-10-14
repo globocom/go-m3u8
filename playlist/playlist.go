@@ -217,7 +217,7 @@ func (p *Playlist) FindLastAdBreak() (*internal.Node, bool) {
 // DuplicateAdBreak checks if two ad breaks have the same START-DATE, indicating a duplicate.
 // Two ad breaks are considered duplicates if they share the same START-DATE
 // and the same PLANNED-DURATION.
-func (p *Playlist) FindDuplicateAdBreak() bool {
+func (p *Playlist) HasDuplicateAdBreak() bool {
 	adBreaks := p.Breaks()
 	if len(adBreaks) < 2 {
 		return false

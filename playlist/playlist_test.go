@@ -271,7 +271,7 @@ func TestFindLastAdBreak(t *testing.T) {
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
 }
 
-func TestFindDuplicateAdBreak(t *testing.T) {
+func TestHasDuplicateAdBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
@@ -293,7 +293,7 @@ func TestFindDuplicateAdBreak(t *testing.T) {
 		},
 	}
 
-	isDuplicate := playlist.FindDuplicateAdBreak()
+	isDuplicate := playlist.HasDuplicateAdBreak()
 	assert.True(t, isDuplicate)
 
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], previous.HLSElement.Attrs["START-DATE"])
