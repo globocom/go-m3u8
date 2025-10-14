@@ -243,3 +243,59 @@ func TestFindSegmentOutsideAdBreak(t *testing.T) {
 	assert.Nil(t, afterAdBreak)
 	assert.Nil(t, beforeAdBreak)
 }
+
+func TestFindLastAdBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withMultipleBreaks.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// Expected: last Ad Break present in the manifest
+	expectedAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"START-DATE":       "2025-05-23T19:28:34.299999Z",
+				"PLANNED-DURATION": "20",
+				"SCTE35-OUT":       "0xFC3025000000000BB800FFF01405F000A7E57FEFFED43025D0FE001B7740000101010000CE90B6B7",
+			},
+		},
+	}
+
+	lastAdBreak, found := playlist.FindLastAdBreak()
+
+	assert.True(t, found)
+	assert.NotNil(t, lastAdBreak)
+	assert.Equal(t, expectedAdBreak.HLSElement.Name, lastAdBreak.HLSElement.Name)
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], lastAdBreak.HLSElement.Attrs["START-DATE"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], lastAdBreak.HLSElement.Attrs["PLANNED-DURATION"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
+}
+
+func TestHasDuplicateAdBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	adBreaks := playlist.Breaks()
+	assert.GreaterOrEqual(t, len(adBreaks), 2)
+
+	// Expected: Last two Ad Breaks are duplicated
+	last := adBreaks[len(adBreaks)-1]
+	previous := adBreaks[len(adBreaks)-2]
+
+	expectedAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"START-DATE":       last.HLSElement.Attrs["START-DATE"],
+				"PLANNED-DURATION": last.HLSElement.Attrs["PLANNED-DURATION"],
+			},
+		},
+	}
+
+	isDuplicate := playlist.HasDuplicateAdBreak()
+	assert.True(t, isDuplicate)
+
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], previous.HLSElement.Attrs["START-DATE"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], previous.HLSElement.Attrs["PLANNED-DURATION"])
+}
