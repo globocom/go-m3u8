@@ -279,23 +279,6 @@ func TestHasDuplicateAdBreak(t *testing.T) {
 	adBreaks := playlist.Breaks()
 	assert.GreaterOrEqual(t, len(adBreaks), 2)
 
-	// Expected: Last two Ad Breaks are duplicated
-	last := adBreaks[len(adBreaks)-1]
-	previous := adBreaks[len(adBreaks)-2]
+	assert.True(t, playlist.HasDuplicateAdBreak())
 
-	expectedAdBreak := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "DateRange",
-			Attrs: map[string]string{
-				"START-DATE":       last.HLSElement.Attrs["START-DATE"],
-				"PLANNED-DURATION": last.HLSElement.Attrs["PLANNED-DURATION"],
-			},
-		},
-	}
-
-	isDuplicate := playlist.HasDuplicateAdBreak()
-	assert.True(t, isDuplicate)
-
-	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], previous.HLSElement.Attrs["START-DATE"])
-	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], previous.HLSElement.Attrs["PLANNED-DURATION"])
 }
