@@ -281,6 +281,8 @@ func TestHasDuplicateAdBreak(t *testing.T) {
 
 	assert.True(t, playlist.HasDuplicateAdBreak())
 
+}
+
 func TestFindBreakInsideAdBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/withBreakInsideBreak.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)

@@ -233,6 +233,8 @@ func (p *Playlist) HasDuplicateAdBreak() bool {
 	previousBreakDuration := previousBreak.HLSElement.Attrs["PLANNED-DURATION"]
 
 	return lastBreakStartDate == previousBreakStartDate && lastBreakDuration == previousBreakDuration
+}
+
 // Returns the previous segment (#EXTINF) before the given node, or nil if none exists.
 func (p *Playlist) FindPreviousSegment(node *internal.Node) *internal.Node {
 	current := node.Prev
