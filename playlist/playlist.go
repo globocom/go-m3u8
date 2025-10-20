@@ -187,7 +187,7 @@ func (p *Playlist) Comment(matchString string) *internal.Node {
 //   - No DateRange SCTE-IN. Exit is ONLY marked by CueIn (#EXT-X-CUE-IN) tag instead.
 //   - SOMETIMES DateRange SCTE-IN is present, alongside the CueIn tag.
 func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, bool) {
-	current := node
+	current := node.Prev
 	for current != nil {
 		// node is inside Ad Break if it is preceded by a DateRange tag with attribute SCTE35-OUT
 		if (current.HLSElement.Name == "DateRange") && (current.HLSElement.Attrs["SCTE35-OUT"] != "") {
@@ -233,4 +233,14 @@ func (p *Playlist) HasDuplicateAdBreak() bool {
 	previousBreakDuration := previousBreak.HLSElement.Attrs["PLANNED-DURATION"]
 
 	return lastBreakStartDate == previousBreakStartDate && lastBreakDuration == previousBreakDuration
+// Returns the previous segment (#EXTINF) before the given node, or nil if none exists.
+func (p *Playlist) FindPreviousSegment(node *internal.Node) *internal.Node {
+	current := node.Prev
+	for current != nil {
+		if current.HLSElement.Name == "ExtInf" {
+			return current
+		}
+		current = current.Prev
+	}
+	return nil
 }
