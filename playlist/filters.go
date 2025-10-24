@@ -6,7 +6,7 @@ import (
 )
 
 // Removes all variant streams (#EXT-X-STREAM-INF) from the playlist that exceed the given maxHeight.
-func (p *Playlist) SetMaxHeight(maxHeight int) {
+func (p *Playlist) FilterByMaxHeight(maxHeight int) {
 	nodes := p.Variants()
 	for _, node := range nodes {
 		resolution := node.HLSElement.Attrs["RESOLUTION"]

@@ -95,7 +95,7 @@ func TestVariantsHeightFilter(t *testing.T) {
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	playlist.SetMaxHeight(720)
+	playlist.FilterByMaxHeight(720)
 	nodes := playlist.Variants()
 	assert.NotNil(t, nodes)
 	assert.Len(t, nodes, 7)
