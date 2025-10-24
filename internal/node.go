@@ -132,3 +132,22 @@ func (l *DoublyLinkedList) FindAll(elementName string) []*Node {
 	}
 	return result
 }
+
+// Removes a node from the doubly linked list
+func (l *DoublyLinkedList) Remove(node *Node) {
+	if node == nil {
+		return
+	}
+
+	if node.Prev != nil {
+		node.Prev.Next = node.Next
+	} else {
+		l.Head = node.Next
+	}
+
+	if node.Next != nil {
+		node.Next.Prev = node.Prev
+	} else {
+		l.Tail = node.Prev
+	}
+}
