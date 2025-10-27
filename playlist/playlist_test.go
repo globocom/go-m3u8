@@ -1,7 +1,6 @@
 package playlist_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -452,9 +451,6 @@ func TestRemoveInvalidBreakTagsForDuplicatedBreaks(t *testing.T) {
 	assert.Len(t, cueIns, 2)
 
 	playlist.TrimInvalidBreaks()
-
-	printPlaylist, _ := m3u8.EncodePlaylist(playlist)
-	fmt.Println("Playlist: ", printPlaylist)
 
 	updatedAdBreaks := playlist.Breaks()
 	assert.Len(t, updatedAdBreaks, 1)
