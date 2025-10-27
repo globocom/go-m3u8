@@ -360,8 +360,6 @@ func main() {
 
 ## Extra Docs
 
-## Extra Docs
-
 - [Handling Ad Breaks](docs/HandlingAdBreaks.md)
 - [Handling Invalid Ad Breaks](docs/HandlingInvalidAdBreaks.md)
 
