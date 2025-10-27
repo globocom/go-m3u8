@@ -286,7 +286,7 @@ func (p *Playlist) TrimInvalidBreaks() {
 			p.removeInvalidBreakTags(adBreak)
 		}
 
-		// breaks duplicados
+		// handle duplicate ad breaks
 		if i > 0 && len(adBreaks) > 1 {
 			previousAdBreak := adBreaks[i-1]
 			sameStartDate := adBreak.HLSElement.Attrs["START-DATE"] == previousAdBreak.HLSElement.Attrs["START-DATE"]
