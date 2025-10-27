@@ -358,6 +358,13 @@ func main() {
 }
 ```
 
+## Extra Docs
+
+## Extra Docs
+
+- [Handling Ad Breaks](docs/HandlingAdBreaks.md)
+- [Handling Invalid Ad Breaks](docs/HandlingInvalidAdBreaks.md)
+
 ## Contributing
 
 As this is an open-source project, we encourage and support any community contributions!
