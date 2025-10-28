@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -265,33 +264,14 @@ func (p *Playlist) IsSegment(node *internal.Node) bool {
 func (p *Playlist) TrimInvalidBreaks() {
 	adBreaks := p.Breaks()
 	for i, adBreak := range adBreaks {
-		// if DateRange tag has an invalid START-DATE, remove it from the playlist
-		_, err := time.Parse(time.RFC3339Nano, adBreak.HLSElement.Attrs["START-DATE"])
-		if err != nil {
-			p.removeInvalidBreakTags(adBreak)
-		}
-
-		// if DateRange tag has an invalid StartMediaSequence, remove it from the playlist
-		_, err = strconv.Atoi(adBreak.HLSElement.Details["StartMediaSequence"])
-		if err != nil {
-			p.removeInvalidBreakTags(adBreak)
-		}
-
-		// if DateRange tag has an invalid PLANNED-DURATION, remove it from the playlist
-		plannedDurationStr := adBreak.HLSElement.Attrs["PLANNED-DURATION"]
-		plannedDuration, err := strconv.ParseFloat(plannedDurationStr, 64)
-		const maxPlannedDuration = 600 // 10 minutes
-
-		if plannedDuration == 0 || err != nil || plannedDuration > maxPlannedDuration {
+		// if any of the ad break validations fail, remove the ad break tags
+		if invalidStartDate(adBreak) || invalidMediaSequence(adBreak) || invalidPlannedDuration(adBreak) {
 			p.removeInvalidBreakTags(adBreak)
 		}
 
 		// handle duplicate ad breaks
 		if i > 0 && len(adBreaks) > 1 {
-			previousAdBreak := adBreaks[i-1]
-			sameStartDate := adBreak.HLSElement.Attrs["START-DATE"] == previousAdBreak.HLSElement.Attrs["START-DATE"]
-			sameDuration := adBreak.HLSElement.Attrs["PLANNED-DURATION"] == previousAdBreak.HLSElement.Attrs["PLANNED-DURATION"]
-			if sameStartDate && sameDuration {
+			if duplicatedBreak(adBreak, adBreaks[i-1]) {
 				p.removeDuplicateBreakTags(adBreak)
 			}
 		}
@@ -299,19 +279,12 @@ func (p *Playlist) TrimInvalidBreaks() {
 }
 
 func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
-	cueOuts := p.CueOutEvents()
-	for _, cueOut := range cueOuts {
-		if cueOut.Prev != nil && cueOut.Prev == adBreak {
-			p.Remove(cueOut)
-		}
+	if adBreak.Next.Next != nil && adBreak.Next.Next.HLSElement.Name == "ProgramDateTime" {
+		p.Remove(adBreak.Next.Next)
 	}
 
-	PDTs := p.ProgramDateTimeTags()
-	for _, PDT := range PDTs {
-		adBreakPDT, found := p.FindNodeInsideAdBreak(PDT)
-		if found && adBreakPDT == adBreak {
-			p.Remove(PDT)
-		}
+	if adBreak.Next != nil && adBreak.Next.HLSElement.Name == "CueOut" {
+		p.Remove(adBreak.Next)
 	}
 
 	cueIns := p.CueInEvents()
@@ -338,11 +311,8 @@ func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
 }
 
 func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
-	cueOuts := p.CueOutEvents()
-	for _, cueOut := range cueOuts {
-		if cueOut.Prev != nil && cueOut.Prev == adBreak {
-			p.Remove(cueOut)
-		}
+	if adBreak.Next != nil && adBreak.Next.HLSElement.Name == "CueOut" {
+		p.Remove(adBreak.Next)
 	}
 
 	cueIns := p.CueInEvents()

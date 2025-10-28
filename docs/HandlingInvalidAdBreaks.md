@@ -8,8 +8,9 @@ Invalid ad breaks are `#EXT-X-DATERANGE` tags that have issues such as:
 
 - Malformed or missing `START-DATE`.
 - Invalid `StartMediaSequence`.
-- Missing, zero, negative, or excessive (>600s) `PLANNED-DURATION`.
 - Duplicate ad breaks (same start date and duration).
+- Missing, zero, negative, or excessive (>600s) `PLANNED-DURATION`.
+By [RFC](https://datatracker.ietf.org/doc/html/rfc8216), the PLANNED-DURATION attribute is optional, but in this library we validate this field because it is important for handling ad breaks.
 
 ## Example of an Invalid Ad Break
 
