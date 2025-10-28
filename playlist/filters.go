@@ -34,19 +34,13 @@ func (p *Playlist) FilterByMaxHeight(maxHeight int) {
 // Validates START-DATE attribute of the given ad break
 func invalidStartDate(adBreak *internal.Node) bool {
 	_, err := time.Parse(time.RFC3339Nano, adBreak.HLSElement.Attrs["START-DATE"])
-	if err != nil {
-		return true
-	}
-	return false
+	return err != nil
 }
 
 // Validates StartMediaSequence of the given ad break
 func invalidMediaSequence(adBreak *internal.Node) bool {
 	_, err := strconv.Atoi(adBreak.HLSElement.Details["StartMediaSequence"])
-	if err != nil {
-		return true
-	}
-	return false
+	return err != nil
 }
 
 // Validates PLANNED-DURATION attribute of the given ad break
