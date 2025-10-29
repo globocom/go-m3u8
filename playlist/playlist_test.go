@@ -1,6 +1,7 @@
 package playlist_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -398,4 +399,72 @@ func TestIsSegment(t *testing.T) {
 
 	assert.True(t, isSegment)
 	assert.False(t, isNotSegment)
+}
+
+func TestRemoveInvalidBreakTags(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withInvalidBreaks.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	adBreaks := playlist.Breaks()
+	assert.Len(t, adBreaks, 1)
+
+	cueOuts := playlist.CueOutEvents()
+	assert.Len(t, cueOuts, 1)
+
+	cueIns := playlist.CueInEvents()
+	assert.Len(t, cueIns, 1)
+
+	PDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, PDTs, 3)
+
+	playlist.TrimInvalidBreaks()
+
+	// Verify that the ad break has been removed
+	updatedAdBreaks := playlist.Breaks()
+	assert.Len(t, updatedAdBreaks, 0)
+
+	updatedCueOuts := playlist.CueOutEvents()
+	assert.Len(t, updatedCueOuts, 0)
+
+	updatedCueIns := playlist.CueInEvents()
+	assert.Len(t, updatedCueIns, 0)
+
+	updatedPDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, updatedPDTs, 1)
+}
+
+func TestRemoveInvalidBreakTagsForDuplicatedBreaks(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withDuplicatedBreaks.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	adBreaks := playlist.Breaks()
+	assert.Len(t, adBreaks, 2)
+
+	cueOuts := playlist.CueOutEvents()
+	assert.Len(t, cueOuts, 2)
+
+	PDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, PDTs, 3)
+
+	cueIns := playlist.CueInEvents()
+	assert.Len(t, cueIns, 2)
+
+	playlist.TrimInvalidBreaks()
+
+	printPlaylist, _ := m3u8.EncodePlaylist(playlist)
+	fmt.Println("Playlist: ", printPlaylist)
+
+	updatedAdBreaks := playlist.Breaks()
+	assert.Len(t, updatedAdBreaks, 1)
+
+	updatedCueOuts := playlist.CueOutEvents()
+	assert.Len(t, updatedCueOuts, 1)
+
+	updatedCueIns := playlist.CueInEvents()
+	assert.Len(t, updatedCueIns, 1)
+
+	updatedPDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, updatedPDTs, 3)
 }

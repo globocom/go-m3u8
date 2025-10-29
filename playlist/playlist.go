@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -130,6 +131,11 @@ func (p *Playlist) EncryptionTags() []*internal.Node {
 	return p.FindAll("Key")
 }
 
+// Returns all ProgramDateTime (#EXT-X-PROGRAM-DATE-TIME) nodes in the playlist
+func (p *Playlist) ProgramDateTimeTags() []*internal.Node {
+	return p.FindAll("ProgramDateTime")
+}
+
 // Returns all CueOut (#EXT-X-CUE-OUT) nodes in the playlist
 func (p *Playlist) CueOutEvents() []*internal.Node {
 	return p.FindAll("CueOut")
@@ -253,4 +259,104 @@ func (p *Playlist) FindPreviousSegment(node *internal.Node) *internal.Node {
 // Returns true if the given node is a segment (#EXTINF), false otherwise.
 func (p *Playlist) IsSegment(node *internal.Node) bool {
 	return node.HLSElement.Name == "ExtInf"
+}
+
+// Trims invalid and duplicated ad breaks from the playlist
+func (p *Playlist) TrimInvalidBreaks() {
+	adBreaks := p.Breaks()
+	for i, adBreak := range adBreaks {
+		// if DateRange tag has an invalid START-DATE, remove it from the playlist
+		_, err := time.Parse(time.RFC3339Nano, adBreak.HLSElement.Attrs["START-DATE"])
+		if err != nil {
+			p.removeInvalidBreakTags(adBreak)
+		}
+
+		// if DateRange tag has an invalid StartMediaSequence, remove it from the playlist
+		_, err = strconv.Atoi(adBreak.HLSElement.Details["StartMediaSequence"])
+		if err != nil {
+			p.removeInvalidBreakTags(adBreak)
+		}
+
+		// if DateRange tag has an invalid PLANNED-DURATION, remove it from the playlist
+		plannedDurationStr := adBreak.HLSElement.Attrs["PLANNED-DURATION"]
+		plannedDuration, err := strconv.ParseFloat(plannedDurationStr, 64)
+		const maxPlannedDuration = 600 // 10 minutes
+
+		if plannedDuration == 0 || err != nil || plannedDuration > maxPlannedDuration {
+			p.removeInvalidBreakTags(adBreak)
+		}
+
+		// breaks duplicados
+		if i > 0 && len(adBreaks) > 1 {
+			previousAdBreak := adBreaks[i-1]
+			sameStartDate := adBreak.HLSElement.Attrs["START-DATE"] == previousAdBreak.HLSElement.Attrs["START-DATE"]
+			sameDuration := adBreak.HLSElement.Attrs["PLANNED-DURATION"] == previousAdBreak.HLSElement.Attrs["PLANNED-DURATION"]
+			if sameStartDate && sameDuration {
+				p.removeDuplicateBreakTags(adBreak)
+			}
+		}
+	}
+}
+
+func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
+	cueOuts := p.CueOutEvents()
+	for _, cueOut := range cueOuts {
+		if cueOut.Prev != nil && cueOut.Prev == adBreak {
+			p.Remove(cueOut)
+		}
+	}
+
+	PDTs := p.ProgramDateTimeTags()
+	for _, PDT := range PDTs {
+		adBreakPDT, found := p.FindNodeInsideAdBreak(PDT)
+		if found && adBreakPDT == adBreak {
+			p.Remove(PDT)
+		}
+	}
+
+	cueIns := p.CueInEvents()
+	for _, cueIn := range cueIns {
+		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
+		if found && adBreakCueIn == adBreak {
+			if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
+				p.Remove(cueIn.Prev)
+			}
+
+			if cueIn.Next != nil && cueIn.Next.HLSElement.Name == "ProgramDateTime" {
+				p.Remove(cueIn.Next)
+			}
+
+			p.Remove(cueIn)
+		}
+	}
+
+	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert(auto_return)") {
+		p.Remove(adBreak.Prev)
+	}
+
+	p.Remove(adBreak)
+}
+
+func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
+	cueOuts := p.CueOutEvents()
+	for _, cueOut := range cueOuts {
+		if cueOut.Prev != nil && cueOut.Prev == adBreak {
+			p.Remove(cueOut)
+		}
+	}
+
+	cueIns := p.CueInEvents()
+	for _, cueIn := range cueIns {
+		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
+		if found && adBreakCueIn == adBreak {
+			p.Remove(cueIn)
+			break
+		}
+	}
+
+	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert(auto_return)") {
+		p.Remove(adBreak.Prev)
+	}
+
+	p.Remove(adBreak)
 }
