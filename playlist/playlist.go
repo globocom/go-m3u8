@@ -214,8 +214,8 @@ func (p *Playlist) FindLastAdBreak() (*internal.Node, bool) {
 	return adBreaks[len(adBreaks)-1], true
 }
 
-// FindPreviousAdBreak retorna o nó DateRange imediatamente anterior ao último, se existir.
-func (p *Playlist) FindPreviousAdBreak() (*internal.Node, bool) {
+// FindSecondLastAdBreak returns the DateRange node immediately preceding the last one, if it exists.
+func (p *Playlist) FindSecondLastAdBreak() (*internal.Node, bool) {
 	adBreaks := p.Breaks()
 	if len(adBreaks) < 2 {
 		return nil, false

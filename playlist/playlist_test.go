@@ -288,7 +288,7 @@ func TestFindPreviousAdBreak(t *testing.T) {
 		},
 	}
 
-	previousAdBreak, found := playlist.FindPreviousAdBreak()
+	previousAdBreak, found := playlist.FindSecondLastAdBreak()
 
 	assert.True(t, found)
 	assert.NotNil(t, previousAdBreak)
