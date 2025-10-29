@@ -314,3 +314,18 @@ func TestFindPreviousSegment(t *testing.T) {
 	assert.Equal(t, previousSegmentToCueIn.HLSElement.URI, "channel-audio_1=96000-video=3442944-364042186.ts")
 	assert.Equal(t, previousSegmentToCueIn.HLSElement.Attrs["Duration"], "6.7333")
 }
+
+func TestIsSegment(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	segmentNode := playlist.Segments()[0]
+	versionNode, _ := playlist.VersionTag()
+
+	isSegment := playlist.IsSegment(segmentNode)
+	isNotSegment := playlist.IsSegment(versionNode)
+
+	assert.True(t, isSegment)
+	assert.False(t, isNotSegment)
+}

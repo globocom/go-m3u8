@@ -216,3 +216,8 @@ func (p *Playlist) FindPreviousSegment(node *internal.Node) *internal.Node {
 	}
 	return nil
 }
+
+// Returns true if the given node is a segment (#EXTINF), false otherwise.
+func (p *Playlist) IsSegment(node *internal.Node) bool {
+	return node.HLSElement.Name == "ExtInf"
+}
