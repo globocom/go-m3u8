@@ -264,14 +264,20 @@ func (p *Playlist) IsSegment(node *internal.Node) bool {
 func (p *Playlist) TrimInvalidBreaks() {
 	adBreaks := p.Breaks()
 	for i, adBreak := range adBreaks {
-		// if any of the ad break validations fail, remove the ad break tags
-		if invalidStartDate(adBreak) || invalidMediaSequence(adBreak) || invalidPlannedDuration(adBreak) {
+		if _, err := ValidateStartDate(adBreak); err != nil {
 			p.removeInvalidBreakTags(adBreak)
 		}
 
-		// handle duplicate ad breaks
+		if _, err := ValidateMediaSequence(adBreak); err != nil {
+			p.removeInvalidBreakTags(adBreak)
+		}
+
+		if err := ValidatePlannedDuration(adBreak); err != nil {
+			p.removeInvalidBreakTags(adBreak)
+		}
+
 		if i > 0 && len(adBreaks) > 1 {
-			if duplicatedBreak(adBreak, adBreaks[i-1]) {
+			if IsDuplicatedBreak(adBreak, adBreaks[i-1]) {
 				p.removeDuplicateBreakTags(adBreak)
 			}
 		}
