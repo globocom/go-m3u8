@@ -271,7 +271,34 @@ func TestFindLastAdBreak(t *testing.T) {
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
 }
 
-func TestHasDuplicateAdBreak(t *testing.T) {
+func TestFindPreviousAdBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withMultipleBreaks.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	// Expected: previous Ad Break present in the manifest
+	expectedAdBreak := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "DateRange",
+			Attrs: map[string]string{
+				"START-DATE":       "2025-05-23T19:27:50.133333Z",
+				"PLANNED-DURATION": "20",
+				"SCTE35-OUT":       "0xFC3025000000000BB800FFF01405F000A7E47FEFFED3F37E78FE001B7740000101010000F8ED5643",
+			},
+		},
+	}
+
+	previousAdBreak, found := playlist.FindPreviousAdBreak()
+
+	assert.True(t, found)
+	assert.NotNil(t, previousAdBreak)
+	assert.Equal(t, expectedAdBreak.HLSElement.Name, previousAdBreak.HLSElement.Name)
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], previousAdBreak.HLSElement.Attrs["START-DATE"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], previousAdBreak.HLSElement.Attrs["PLANNED-DURATION"])
+	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], previousAdBreak.HLSElement.Attrs["SCTE35-OUT"])
+}
+
+func TestIsDuplicateAdBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
@@ -279,8 +306,11 @@ func TestHasDuplicateAdBreak(t *testing.T) {
 	adBreaks := playlist.Breaks()
 	assert.GreaterOrEqual(t, len(adBreaks), 2)
 
-	assert.True(t, playlist.HasDuplicateAdBreak())
+	currentBreak := adBreaks[1]
+	previousBreak := adBreaks[0]
 
+	isDuplicate := playlist.IsDuplicateAdBreak(currentBreak, previousBreak)
+	assert.True(t, isDuplicate)
 }
 
 func TestFindBreakInsideAdBreak(t *testing.T) {
