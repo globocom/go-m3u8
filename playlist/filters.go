@@ -74,8 +74,5 @@ func ValidatePlannedDuration(adBreak *internal.Node) error {
 func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	sameStartDate := adBreak.HLSElement.Attrs["START-DATE"] == previousAdBreak.HLSElement.Attrs["START-DATE"]
 	sameDuration := adBreak.HLSElement.Attrs["PLANNED-DURATION"] == previousAdBreak.HLSElement.Attrs["PLANNED-DURATION"]
-	if sameStartDate && sameDuration {
-		return true
-	}
-	return false
+	return sameStartDate && sameDuration
 }
