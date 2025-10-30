@@ -6,6 +6,7 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
+	"github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -311,10 +312,10 @@ func TestFindPreviousAdBreak(t *testing.T) {
 
 func TestIsDuplicateAdBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
-	playlist, err := m3u8.ParsePlaylist(file)
+	pl, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	adBreaks := playlist.Breaks()
+	adBreaks := pl.Breaks()
 	assert.GreaterOrEqual(t, len(adBreaks), 2)
 
 	lastBreak := adBreaks[1]
