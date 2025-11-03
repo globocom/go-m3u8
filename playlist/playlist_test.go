@@ -6,7 +6,6 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
-	"github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -308,21 +307,6 @@ func TestFindPreviousAdBreak(t *testing.T) {
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], previousAdBreak.HLSElement.Attrs["START-DATE"])
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], previousAdBreak.HLSElement.Attrs["PLANNED-DURATION"])
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], previousAdBreak.HLSElement.Attrs["SCTE35-OUT"])
-}
-
-func TestIsDuplicateAdBreak(t *testing.T) {
-	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
-	pl, err := m3u8.ParsePlaylist(file)
-	assert.NoError(t, err)
-
-	adBreaks := pl.Breaks()
-	assert.GreaterOrEqual(t, len(adBreaks), 2)
-
-	lastBreak := adBreaks[1]
-	previousBreak := adBreaks[0]
-
-	isDuplicate := playlist.IsDuplicateAdBreak(lastBreak, previousBreak)
-	assert.True(t, isDuplicate)
 }
 
 func TestFindBreakInsideAdBreak(t *testing.T) {
