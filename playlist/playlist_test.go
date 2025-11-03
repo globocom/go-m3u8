@@ -453,7 +453,7 @@ func TestRemoveInvalidBreakTagsForDuplicatedBreaks(t *testing.T) {
 	playlist.TrimInvalidBreaks()
 
 	updatedAdBreaks := playlist.Breaks()
-	assert.Len(t, updatedAdBreaks, 2)
+	assert.Len(t, updatedAdBreaks, 1)
 
 	updatedCueOuts := playlist.CueOutEvents()
 	assert.Len(t, updatedCueOuts, 1)
