@@ -294,7 +294,7 @@ func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
 		}
 	}
 
-	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert(auto_return)") {
+	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert") {
 		p.Remove(adBreak.Prev)
 	}
 
@@ -319,7 +319,7 @@ func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
 		}
 	}
 
-	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert(auto_return)") {
+	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert") {
 		p.Remove(adBreak.Prev)
 	}
 
