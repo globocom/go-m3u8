@@ -324,6 +324,10 @@ func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
 	cueIns := p.CueInEvents()
 	for _, cueIn := range cueIns {
 		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
+		if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
+			p.Remove(cueIn.Prev)
+		}
+
 		if found && adBreakCueIn == adBreak {
 			p.Remove(cueIn)
 			break
