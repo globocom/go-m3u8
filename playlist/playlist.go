@@ -205,6 +205,39 @@ func (p *Playlist) FindNodeInsideAdBreak(node *internal.Node) (*internal.Node, b
 	return nil, false
 }
 
+// Returns the last DateRange (#EXT-X-DATERANGE) node with SCTE35-OUT marking (i.e. the last Ad Break) in the playlist
+func (p *Playlist) FindLastAdBreak() (*internal.Node, bool) {
+	adBreaks := p.Breaks()
+	if len(adBreaks) == 0 {
+		return nil, false
+	}
+	return adBreaks[len(adBreaks)-1], true
+}
+
+// FindSecondLastAdBreak returns the DateRange node immediately preceding the last one, if it exists.
+func (p *Playlist) FindSecondLastAdBreak() (*internal.Node, bool) {
+	adBreaks := p.Breaks()
+	if len(adBreaks) < 2 {
+		return nil, false
+	}
+	return adBreaks[len(adBreaks)-2], true
+}
+
+// IsDuplicateAdBreak checks if two ad breaks have the same START-DATE and PLANNED-DURATION.
+func IsDuplicateAdBreak(lastBreak, previousBreak *internal.Node) bool {
+	if lastBreak == nil || previousBreak == nil {
+		return false
+	}
+
+	lastBreakStartDate := lastBreak.HLSElement.Attrs["START-DATE"]
+	previousBreakStartDate := previousBreak.HLSElement.Attrs["START-DATE"]
+
+	lastBreakDuration := lastBreak.HLSElement.Attrs["PLANNED-DURATION"]
+	previousBreakDuration := previousBreak.HLSElement.Attrs["PLANNED-DURATION"]
+
+	return lastBreakStartDate == previousBreakStartDate && lastBreakDuration == previousBreakDuration
+}
+
 // Returns the previous segment (#EXTINF) before the given node, or nil if none exists.
 func (p *Playlist) FindPreviousSegment(node *internal.Node) *internal.Node {
 	current := node.Prev
