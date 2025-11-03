@@ -22,6 +22,7 @@ const (
 	MediaSequenceName         = "MediaSequence"
 	DiscontinuitySequenceName = "DiscontinuitySequence"
 	IFramesOnlyName           = "IFramesOnly"
+	EndListName               = "Endlist"
 )
 
 var (
@@ -29,7 +30,7 @@ var (
 	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"
 	DiscontinuitySequenceTag = "#EXT-X-DISCONTINUITY-SEQUENCE"
 	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"
-	EndlistTag               = "#EXT-X-ENDLIST"        // todo
+	EndlistTag               = "#EXT-X-ENDLIST"
 	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  // todo: has one attribute
 	PartInfTag               = "#EXT-X-PART-INF"       // todo: has attributes
 	ServerControlTag         = "#EXT-X-SERVER-CONTROL" // todo: has attributes
@@ -40,6 +41,7 @@ type (
 	MediaSequenceParser         struct{}
 	DiscontinuitySequenceParser struct{}
 	IFramesOnlyParser           struct{}
+	EndlistParser               struct{}
 )
 
 type (
@@ -47,6 +49,7 @@ type (
 	MediaSequenceEncoder         struct{}
 	DiscontinuitySequenceEncoder struct{}
 	IFramesOnlyEncoder           struct{}
+	EndlistEncoder               struct{}
 )
 
 func (p TargetDurationParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -129,6 +132,18 @@ func (p IFramesOnlyParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
+func (p EndlistParser) Parse(tag string, playlist *pl.Playlist) error {
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: EndListName,
+			Attrs: map[string]string{
+				EndlistTag: "",
+			},
+		},
+	})
+	return nil
+}
+
 func (e TargetDurationEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	return pl.EncodeSimpleTag(node, builder, TargetDurationTag, TargetDurationTag)
 }
@@ -143,5 +158,10 @@ func (e DiscontinuitySequenceEncoder) Encode(node *internal.Node, builder *strin
 
 func (e IFramesOnlyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	_, err := builder.WriteString(IFramesOnlyTag + "\n")
+	return err
+}
+
+func (e EndlistEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	_, err := builder.WriteString(EndlistTag + "\n")
 	return err
 }

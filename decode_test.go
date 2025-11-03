@@ -852,3 +852,21 @@ func TestMediaPlaylist_WithIFramesOnly(t *testing.T) {
 	assert.Equal(t, "hls/channel-hevc-hdr-video=18000000.m4s", mapTag.HLSElement.Attrs["URI"])
 	assert.Contains(t, segment.HLSElement.URI, ".m4s")
 }
+
+func TestMediaPlaylist_WithEndList(t *testing.T) {
+	file, _ := os.Open("mocks/media/media.m3u8")
+	p, _ := m3u8.ParsePlaylist(file)
+
+	file, _ = os.Open("mocks/media/withEndList.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	validatePlaylist(t, p, err)
+
+	_, found := p.Find(tags.EndlistTag)
+	assert.True(t, found)
+
+	EndListTag, _ := p.Find(tags.EndlistTag)
+	segment := p.Segments()[0]
+
+	assert.NotNil(t, EndListTag)
+	assert.Contains(t, segment.HLSElement.URI, ".ts")
+}
