@@ -854,17 +854,13 @@ func TestMediaPlaylist_WithIFramesOnly(t *testing.T) {
 }
 
 func TestMediaPlaylist_WithEndList(t *testing.T) {
-	file, _ := os.Open("mocks/media/media.m3u8")
-	p, _ := m3u8.ParsePlaylist(file)
-
-	file, _ = os.Open("mocks/media/withEndList.m3u8")
+	file, _ := os.Open("mocks/media/withEndList.m3u8")
 	p, err := m3u8.ParsePlaylist(file)
 	validatePlaylist(t, p, err)
 
-	_, found := p.Find(tags.EndlistTag)
+	EndListTag, found := p.Find(tags.EndListName)
 	assert.True(t, found)
 
-	EndListTag, _ := p.Find(tags.EndlistTag)
 	segment := p.Segments()[0]
 
 	assert.NotNil(t, EndListTag)
