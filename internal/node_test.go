@@ -251,3 +251,43 @@ func TestDoublyLinkedListFindAll(t *testing.T) {
 	assert.Equal(t, node[0], secondNode)
 	assert.Equal(t, node[1], thirdNode)
 }
+
+func TestDoublyLinkedListRemove(t *testing.T) {
+	list := internal.DoublyLinkedList{}
+
+	firstNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Version",
+			Attrs: map[string]string{
+				"#EXT-X-VERSION": "3",
+			},
+		},
+	}
+	secondNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "MediaSequence",
+			Attrs: map[string]string{
+				"#EXT-X-MEDIA-SEQUENCE": "360948012",
+			},
+		},
+	}
+	thirdNode := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Comment",
+			Attrs: map[string]string{
+				"Comment": "## Created with Unified Streaming Platform (version=1.11.23-28141)",
+			},
+		},
+	}
+
+	list.Insert(firstNode)
+	list.Insert(secondNode)
+	list.Insert(thirdNode)
+
+	list.Remove(secondNode)
+
+	assert.Equal(t, firstNode, list.Head)
+	assert.Equal(t, thirdNode, list.Tail)
+	assert.Equal(t, thirdNode, firstNode.Next)
+	assert.Equal(t, firstNode, thirdNode.Prev)
+}
