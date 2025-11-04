@@ -6,7 +6,6 @@ import (
 
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
-	"github.com/globocom/go-m3u8/playlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -310,21 +309,6 @@ func TestFindPreviousAdBreak(t *testing.T) {
 	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], previousAdBreak.HLSElement.Attrs["SCTE35-OUT"])
 }
 
-func TestIsDuplicateAdBreak(t *testing.T) {
-	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
-	pl, err := m3u8.ParsePlaylist(file)
-	assert.NoError(t, err)
-
-	adBreaks := pl.Breaks()
-	assert.GreaterOrEqual(t, len(adBreaks), 2)
-
-	lastBreak := adBreaks[1]
-	previousBreak := adBreaks[0]
-
-	isDuplicate := playlist.IsDuplicateAdBreak(lastBreak, previousBreak)
-	assert.True(t, isDuplicate)
-}
-
 func TestFindBreakInsideAdBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/withBreakInsideBreak.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -399,41 +383,68 @@ func TestIsSegment(t *testing.T) {
 	assert.True(t, isSegment)
 	assert.False(t, isNotSegment)
 }
-func TestFindLastAdBreak(t *testing.T) {
-	file, _ := os.Open("./../mocks/media/withMultipleBreaks.m3u8")
-	playlist, err := m3u8.ParsePlaylist(file)
-	assert.NoError(t, err)
 
-	// Expected: last Ad Break present in the manifest
-	expectedAdBreak := &internal.Node{
-		HLSElement: &internal.HLSElement{
-			Name: "DateRange",
-			Attrs: map[string]string{
-				"START-DATE":       "2025-05-23T19:28:34.299999Z",
-				"PLANNED-DURATION": "20",
-				"SCTE35-OUT":       "0xFC3025000000000BB800FFF01405F000A7E57FEFFED43025D0FE001B7740000101010000CE90B6B7",
-			},
-		},
-	}
-
-	lastAdBreak, found := playlist.FindLastAdBreak()
-
-	assert.True(t, found)
-	assert.NotNil(t, lastAdBreak)
-	assert.Equal(t, expectedAdBreak.HLSElement.Name, lastAdBreak.HLSElement.Name)
-	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["START-DATE"], lastAdBreak.HLSElement.Attrs["START-DATE"])
-	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["PLANNED-DURATION"], lastAdBreak.HLSElement.Attrs["PLANNED-DURATION"])
-	assert.Equal(t, expectedAdBreak.HLSElement.Attrs["SCTE35-OUT"], lastAdBreak.HLSElement.Attrs["SCTE35-OUT"])
-}
-
-func TestHasDuplicateAdBreak(t *testing.T) {
-	file, _ := os.Open("./../mocks/media/withDuplicateBreaks.m3u8")
+func TestRemoveInvalidBreakTags(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withInvalidBreaks.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
 	adBreaks := playlist.Breaks()
-	assert.GreaterOrEqual(t, len(adBreaks), 2)
+	assert.Len(t, adBreaks, 1)
 
-	assert.True(t, playlist.HasDuplicateAdBreak())
+	cueOuts := playlist.CueOutEvents()
+	assert.Len(t, cueOuts, 1)
 
+	cueIns := playlist.CueInEvents()
+	assert.Len(t, cueIns, 1)
+
+	PDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, PDTs, 3)
+
+	playlist.TrimInvalidBreaks()
+
+	// Verify that the ad break has been removed
+	updatedAdBreaks := playlist.Breaks()
+	assert.Len(t, updatedAdBreaks, 0)
+
+	updatedCueOuts := playlist.CueOutEvents()
+	assert.Len(t, updatedCueOuts, 0)
+
+	updatedCueIns := playlist.CueInEvents()
+	assert.Len(t, updatedCueIns, 0)
+
+	updatedPDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, updatedPDTs, 1)
+}
+
+func TestRemoveInvalidBreakTagsForDuplicatedBreaks(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withDuplicatedBreaks.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	adBreaks := playlist.Breaks()
+	assert.Len(t, adBreaks, 2)
+
+	cueOuts := playlist.CueOutEvents()
+	assert.Len(t, cueOuts, 2)
+
+	PDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, PDTs, 3)
+
+	cueIns := playlist.CueInEvents()
+	assert.Len(t, cueIns, 2)
+
+	playlist.TrimInvalidBreaks()
+
+	updatedAdBreaks := playlist.Breaks()
+	assert.Len(t, updatedAdBreaks, 1)
+
+	updatedCueOuts := playlist.CueOutEvents()
+	assert.Len(t, updatedCueOuts, 1)
+
+	updatedCueIns := playlist.CueInEvents()
+	assert.Len(t, updatedCueIns, 1)
+
+	updatedPDTs := playlist.ProgramDateTimeTags()
+	assert.Len(t, updatedPDTs, 3)
 }
