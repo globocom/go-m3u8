@@ -118,3 +118,16 @@ func TestIsDuplicatedBreak(t *testing.T) {
 	isDuplicate := playlist.IsDuplicatedBreak(lastBreak, previousBreak)
 	assert.True(t, isDuplicate)
 }
+
+func TestIsSameMediaSequenceFromBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	pl, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	segments := pl.Segments()
+	segmentElement := segments[6]
+
+	breakMediaSequence := 364042175
+	result := playlist.IsSameMediaSequenceFromBreak(breakMediaSequence, segmentElement, *pl)
+	assert.True(t, result)
+}
