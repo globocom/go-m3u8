@@ -64,7 +64,6 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 }
 
 func IsSameMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node, manifest Playlist) bool {
-
 	if element != nil && IsSegment(element) {
 		currentMediaSequence, _ := strconv.Atoi(element.HLSElement.Details["MediaSequence"])
 		if breakMediaSequence == currentMediaSequence {
