@@ -281,7 +281,8 @@ func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
 
 	cueIns := p.CueInEvents()
 	for _, cueIn := range cueIns {
-		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
+		previousSegment := p.FindPreviousSegment(cueIn)
+		adBreakCueIn, found := p.FindNodeInsideAdBreak(previousSegment)
 		if found && adBreakCueIn == adBreak {
 			if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
 				p.Remove(cueIn.Prev)

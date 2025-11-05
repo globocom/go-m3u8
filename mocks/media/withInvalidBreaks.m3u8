@@ -1,35 +1,140 @@
 #EXTM3U
 #EXT-X-VERSION:3
-## Created with Unified Streaming Platform  (version=1.14.4-30793)
-#EXT-X-MEDIA-SEQUENCE:546178966
+#EXT-X-MEDIA-SEQUENCE:367162365
 #EXT-X-INDEPENDENT-SEGMENTS
-#EXT-X-TARGETDURATION:5
-#USP-X-TIMESTAMP-MAP:MPEGTS=660610295,LOCAL=2025-05-20T20:24:48.433300Z
-#EXT-X-PROGRAM-DATE-TIME:2025-05-20T20:24:48.433333Z
-#EXTINF:4.2666, no desc
-channel-audio_1=96000-video=3442944-546178966.ts
+#EXT-X-TARGETDURATION:7
+#EXT-X-PROGRAM-DATE-TIME:2025-11-05T21:49:07.300000Z
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162365.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162366.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162367.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162368.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162369.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162370.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162371.ts
+#EXTINF:5.3, no desc
+channel-audio_1=96000-video=558976-367162372.ts
 ## splice_insert(auto_return)
-#EXT-X-DATERANGE:ID="4026554822-1747772692",START-DATE="2025-05-20T20:24:52.699999Z",PLANNED-DURATION=0,SCTE35-OUT=0xFC3025000000000BB800FFF01405F00059C67FEFFF253C6500FE001B7740000101010000CB09D539
-#EXT-X-CUE-OUT:20
-#EXT-X-PROGRAM-DATE-TIME:2025-05-20T20:24:52.699999Z
-#EXTINF:2.1333, no desc
-channel-audio_1=96000-video=3442944-546178967.ts
-#EXTINF:3.2, no desc
-channel-audio_1=96000-video=3442944-546178968.ts
-#EXTINF:3.2, no desc
-channel-audio_1=96000-video=3442944-546178969.ts
-#EXTINF:3.2, no desc
-channel-audio_1=96000-video=3442944-546178970.ts
-#EXTINF:3.2, no desc
-channel-audio_1=96000-video=3442944-546178971.ts
-#EXTINF:3.2, no desc
-channel-audio_1=96000-video=3442944-546178972.ts
-#EXTINF:1.8666, no desc
-channel-audio_1=96000-video=3442944-546178973.ts
+#EXT-X-DATERANGE:ID="4026532487-1762379386",START-DATE="2025-11-05T21:49:46.766666Z",PLANNED-DURATION=0,SCTE35-OUT=0xFC3025000000000BB800FFF01405F00002877FEFFFF39B3100FE005265C0000101010000F6BB7ABD
+#EXT-X-CUE-OUT:60
+#EXT-X-PROGRAM-DATE-TIME:2025-11-05T21:49:46.200000Z
+#EXTINF:4.3, no desc
+channel-audio_1=96000-video=558976-367162373.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162374.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162375.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162376.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162377.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162378.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162379.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162380.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162381.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162382.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162383.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162384.ts
+#EXTINF:2.9, no desc
+channel-audio_1=96000-video=558976-367162385.ts
 ## Auto Return Mode
 #EXT-X-CUE-IN
-#EXT-X-PROGRAM-DATE-TIME:2025-05-20T20:25:12.699999Z
-#EXTINF:4.5333, no desc
-channel-audio_1=96000-video=3442944-546178974.ts
-#EXTINF:3.2, no desc
-channel-audio_1=96000-video=3442944-546178975.ts
+#EXT-X-PROGRAM-DATE-TIME:2025-11-05T21:50:46.200000Z
+#EXTINF:6.7, no desc
+channel-audio_1=96000-video=558976-367162386.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162387.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162388.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162389.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162390.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162391.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162392.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162393.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162394.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162395.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162396.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162397.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162398.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162399.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162400.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162401.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162402.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162403.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162404.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162405.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162406.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162407.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162408.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162409.ts
+#EXTINF:5.5, no desc
+channel-audio_1=96000-video=558976-367162410.ts
+## splice_insert(auto_return)
+#EXT-X-DATERANGE:ID="4026532489-1762379569",START-DATE="2025-11-05T21:52:49.333333Z",PLANNED-DURATION=60,SCTE35-OUT=0xFC3025000000000BB800FFF01405F00002897FEFFFF495E898FE005265C0000101010000E289CA82
+#EXT-X-CUE-OUT:60
+#EXT-X-PROGRAM-DATE-TIME:2025-11-05T21:52:48.800000Z
+#EXTINF:4.1, no desc
+channel-audio_1=96000-video=558976-367162411.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162412.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162413.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162414.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162415.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162416.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162417.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162418.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162419.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162420.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162421.ts
+#EXTINF:4.8, no desc
+channel-audio_1=96000-video=558976-367162422.ts
+#EXTINF:3.1, no desc
+channel-audio_1=96000-video=558976-367162423.ts
+## Auto Return Mode
+#EXT-X-CUE-IN
+#EXT-X-PROGRAM-DATE-TIME:2025-11-05T21:53:48.800000Z
+#EXTINF:6.5, no desc
+channel-audio_1=96000-video=558976-367162424.ts
