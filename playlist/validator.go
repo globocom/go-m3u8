@@ -65,7 +65,7 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 
 func IsSameMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node, manifest Playlist) bool {
 
-	if element != nil && manifest.IsSegment(element) {
+	if element != nil && IsSegment(element) {
 		currentMediaSequence, _ := strconv.Atoi(element.HLSElement.Details["MediaSequence"])
 		if breakMediaSequence == currentMediaSequence {
 			return true
@@ -75,9 +75,13 @@ func IsSameMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node
 }
 
 func IsCueInMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node, manifest Playlist) bool {
-	previous2Element := element.Prev.Prev
-	if previous2Element != nil && manifest.IsSegment(previous2Element) {
-		adBreakNode, found := manifest.FindNodeInsideAdBreak(element)
+	previousElement := element.Prev.Prev
+	if previousElement != nil && previousElement.HLSElement.Name == "Comment" {
+		previousElement = previousElement.Prev
+	}
+
+	if previousElement != nil && IsSegment(previousElement) {
+		adBreakNode, found := manifest.FindNodeInsideAdBreak(previousElement)
 		if found {
 			adBreakMediaSequence, _ := strconv.Atoi(adBreakNode.HLSElement.Details["StartMediaSequence"])
 			if adBreakMediaSequence == breakMediaSequence {

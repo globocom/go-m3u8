@@ -7,6 +7,8 @@ import (
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/globocom/go-m3u8/playlist"
 )
 
 func TestVersionValue(t *testing.T) {
@@ -371,11 +373,11 @@ func TestFindPreviousSegment(t *testing.T) {
 
 func TestIsSegment(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
-	playlist, err := m3u8.ParsePlaylist(file)
+	playlistInstance, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	segmentNode := playlist.Segments()[0]
-	versionNode, _ := playlist.VersionTag()
+	segmentNode := playlistInstance.Segments()[0]
+	versionNode, _ := playlistInstance.VersionTag()
 
 	isSegment := playlist.IsSegment(segmentNode)
 	isNotSegment := playlist.IsSegment(versionNode)
