@@ -73,3 +73,17 @@ func IsSameMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node
 	}
 	return false
 }
+
+func IsCueInMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node, manifest Playlist) bool {
+	previous2Element := element.Prev.Prev
+	if previous2Element != nil && manifest.IsSegment(previous2Element) {
+		adBreakNode, found := manifest.FindNodeInsideAdBreak(element)
+		if found {
+			adBreakMediaSequence, _ := strconv.Atoi(adBreakNode.HLSElement.Details["StartMediaSequence"])
+			if adBreakMediaSequence == breakMediaSequence {
+				return true
+			}
+		}
+	}
+	return false
+}
