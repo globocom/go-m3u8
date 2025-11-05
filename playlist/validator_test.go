@@ -112,8 +112,8 @@ func TestIsDuplicatedBreak(t *testing.T) {
 	adBreaks := pl.Breaks()
 	assert.GreaterOrEqual(t, len(adBreaks), 2)
 
-	lastBreak := adBreaks[1]
-	previousBreak := adBreaks[0]
+	lastBreak := adBreaks[len(adBreaks)-1]
+	previousBreak := adBreaks[len(adBreaks)-2]
 
 	isDuplicate := playlist.IsDuplicatedBreak(lastBreak, previousBreak)
 	assert.True(t, isDuplicate)

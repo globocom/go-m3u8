@@ -262,8 +262,9 @@ func (p *Playlist) TrimInvalidBreaks() {
 		}
 
 		if i > 0 && len(adBreaks) > 1 {
-			if IsDuplicatedBreak(adBreak, adBreaks[i-1]) {
-				p.removeDuplicateBreakTags(adBreak)
+			previousAdBreak := adBreaks[i-1]
+			if IsDuplicatedBreak(adBreak, previousAdBreak) {
+				p.removeDuplicateBreakTags(adBreak, previousAdBreak)
 			}
 		}
 	}
@@ -301,27 +302,28 @@ func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
 	p.Remove(adBreak)
 }
 
-func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
-	if adBreak.Next != nil && adBreak.Next.HLSElement.Name == "CueOut" {
-		p.Remove(adBreak.Next)
+func (p *Playlist) removeDuplicateBreakTags(adBreak, previousAdBreak *internal.Node) {
+	if previousAdBreak.Next != nil && previousAdBreak.Next.HLSElement.Name == "CueOut" {
+		p.Remove(previousAdBreak.Next)
+	}
+
+	if previousAdBreak.Prev != nil && previousAdBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(previousAdBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert") {
+		p.Remove(previousAdBreak.Prev)
 	}
 
 	cueIns := p.CueInEvents()
 	for _, cueIn := range cueIns {
-		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
-		if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
-			p.Remove(cueIn.Prev)
-		}
-
+		previousSegment := p.FindPreviousSegment(cueIn)
+		adBreakCueIn, found := p.FindNodeInsideAdBreak(previousSegment)
 		if found && adBreakCueIn == adBreak {
+			if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
+				p.Remove(cueIn.Prev)
+			}
+
 			p.Remove(cueIn)
 			break
 		}
 	}
 
-	if adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == "Comment" && strings.Contains(adBreak.Prev.HLSElement.Attrs["Comment"], "## splice_insert") {
-		p.Remove(adBreak.Prev)
-	}
-
-	p.Remove(adBreak)
+	p.Remove(previousAdBreak)
 }
