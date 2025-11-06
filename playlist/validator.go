@@ -79,13 +79,9 @@ func (p *Playlist) IsCueInFromBreak(breakMediaSequence int, currentElement *inte
 	previousSegment := p.FindPreviousSegment(currentElement)
 
 	if previousSegment != nil {
-		node, found := p.FindNodeInsideAdBreak(previousSegment)
-		if found {
-			nodeMediaSequence, _ := strconv.Atoi(node.HLSElement.Details["StartMediaSequence"])
-			if nodeMediaSequence == breakMediaSequence {
-				return true
-			}
-		}
+		adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
+		adBreakMediaSequence, _ := strconv.Atoi(adBreakNode.HLSElement.Details["StartMediaSequence"])
+		return found && adBreakMediaSequence == breakMediaSequence
 	}
 	return false
 }
