@@ -75,7 +75,7 @@ func (p *Playlist) IsCueOutMediaSequenceFromBreak(breakMediaSequence int, curren
 	return false
 }
 
-func (p *Playlist) IsCueInMediaSequenceFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
+func (p *Playlist) IsCueInFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
 	previousSegment := p.FindPreviousSegment(currentElement)
 
 	if previousSegment != nil {

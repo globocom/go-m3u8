@@ -131,14 +131,14 @@ func TestIsCueOutMediaSequenceFromBreak(t *testing.T) {
 	assert.True(t, result)
 }
 
-func TestIsCueInMediaSequenceFromBreak(t *testing.T) {
+func TestIsCueInFromBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	pl, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 	cueInNode, _ := pl.Find("CueIn")
 	breakMediaSequence := 364042175
 
-	result := pl.IsCueInMediaSequenceFromBreak(breakMediaSequence, cueInNode)
+	result := pl.IsCueInFromBreak(breakMediaSequence, cueInNode)
 	assert.True(t, result)
 
 }
