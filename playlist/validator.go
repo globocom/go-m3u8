@@ -63,9 +63,11 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	return sameStartDate && sameDuration
 }
 
-func IsSameMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node, manifest Playlist) bool {
-	if element != nil && IsSegment(element) {
-		currentMediaSequence, _ := strconv.Atoi(element.HLSElement.Details["MediaSequence"])
+func (p *Playlist) IsCueOutMediaSequenceFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
+	nextSegment := p.FindNextSegment(currentElement)
+
+	if nextSegment != nil {
+		currentMediaSequence, _ := strconv.Atoi(nextSegment.HLSElement.Details["MediaSequence"])
 		if breakMediaSequence == currentMediaSequence {
 			return true
 		}
@@ -73,17 +75,14 @@ func IsSameMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node
 	return false
 }
 
-func IsCueInMediaSequenceFromBreak(breakMediaSequence int, element *internal.Node, manifest Playlist) bool {
-	previousElement := element.Prev.Prev
-	if previousElement != nil && previousElement.HLSElement.Name == "Comment" {
-		previousElement = previousElement.Prev
-	}
+func (p *Playlist) IsCueInMediaSequenceFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
+	previousSegment := p.FindPreviousSegment(currentElement)
 
-	if previousElement != nil && IsSegment(previousElement) {
-		adBreakNode, found := manifest.FindNodeInsideAdBreak(previousElement)
+	if previousSegment != nil {
+		node, found := p.FindNodeInsideAdBreak(previousSegment)
+		nodeMediaSequence, _ := strconv.Atoi(node.HLSElement.Details["StartMediaSequence"])
 		if found {
-			adBreakMediaSequence, _ := strconv.Atoi(adBreakNode.HLSElement.Details["StartMediaSequence"])
-			if adBreakMediaSequence == breakMediaSequence {
+			if nodeMediaSequence == breakMediaSequence {
 				return true
 			}
 		}
