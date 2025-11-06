@@ -63,7 +63,7 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	return sameStartDate && sameDuration
 }
 
-func (p *Playlist) IsCueOutMediaSequenceFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
+func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
 	nextSegment := p.FindNextSegment(currentElement)
 
 	if nextSegment != nil {

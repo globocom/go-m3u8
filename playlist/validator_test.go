@@ -119,7 +119,7 @@ func TestIsDuplicatedBreak(t *testing.T) {
 	assert.True(t, isDuplicate)
 }
 
-func TestIsCueOutMediaSequenceFromBreak(t *testing.T) {
+func TestIsCueOutFromBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	pl, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
@@ -127,7 +127,7 @@ func TestIsCueOutMediaSequenceFromBreak(t *testing.T) {
 	cueOutNode, _ := pl.Find("CueOut")
 
 	breakMediaSequence := 364042175
-	result := pl.IsCueOutMediaSequenceFromBreak(breakMediaSequence, cueOutNode)
+	result := pl.IsCueOutFromBreak(breakMediaSequence, cueOutNode)
 	assert.True(t, result)
 }
 
