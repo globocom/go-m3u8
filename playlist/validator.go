@@ -2,6 +2,7 @@ package playlist
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -75,14 +76,15 @@ func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, currentElement *int
 	return false
 }
 
-func (p *Playlist) IsCueInFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
+func (p *Playlist) IsCueInFromBreak(breakTimestamp string, currentElement *internal.Node) bool {
 	previousSegment := p.FindPreviousSegment(currentElement)
 
 	if previousSegment != nil {
 		adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
+		startDate, _ := ValidateStartDate(adBreakNode)
+		realTimestamp := fmt.Sprintf("%d", startDate.Unix())
 		if found {
-			adBreakMediaSequence, _ := ValidateMediaSequence(adBreakNode)
-			return found && adBreakMediaSequence == breakMediaSequence
+			return found && realTimestamp == breakTimestamp
 		}
 	}
 	return false

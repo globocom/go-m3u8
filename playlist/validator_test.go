@@ -136,9 +136,9 @@ func TestIsCueInFromBreak(t *testing.T) {
 	pl, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 	cueInNode, _ := pl.Find("CueIn")
-	breakMediaSequence := 364042175
+	breakTimestamp := "1747402436"
 
-	result := pl.IsCueInFromBreak(breakMediaSequence, cueInNode)
+	result := pl.IsCueInFromBreak(breakTimestamp, cueInNode)
 	assert.True(t, result)
 
 }
