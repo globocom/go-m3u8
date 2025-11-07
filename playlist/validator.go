@@ -64,29 +64,25 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 }
 
 func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
-	if currentElement.HLSElement.Name == "cue-out" {
-		nextSegment := p.FindNextSegment(currentElement)
+	nextSegment := p.FindNextSegment(currentElement)
 
-		if nextSegment != nil {
-			currentMediaSequence, _ := strconv.Atoi(nextSegment.HLSElement.Details["MediaSequence"])
-			if breakMediaSequence == currentMediaSequence {
-				return true
-			}
+	if nextSegment != nil {
+		currentMediaSequence, _ := strconv.Atoi(nextSegment.HLSElement.Details["MediaSequence"])
+		if breakMediaSequence == currentMediaSequence {
+			return true
 		}
 	}
 	return false
 }
 
 func (p *Playlist) IsCueInFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
-	if currentElement.HLSElement.Name == "cue-in" {
-		previousSegment := p.FindPreviousSegment(currentElement)
+	previousSegment := p.FindPreviousSegment(currentElement)
 
-		if previousSegment != nil {
-			adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
-			if found {
-				adBreakMediaSequence, _ := ValidateMediaSequence(adBreakNode)
-				return found && adBreakMediaSequence == breakMediaSequence
-			}
+	if previousSegment != nil {
+		adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
+		if found {
+			adBreakMediaSequence, _ := ValidateMediaSequence(adBreakNode)
+			return found && adBreakMediaSequence == breakMediaSequence
 		}
 	}
 	return false
