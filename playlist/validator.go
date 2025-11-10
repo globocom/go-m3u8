@@ -82,9 +82,9 @@ func (p *Playlist) IsCueInFromBreak(breakTimestamp string, currentElement *inter
 	if previousSegment != nil {
 		adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
 		startDate, _ := ValidateStartDate(adBreakNode)
-		realTimestamp := fmt.Sprintf("%d", startDate.Unix())
+		adBreakTimeStamp := fmt.Sprintf("%d", startDate.Unix())
 		if found {
-			return found && realTimestamp == breakTimestamp
+			return found && adBreakTimeStamp == breakTimestamp
 		}
 	}
 	return false
