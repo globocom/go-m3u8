@@ -373,11 +373,11 @@ func TestFindPreviousSegment(t *testing.T) {
 
 func TestIsSegment(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
-	playlistInstance, err := m3u8.ParsePlaylist(file)
+	playlist, err := m3u8.ParsePlaylist(file)
 	assert.NoError(t, err)
 
-	segmentNode := playlistInstance.Segments()[0]
-	versionNode, _ := playlistInstance.VersionTag()
+	segmentNode := playlist.Segments()[0]
+	versionNode, _ := playlist.VersionTag()
 
 	isSegment := p.IsSegment(segmentNode)
 	isNotSegment := p.IsSegment(versionNode)
