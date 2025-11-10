@@ -64,8 +64,9 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	return sameStartDate && sameDuration
 }
 
-func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, currentElement *internal.Node) bool {
-	nextSegment := p.FindNextSegment(currentElement)
+// Checks if the given cue out segment belongs to the ad break with the given media sequence
+func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, cueOutSegment *internal.Node) bool {
+	nextSegment := p.FindNextSegment(cueOutSegment)
 
 	if nextSegment != nil {
 		currentMediaSequence, _ := strconv.Atoi(nextSegment.HLSElement.Details["MediaSequence"])
@@ -76,14 +77,15 @@ func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, currentElement *int
 	return false
 }
 
-func (p *Playlist) IsCueInFromBreak(breakTimestamp string, currentElement *internal.Node) bool {
-	previousSegment := p.FindPreviousSegment(currentElement)
+// Checks if the given cue in segment belongs to the ad break with the given start date timestamp
+func (p *Playlist) IsCueInFromBreak(breakTimestamp string, cueInSegment *internal.Node) bool {
+	previousSegment := p.FindPreviousSegment(cueInSegment)
 
 	if previousSegment != nil {
 		adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
-		startDate, _ := ValidateStartDate(adBreakNode)
-		adBreakTimeStamp := fmt.Sprintf("%d", startDate.Unix())
 		if found {
+			startDate, _ := ValidateStartDate(adBreakNode)
+			adBreakTimeStamp := fmt.Sprintf("%d", startDate.Unix())
 			return found && adBreakTimeStamp == breakTimestamp
 		}
 	}
