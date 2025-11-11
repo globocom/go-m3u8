@@ -35,7 +35,7 @@ var Parsers = map[string]TagParser{
 	EventCueOutTag:           EventCueOutParser{},
 	EventCueInTag:            EventCueInParser{},
 	CommentLineTag:           CommentParser{},
-	EndlistTag:               EndlistParser{},
+	EndListTag:               EndListParser{},
 }
 
 // Parse *Playlist to string.

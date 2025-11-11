@@ -858,11 +858,11 @@ func TestMediaPlaylist_WithEndList(t *testing.T) {
 	p, err := m3u8.ParsePlaylist(file)
 	validatePlaylist(t, p, err)
 
-	EndListTag, found := p.Find(tags.EndListName)
+	endListTag, found := p.Find(tags.EndListName)
 	assert.True(t, found)
 
 	segment := p.Segments()[0]
 
-	assert.NotNil(t, EndListTag)
+	assert.NotNil(t, endListTag)
 	assert.Contains(t, segment.HLSElement.URI, ".ts")
 }

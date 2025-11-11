@@ -30,7 +30,7 @@ var (
 	MediaSequenceTag         = "#EXT-X-MEDIA-SEQUENCE"
 	DiscontinuitySequenceTag = "#EXT-X-DISCONTINUITY-SEQUENCE"
 	IFramesOnlyTag           = "#EXT-X-I-FRAMES-ONLY"
-	EndlistTag               = "#EXT-X-ENDLIST"
+	EndListTag               = "#EXT-X-ENDLIST"
 	PlaylistTypeTag          = "#EXT-X-PLAYLIST-TYPE"  // todo: has one attribute
 	PartInfTag               = "#EXT-X-PART-INF"       // todo: has attributes
 	ServerControlTag         = "#EXT-X-SERVER-CONTROL" // todo: has attributes
@@ -41,7 +41,7 @@ type (
 	MediaSequenceParser         struct{}
 	DiscontinuitySequenceParser struct{}
 	IFramesOnlyParser           struct{}
-	EndlistParser               struct{}
+	EndListParser               struct{}
 )
 
 type (
@@ -132,12 +132,12 @@ func (p IFramesOnlyParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
-func (p EndlistParser) Parse(tag string, playlist *pl.Playlist) error {
+func (p EndListParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
 			Name: EndListName,
 			Attrs: map[string]string{
-				EndlistTag: "",
+				EndListTag: "",
 			},
 		},
 	})
@@ -162,6 +162,6 @@ func (e IFramesOnlyEncoder) Encode(node *internal.Node, builder *strings.Builder
 }
 
 func (e EndlistEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	_, err := builder.WriteString(EndlistTag + "\n")
+	_, err := builder.WriteString(EndListTag + "\n")
 	return err
 }
