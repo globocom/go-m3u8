@@ -22,7 +22,7 @@ const (
 	MediaSequenceName         = "MediaSequence"
 	DiscontinuitySequenceName = "DiscontinuitySequence"
 	IFramesOnlyName           = "IFramesOnly"
-	EndListName               = "Endlist"
+	EndListName               = "EndList"
 )
 
 var (
