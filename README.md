@@ -62,6 +62,7 @@ The [**tags**](/tags) package implements the currently supported [Playlist Tags]
 - `#EXT-X-PROGRAM-DATE-TIME`
 - `#EXT-X-KEY`
 - `#EXT-X-MAP`
+- `#EXT-X-ENDLIST`
 
 4. **multivariant -** Multivariant Playlist Tags (Section 4.4.6).
 - `#EXT-X-STREAM-INF`
