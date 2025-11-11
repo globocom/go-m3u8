@@ -64,7 +64,7 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	return sameStartDate && sameDuration
 }
 
-// Checks if the given cue out segment belongs to the ad break with the given media sequence
+// Checks if the given cue out node belongs to the ad break with the given media sequence
 func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, cueOutSegment *internal.Node) bool {
 	nextSegment := p.FindNextSegment(cueOutSegment)
 
@@ -77,7 +77,7 @@ func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, cueOutSegment *inte
 	return false
 }
 
-// Checks if the given cue in segment belongs to the ad break with the given start date timestamp
+// Checks if the given cue in node belongs to the ad break with the given start date timestamp
 func (p *Playlist) IsCueInFromBreak(breakTimestamp string, cueInSegment *internal.Node) bool {
 	previousSegment := p.FindPreviousSegment(cueInSegment)
 
