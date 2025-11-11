@@ -35,6 +35,7 @@ var Parsers = map[string]TagParser{
 	EventCueOutTag:           EventCueOutParser{},
 	EventCueInTag:            EventCueInParser{},
 	CommentLineTag:           CommentParser{},
+	EndListTag:               EndListParser{},
 }
 
 // Parse *Playlist to string.
@@ -65,4 +66,5 @@ var Encoders = map[string]PlaylistEncoder{
 	EventCueOutName:           EventCueOutEncoder{},
 	EventCueInName:            EventCueInEncoder{},
 	CommentLineName:           CommentEncoder{},
+	EndListName:               EndListEncoder{},
 }
