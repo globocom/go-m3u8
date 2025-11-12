@@ -7,6 +7,8 @@ import (
 	m3u8 "github.com/globocom/go-m3u8"
 	"github.com/globocom/go-m3u8/internal"
 	"github.com/stretchr/testify/assert"
+
+	p "github.com/globocom/go-m3u8/playlist"
 )
 
 func TestVersionValue(t *testing.T) {
@@ -377,8 +379,8 @@ func TestIsSegment(t *testing.T) {
 	segmentNode := playlist.Segments()[0]
 	versionNode, _ := playlist.VersionTag()
 
-	isSegment := playlist.IsSegment(segmentNode)
-	isNotSegment := playlist.IsSegment(versionNode)
+	isSegment := p.IsSegment(segmentNode)
+	isNotSegment := p.IsSegment(versionNode)
 
 	assert.True(t, isSegment)
 	assert.False(t, isNotSegment)

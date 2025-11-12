@@ -240,8 +240,20 @@ func (p *Playlist) FindPreviousSegment(node *internal.Node) *internal.Node {
 	return nil
 }
 
+// Returns the next segment (#EXTINF) after the given node, or nil if none exists.
+func (p *Playlist) FindNextSegment(node *internal.Node) *internal.Node {
+	current := node.Next
+	for current != nil {
+		if current.HLSElement.Name == "ExtInf" {
+			return current
+		}
+		current = current.Next
+	}
+	return nil
+}
+
 // Returns true if the given node is a segment (#EXTINF), false otherwise.
-func (p *Playlist) IsSegment(node *internal.Node) bool {
+func IsSegment(node *internal.Node) bool {
 	return node.HLSElement.Name == "ExtInf"
 }
 

@@ -2,6 +2,7 @@ package playlist
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -61,4 +62,32 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	sameStartDate := startDate.Sub(startDatePrevious) < offset
 
 	return sameStartDate && sameDuration
+}
+
+// Checks if the given cue out node belongs to the ad break with the given media sequence
+func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, cueOutNode *internal.Node) bool {
+	nextSegment := p.FindNextSegment(cueOutNode)
+
+	if nextSegment != nil {
+		currentMediaSequence, _ := strconv.Atoi(nextSegment.HLSElement.Details["MediaSequence"])
+		if breakMediaSequence == currentMediaSequence {
+			return true
+		}
+	}
+	return false
+}
+
+// Checks if the given cue in node belongs to the ad break with the given start date timestamp
+func (p *Playlist) IsCueInFromBreak(breakTimestamp string, cueInNode *internal.Node) bool {
+	previousSegment := p.FindPreviousSegment(cueInNode)
+
+	if previousSegment != nil {
+		adBreakNode, found := p.FindNodeInsideAdBreak(previousSegment)
+		if found {
+			startDate, _ := ValidateStartDate(adBreakNode)
+			adBreakTimeStamp := fmt.Sprintf("%d", startDate.Unix())
+			return found && adBreakTimeStamp == breakTimestamp
+		}
+	}
+	return false
 }
