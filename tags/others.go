@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dlclark/regexp2"
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/rs/zerolog/log"
@@ -27,7 +26,6 @@ var (
 	EventCueOutTag     = "#EXT-X-CUE-OUT"
 	EventCueInTag      = "#EXT-X-CUE-IN"
 	CommentLineTag     = "# comment"
-	CommentLineRegex   = regexp2.MustCompile(`^#(?!(EXT|ext|USP)).*`, 0) // excludes tags (#EXT, #ext or #USP)
 )
 
 type (
