@@ -52,27 +52,26 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 // Lines that start with the character '#' are either comments or tags.
 // Tags begin with #EXT.  They are case sensitive.  All other lines that begin with '#' are comments and SHOULD be ignored.
 func extractPrefix(line string) string {
-	// check for blank lines
 	if line == "" {
 		return ""
 	}
 
-	// check for comments
-	isComment, err := tags.CommentLineRegex.MatchString(line)
-	if err != nil {
-		log.Error().Str("service", "go-m3u8/decode.go").Err(err).Msgf("failed to parse line: %s", line)
-		return ""
+	// check for tags: lines starting with #EXT, #ext ou #USP (case sensitive)
+	if strings.HasPrefix(line, "#EXT") || strings.HasPrefix(line, "#ext") || strings.HasPrefix(line, "#USP") {
+		// it's a tag, extract prefix as before
+		for i, r := range line {
+			if r == ':' || unicode.IsSpace(r) {
+				return line[:i]
+			}
+		}
+		return line
 	}
 
-	if isComment {
+	// if starts with '#' but is not a tag, it's a comment
+	if strings.HasPrefix(line, "#") {
 		return tags.CommentLineTag
 	}
 
-	// check for tags and uri
-	for i, r := range line {
-		if r == ':' || unicode.IsSpace(r) {
-			return line[:i]
-		}
-	}
+	// otherwise, return as is (URI or data line)
 	return line
 }

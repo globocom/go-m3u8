@@ -95,7 +95,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 					"Title":    p.CurrentSegment.Title,
 				},
 				Details: map[string]string{
-					"MediaSequence":   fmt.Sprintf("%d", p.CurrentSegment.MediaSequence),
+					"MediaSequence":   strconv.Itoa(p.CurrentSegment.MediaSequence),
 					"ProgramDateTime": p.CurrentSegment.ProgramDateTime.Format(time.RFC3339Nano),
 				},
 			},
