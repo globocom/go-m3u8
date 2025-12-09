@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"unicode"
 
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/globocom/go-m3u8/tags"
@@ -56,24 +55,24 @@ func extractPrefix(line string) string {
 		return ""
 	}
 
-	// Check if line is a tag
+	// Check if line starts with '#'
+	if line[0] != '#' {
+		// Not a tag or comment, return as is (URI or data line)
+		return line
+	}
+
+	// Check if it's an HLS tag (#ext or #usp)
 	if isRegularHLSTag(line) {
-		// it's a tag, extract prefix until ':' or whitespace
-		for i, r := range line {
-			if r == ':' || unicode.IsSpace(r) {
-				return line[:i]
-			}
+		// Extract prefix until ':' or whitespace
+		idx := strings.IndexAny(line, ": \t\n\r")
+		if idx != -1 {
+			return line[:idx]
 		}
 		return line
 	}
 
 	// if starts with '#' but is not a tag, it's a comment
-	if strings.HasPrefix(line, "#") {
-		return tags.CommentLineTag
-	}
-
-	// otherwise, return as is (URI or data line)
-	return line
+	return tags.CommentLineTag
 }
 
 // isHLSTag checks if a line is an HLS tag by examining its prefix.
