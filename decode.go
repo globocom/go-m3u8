@@ -50,15 +50,15 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 }
 
 // Lines that start with the character '#' are either comments or tags.
-// Tags begin with #EXT.  They are case sensitive.  All other lines that begin with '#' are comments and SHOULD be ignored.
+// Tags begin with #EXT or #USP. All other lines that begin with '#' are comments and SHOULD be ignored.
 func extractPrefix(line string) string {
 	if line == "" {
 		return ""
 	}
 
-	// check for tags: lines starting with #EXT, #ext ou #USP (case sensitive)
-	if strings.HasPrefix(line, "#EXT") || strings.HasPrefix(line, "#ext") || strings.HasPrefix(line, "#USP") {
-		// it's a tag, extract prefix as before
+	// Check if line is a tag
+	if isRegularHLSTag(line) {
+		// it's a tag, extract prefix until ':' or whitespace
 		for i, r := range line {
 			if r == ':' || unicode.IsSpace(r) {
 				return line[:i]
@@ -74,4 +74,23 @@ func extractPrefix(line string) string {
 
 	// otherwise, return as is (URI or data line)
 	return line
+}
+
+// isHLSTag checks if a line is an HLS tag by examining its prefix.
+// Tags must start with #ext (case-insensitive) or #usp (case-insensitive).
+// This function converts the prefix to lowercase internally for comparison.
+func isRegularHLSTag(line string) bool {
+	if len(line) < 4 {
+		return false
+	}
+
+	prefix := line[:4]
+	lowerPrefix := strings.ToLower(prefix)
+
+	// Check for #ext or #usp (case-insensitive)
+	if lowerPrefix == "#ext" || lowerPrefix == "#usp" {
+		return true
+	}
+
+	return false
 }
