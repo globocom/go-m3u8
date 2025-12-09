@@ -51,12 +51,7 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 // Lines that start with the character '#' are either comments or tags.
 // Tags begin with #EXT or #USP. All other lines that begin with '#' are comments and SHOULD be ignored.
 func extractPrefix(line string) string {
-	if line == "" {
-		return ""
-	}
-
-	// Check if line starts with '#'
-	if line[0] != '#' {
+	if line == "" || line[0] != '#' {
 		// Not a tag or comment, return as is (URI or data line)
 		return line
 	}
