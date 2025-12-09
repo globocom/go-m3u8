@@ -189,13 +189,19 @@ func (e ExtInfEncoder) Encode(node *internal.Node, builder *strings.Builder) err
 	uri := node.HLSElement.URI
 
 	// #EXTINF:<duration>,[<title>]
+	// Write directly to builder to avoid intermediate string allocations
+	builder.WriteString(ExtInfTag)
+	builder.WriteString(":")
+	builder.WriteString(duration)
 	if title != "" {
-		title = "," + title
+		builder.WriteString(",")
+		builder.WriteString(title)
 	}
+	builder.WriteString("\n")
+	builder.WriteString(uri)
+	builder.WriteString("\n")
 
-	attr := fmt.Sprintf("%s:%s%s\n%s\n", ExtInfTag, duration, title, uri)
-	_, err := builder.WriteString(attr)
-	return err
+	return nil
 }
 
 func (e DiscontinuityEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
