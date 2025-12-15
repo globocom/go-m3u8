@@ -70,21 +70,7 @@ func extractPrefix(line string) string {
 	return tags.CommentLineTag
 }
 
-// isHLSTag checks if a line is an HLS tag by examining its prefix.
-// Tags must start with #ext (case-insensitive) or #usp (case-insensitive).
-// This function converts the prefix to lowercase internally for comparison.
+// isRegularHLSTag checks if a line is an HLS tag by examining its prefix.
 func isRegularHLSTag(line string) bool {
-	if len(line) < 4 {
-		return false
-	}
-
-	prefix := line[:4]
-	lowerPrefix := strings.ToLower(prefix)
-
-	// Check for #ext or #usp (case-insensitive)
-	if lowerPrefix == "#ext" || lowerPrefix == "#usp" {
-		return true
-	}
-
-	return false
+	return strings.HasPrefix(line, "#EXT") || strings.HasPrefix(line, "#ext") || strings.HasPrefix(line, "#USP")
 }
