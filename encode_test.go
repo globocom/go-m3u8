@@ -226,6 +226,26 @@ func TestDiscontinuityEncoder(t *testing.T) {
 	assert.Equal(t, "#EXT-X-DISCONTINUITY\n", p)
 }
 
+func TestGapEncoder(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "Gap",
+		},
+	}
+
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	p, err := m3u8.EncodePlaylist(playlist)
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, "#EXT-X-GAP\n", p)
+}
+
 func TestUspTimestampMapEncoder(t *testing.T) {
 	node := &internal.Node{
 		HLSElement: &internal.HLSElement{
