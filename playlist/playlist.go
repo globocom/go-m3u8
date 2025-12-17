@@ -149,9 +149,9 @@ func (p *Playlist) CueInEvents() []*internal.Node {
 func (p *Playlist) Breaks() []*internal.Node {
 	result := make([]*internal.Node, 0)
 	nodes := p.FindAll("DateRange")
-	for _, node := range nodes {
-		if node.HLSElement.Attrs["SCTE35-OUT"] != "" {
-			result = append(result, node)
+	for i := range nodes {
+		if nodes[i].HLSElement.Attrs["SCTE35-OUT"] != "" {
+			result = append(result, nodes[i])
 		}
 	}
 	return result
@@ -161,9 +161,9 @@ func (p *Playlist) Breaks() []*internal.Node {
 func (p *Playlist) SCTE35InTags() []*internal.Node {
 	result := make([]*internal.Node, 0)
 	nodes := p.FindAll("DateRange")
-	for _, node := range nodes {
-		if node.HLSElement.Attrs["SCTE35-IN"] != "" {
-			result = append(result, node)
+	for i := range nodes {
+		if nodes[i].HLSElement.Attrs["SCTE35-IN"] != "" {
+			result = append(result, nodes[i])
 		}
 	}
 	return result
@@ -174,9 +174,9 @@ func (p *Playlist) SCTE35InTags() []*internal.Node {
 //	Example: "# variants", "# AUDIO groups", etc
 func (p *Playlist) Comment(matchString string) *internal.Node {
 	nodes := p.FindAll("Comment")
-	for _, node := range nodes {
-		if strings.Contains(node.HLSElement.Attrs["Comment"], matchString) {
-			return node
+	for i := range nodes {
+		if strings.Contains(nodes[i].HLSElement.Attrs["Comment"], matchString) {
+			return nodes[i]
 		}
 	}
 	return nil
@@ -291,18 +291,18 @@ func (p *Playlist) removeInvalidBreakTags(adBreak *internal.Node) {
 	}
 
 	cueIns := p.CueInEvents()
-	for _, cueIn := range cueIns {
-		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
+	for i := range cueIns {
+		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIns[i])
 		if found && adBreakCueIn == adBreak {
-			if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
-				p.Remove(cueIn.Prev)
+			if cueIns[i].Prev != nil && cueIns[i].Prev.HLSElement.Name == "Comment" && cueIns[i].Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
+				p.Remove(cueIns[i].Prev)
 			}
 
-			if cueIn.Next != nil && cueIn.Next.HLSElement.Name == "ProgramDateTime" {
-				p.Remove(cueIn.Next)
+			if cueIns[i].Next != nil && cueIns[i].Next.HLSElement.Name == "ProgramDateTime" {
+				p.Remove(cueIns[i].Next)
 			}
 
-			p.Remove(cueIn)
+			p.Remove(cueIns[i])
 		}
 	}
 
@@ -319,14 +319,14 @@ func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
 	}
 
 	cueIns := p.CueInEvents()
-	for _, cueIn := range cueIns {
-		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIn)
-		if cueIn.Prev != nil && cueIn.Prev.HLSElement.Name == "Comment" && cueIn.Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
-			p.Remove(cueIn.Prev)
+	for i := range cueIns {
+		adBreakCueIn, found := p.FindNodeInsideAdBreak(cueIns[i])
+		if cueIns[i].Prev != nil && cueIns[i].Prev.HLSElement.Name == "Comment" && cueIns[i].Prev.HLSElement.Attrs["Comment"] == "## Auto Return Mode" {
+			p.Remove(cueIns[i].Prev)
 		}
 
 		if found && adBreakCueIn == adBreak {
-			p.Remove(cueIn)
+			p.Remove(cueIns[i])
 			break
 		}
 	}

@@ -166,13 +166,13 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 	processed := make(map[string]bool)
 	first := true
 
-	for _, key := range order {
-		if value, exists := attrs[key]; exists && value != "" {
+	for i := range order {
+		if value, exists := attrs[order[i]]; exists && value != "" {
 			if !first {
 				builder.WriteByte(',')
 			}
-			writeAttribute(builder, key, value, shouldQuote)
-			processed[key] = true
+			writeAttribute(builder, order[i], value, shouldQuote)
+			processed[order[i]] = true
 			first = false
 		}
 	}
@@ -184,11 +184,11 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 		}
 	}
 	sort.Strings(unorderedKeys)
-	for _, key := range unorderedKeys {
+	for i := range unorderedKeys {
 		if !first {
 			builder.WriteByte(',')
 		}
-		writeAttribute(builder, key, attrs[key], shouldQuote)
+		writeAttribute(builder, unorderedKeys[i], attrs[unorderedKeys[i]], shouldQuote)
 		first = false
 	}
 
