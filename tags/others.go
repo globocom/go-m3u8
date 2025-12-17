@@ -26,6 +26,9 @@ var (
 	EventCueOutTag     = "#EXT-X-CUE-OUT"
 	EventCueInTag      = "#EXT-X-CUE-IN"
 	CommentLineTag     = "# comment"
+
+	USPTimestampMapOrderAttr       = []string{"MPEGTS", "LOCAL"}
+	USPTimestampMapShouldQuoteAttr = map[string]bool{"MPEGTS": false, "LOCAL": false}
 )
 
 type (
@@ -104,9 +107,7 @@ func (p CommentParser) Parse(line string, playlist *pl.Playlist) error {
 }
 
 func (e USPTimestampMapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"MPEGTS", "LOCAL"}
-	shouldQuoteAttr := map[string]bool{"MPEGTS": false, "LOCAL": false}
-	return pl.EncodeTagWithAttributes(builder, USPTimestampMapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+	return pl.EncodeTagWithAttributes(builder, USPTimestampMapTag, node.HLSElement.Attrs, USPTimestampMapOrderAttr, USPTimestampMapShouldQuoteAttr)
 }
 
 func (e EventCueOutEncoder) Encode(node *internal.Node, builder *strings.Builder) error {

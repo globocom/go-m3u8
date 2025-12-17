@@ -31,6 +31,8 @@ var (
 	SessionKeyTag      = "#EXT-X-SESSION-KEY"
 
 	// Pre-allocated shouldQuote maps (avoid allocations in hot path)
+
+	streamInfOrderAttr   = []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE", "HDCP-LEVEL", "VIDEO-RANGE", "AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
 	streamInfShouldQuote = map[string]bool{
 		"BANDWIDTH":         false,
 		"AVERAGE-BANDWIDTH": false,
@@ -45,6 +47,7 @@ var (
 		"CLOSED-CAPTIONS":   true,
 	}
 
+	mediaOrderAttr   = []string{"TYPE", "GROUP-ID", "LANGUAGE", "NAME", "DEFAULT", "AUTOSELECT", "CHANNELS", "URI", "INSTREAM-ID"}
 	mediaShouldQuote = map[string]bool{
 		"TYPE":        false,
 		"GROUP-ID":    true,
@@ -57,6 +60,7 @@ var (
 		"INSTREAM-ID": true,
 	}
 
+	iFrameStreamInfOrderAttr   = []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "URI", "VIDEO-RANGE", "VIDEO", "SCORE"}
 	iFrameStreamInfShouldQuote = map[string]bool{
 		"BANDWIDTH":         false,
 		"AVERAGE-BANDWIDTH": false,
@@ -68,6 +72,7 @@ var (
 		"SCORE":             false,
 	}
 
+	sessionKeyOrderAttr   = []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
 	sessionKeyShouldQuote = map[string]bool{
 		"METHOD":            false,
 		"URI":               true,
@@ -200,8 +205,6 @@ func (p SessionKeyParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "FRAME-RATE", "HDCP-LEVEL", "VIDEO-RANGE", "AUDIO", "VIDEO", "SUBTITLES", "CLOSED-CAPTIONS"}
-
 	// Use pre-allocated map, only copy for CLOSED-CAPTIONS=NONE case
 	shouldQuoteAttr := streamInfShouldQuote
 	if node.HLSElement.Attrs["CLOSED-CAPTIONS"] == "NONE" {
@@ -213,7 +216,7 @@ func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 		shouldQuoteAttr["CLOSED-CAPTIONS"] = false
 	}
 
-	if err := pl.EncodeTagWithAttributes(builder, StreamInfTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr); err != nil {
+	if err := pl.EncodeTagWithAttributes(builder, StreamInfTag, node.HLSElement.Attrs, streamInfOrderAttr, shouldQuoteAttr); err != nil {
 		return err
 	}
 	if node.HLSElement.URI != "" {
@@ -224,16 +227,13 @@ func (e StreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) 
 }
 
 func (e MediaEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"TYPE", "GROUP-ID", "LANGUAGE", "NAME", "DEFAULT", "AUTOSELECT", "CHANNELS", "URI", "INSTREAM-ID"}
-	return pl.EncodeTagWithAttributes(builder, MediaTag, node.HLSElement.Attrs, orderAttr, mediaShouldQuote)
+	return pl.EncodeTagWithAttributes(builder, MediaTag, node.HLSElement.Attrs, mediaOrderAttr, mediaShouldQuote)
 }
 
 func (e IFrameStreamInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"BANDWIDTH", "AVERAGE-BANDWIDTH", "CODECS", "RESOLUTION", "URI", "VIDEO-RANGE", "VIDEO", "SCORE"}
-	return pl.EncodeTagWithAttributes(builder, IFrameStreamInfTag, node.HLSElement.Attrs, orderAttr, iFrameStreamInfShouldQuote)
+	return pl.EncodeTagWithAttributes(builder, IFrameStreamInfTag, node.HLSElement.Attrs, iFrameStreamInfOrderAttr, iFrameStreamInfShouldQuote)
 }
 
 func (e SessionKeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
-	return pl.EncodeTagWithAttributes(builder, SessionKeyTag, node.HLSElement.Attrs, orderAttr, sessionKeyShouldQuote)
+	return pl.EncodeTagWithAttributes(builder, SessionKeyTag, node.HLSElement.Attrs, sessionKeyOrderAttr, sessionKeyShouldQuote)
 }

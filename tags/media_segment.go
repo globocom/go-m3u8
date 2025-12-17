@@ -37,6 +37,21 @@ var (
 	ByteRangeTag       = "#EXT-X-BYTERANGE" // todo: has attributes
 	GapTag             = "#EXT-X-GAP"
 	PartTag            = "#EXT-X-PART" // todo: has attributes
+
+	mapOrderAttr       = []string{"URI", "BYTERANGE"}
+	mapShouldQuoteAttr = map[string]bool{
+		"URI":       true,
+		"BYTERANGE": true,
+	}
+
+	keyOrderAttr       = []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
+	keyShouldQuoteAttr = map[string]bool{
+		"METHOD":            false,
+		"URI":               true,
+		"IV":                false,
+		"KEYFORMAT":         true,
+		"KEYFORMATVERSIONS": true,
+	}
 )
 
 type (
@@ -214,24 +229,11 @@ func (e ProgramDateTimeEncoder) Encode(node *internal.Node, builder *strings.Bui
 }
 
 func (e KeyEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"METHOD", "URI", "IV", "KEYFORMAT", "KEYFORMATVERSIONS"}
-	shouldQuoteAttr := map[string]bool{
-		"METHOD":            false,
-		"URI":               true,
-		"IV":                false,
-		"KEYFORMAT":         true,
-		"KEYFORMATVERSIONS": true,
-	}
-	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+	return pl.EncodeTagWithAttributes(builder, KeyTag, node.HLSElement.Attrs, keyOrderAttr, keyShouldQuoteAttr)
 }
 
 func (e MapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"URI", "BYTERANGE"}
-	shouldQuoteAttr := map[string]bool{
-		"URI":       true,
-		"BYTERANGE": true,
-	}
-	return pl.EncodeTagWithAttributes(builder, MapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+	return pl.EncodeTagWithAttributes(builder, MapTag, node.HLSElement.Attrs, mapOrderAttr, mapShouldQuoteAttr)
 }
 
 func (e GapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {

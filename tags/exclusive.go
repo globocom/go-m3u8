@@ -32,6 +32,14 @@ var (
 	IndependentSegmentsTag = "#EXT-X-INDEPENDENT-SEGMENTS"
 	VariableDefineTag      = "#EXT-X-DEFINE"
 	StartTag               = "#EXT-X-START" //todo: has attributes
+
+	variableDefineOrderAttr       = []string{"NAME", "VALUE", "IMPORT", "QUERYPARAM"}
+	variableDefineShouldQuoteAttr = map[string]bool{
+		"NAME":       true,
+		"VALUE":      true,
+		"IMPORT":     true,
+		"QUERYPARAM": true,
+	}
 )
 
 type (
@@ -83,12 +91,5 @@ func (e IndependentSegmentsEncoder) Encode(node *internal.Node, builder *strings
 }
 
 func (e VariableDefineEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	orderAttr := []string{"NAME", "VALUE", "IMPORT", "QUERYPARAM"}
-	shouldQuoteAttr := map[string]bool{
-		"NAME":       true,
-		"VALUE":      true,
-		"IMPORT":     true,
-		"QUERYPARAM": true,
-	}
-	return pl.EncodeTagWithAttributes(builder, VariableDefineTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+	return pl.EncodeTagWithAttributes(builder, VariableDefineTag, node.HLSElement.Attrs, variableDefineOrderAttr, variableDefineShouldQuoteAttr)
 }
