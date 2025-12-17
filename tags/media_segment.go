@@ -25,6 +25,7 @@ const (
 	ProgramDateTimeName = "ProgramDateTime"
 	KeyName             = "Key"
 	MapName             = "Map"
+	GapName             = "Gap"
 )
 
 var (
@@ -34,8 +35,8 @@ var (
 	KeyTag             = "#EXT-X-KEY"
 	MapTag             = "#EXT-X-MAP"
 	ByteRangeTag       = "#EXT-X-BYTERANGE" // todo: has attributes
-	GapTag             = "#EXT-X-GAP"       // todo
-	PartTag            = "#EXT-X-PART"      // todo: has attributes
+	GapTag             = "#EXT-X-GAP"
+	PartTag            = "#EXT-X-PART" // todo: has attributes
 )
 
 type (
@@ -44,6 +45,7 @@ type (
 	ProgramDateTimeParser struct{}
 	KeyParser             struct{}
 	MapParser             struct{}
+	GapParser             struct{}
 )
 
 type (
@@ -52,6 +54,7 @@ type (
 	ProgramDateTimeEncoder struct{}
 	KeyEncoder             struct{}
 	MapEncoder             struct{}
+	GapEncoder             struct{}
 )
 
 func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
@@ -168,6 +171,18 @@ func (p MapParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
+func (p GapParser) Parse(tag string, playlist *pl.Playlist) error {
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: GapName,
+			Attrs: map[string]string{
+				GapTag: "",
+			},
+		},
+	})
+	return nil
+}
+
 func (e ExtInfEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	duration := node.HLSElement.Attrs["Duration"]
 	title := node.HLSElement.Attrs["Title"]
@@ -211,4 +226,9 @@ func (e MapEncoder) Encode(node *internal.Node, builder *strings.Builder) error 
 		"BYTERANGE": true,
 	}
 	return pl.EncodeTagWithAttributes(builder, MapTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+}
+
+func (e GapEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	_, err := builder.WriteString(GapTag + "\n")
+	return err
 }

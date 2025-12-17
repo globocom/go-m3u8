@@ -254,6 +254,16 @@ func TestDiscontinuityParser(t *testing.T) {
 	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-DISCONTINUITY"])
 }
 
+func TestGapParser(t *testing.T) {
+	playlist := "#EXT-X-GAP"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, ok := p.Find(tags.GapName)
+	assert.True(t, ok)
+	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-GAP"])
+}
+
 func TestExtInfParser(t *testing.T) {
 	playlist := "#EXTINF:4.8, no desc"
 	p, err := setupPlaylist(playlist)
