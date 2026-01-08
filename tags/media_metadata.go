@@ -9,6 +9,7 @@ package tags
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,6 +31,20 @@ var (
 	SkipTag            = "#EXT-X-SKIP"             //todo: has attributes
 	PreLoadHintTag     = "#EXT-X-PRELOAD-HINT"     //todo: has attributes
 	RenditionReportTag = "#EXT-X-RENDITION-REPORT" //todo: has attributes
+
+	// Attribute X-<client-attribute> is a client-specific attribute and new ones must be added manually below (e.g., X-ASSET-URI)
+	dateRangeOrderAttr       = []string{"ID", "CLASS", "START-DATE", "END-DATE", "DURATION", "PLANNED-DURATION", "X-ASSET-URI", "SCTE35-OUT", "SCTE35-IN"}
+	dateRangeShouldQuoteAttr = map[string]bool{
+		"ID":               true,
+		"CLASS":            true,
+		"START-DATE":       true,
+		"END-DATE":         true,
+		"DURATION":         false,
+		"PLANNED-DURATION": false,
+		"X-ASSET-URI":      true,
+		"SCTE35-OUT":       false,
+		"SCTE35-IN":        false,
+	}
 )
 
 type DateRangeParser struct{}
@@ -63,27 +78,14 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 }
 
 func (e DateRangeEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
-	// Attribute X-<client-attribute> is a client-specific attribute and new ones must be added manually below (e.g., X-ASSET-URI)
-	orderAttr := []string{"ID", "CLASS", "START-DATE", "END-DATE", "DURATION", "PLANNED-DURATION", "X-ASSET-URI", "SCTE35-OUT", "SCTE35-IN"}
-	shouldQuoteAttr := map[string]bool{
-		"ID":               true,
-		"CLASS":            true,
-		"START-DATE":       true,
-		"END-DATE":         true,
-		"DURATION":         false,
-		"PLANNED-DURATION": false,
-		"X-ASSET-URI":      true,
-		"SCTE35-OUT":       false,
-		"SCTE35-IN":        false,
-	}
-	return pl.EncodeTagWithAttributes(builder, DateRangeTag, node.HLSElement.Attrs, orderAttr, shouldQuoteAttr)
+	return pl.EncodeTagWithAttributes(builder, DateRangeTag, node.HLSElement.Attrs, dateRangeOrderAttr, dateRangeShouldQuoteAttr)
 }
 
 // Returns the Ad Break's media sequence (string) and status (string).
 //   - The Break's media sequence will be the media sequence of the first segment inside the break (or zero if Break is incomplete).
 //   - The Break's status will be: "complete" or incomplete ("leavingDVRLimit" or "segmentsNotReady").
 func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (value, status string) {
-	currentMediaSequence := fmt.Sprintf("%d", playlist.MediaSequence+playlist.SegmentsCounter)
+	currentMediaSequence := strconv.Itoa(playlist.MediaSequence + playlist.SegmentsCounter)
 	breakStartDate, _ := time.Parse(time.RFC3339Nano, dateRangeNode.HLSElement.Attrs["START-DATE"])
 
 	// when ad break segments are leaving DVR, we lose the break's first segment's media sequence

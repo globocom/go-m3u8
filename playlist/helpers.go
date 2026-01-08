@@ -95,7 +95,7 @@ func HandleMultiLineHLSElements(line string, p *Playlist) error {
 					"Title":    p.CurrentSegment.Title,
 				},
 				Details: map[string]string{
-					"MediaSequence":   fmt.Sprintf("%d", p.CurrentSegment.MediaSequence),
+					"MediaSequence":   strconv.Itoa(p.CurrentSegment.MediaSequence),
 					"ProgramDateTime": p.CurrentSegment.ProgramDateTime.Format(time.RFC3339Nano),
 				},
 			},
@@ -160,13 +160,20 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 		return err
 	}
 
-	formattedAttrs := make([]string, 0, len(attrs))
-	processed := make(map[string]bool)
+	builder.WriteString(tag)
+	builder.WriteByte(':')
 
-	for _, key := range order {
-		if value, exists := attrs[key]; exists && value != "" {
-			formattedAttrs = append(formattedAttrs, FormatAttribute(key, value, shouldQuote))
-			processed[key] = true
+	processed := make(map[string]bool)
+	first := true
+
+	for i := range order {
+		if value, exists := attrs[order[i]]; exists && value != "" {
+			if !first {
+				builder.WriteByte(',')
+			}
+			writeAttribute(builder, order[i], value, shouldQuote)
+			processed[order[i]] = true
+			first = false
 		}
 	}
 
@@ -177,14 +184,16 @@ func EncodeTagWithAttributes(builder *strings.Builder, tag string, attrs map[str
 		}
 	}
 	sort.Strings(unorderedKeys)
-	for _, key := range unorderedKeys {
-		formattedAttrs = append(formattedAttrs, FormatAttribute(key, attrs[key], shouldQuote))
+	for i := range unorderedKeys {
+		if !first {
+			builder.WriteByte(',')
+		}
+		writeAttribute(builder, unorderedKeys[i], attrs[unorderedKeys[i]], shouldQuote)
+		first = false
 	}
 
-	attributes := fmt.Sprintf("%s:%s\n", tag, strings.Join(formattedAttrs, ","))
-
-	_, err := builder.WriteString(attributes)
-	return err
+	builder.WriteByte('\n')
+	return nil
 }
 
 // Encodes a tag without attributes into a string.
@@ -195,6 +204,31 @@ func EncodeSimpleTag(node *internal.Node, builder *strings.Builder, tag, attrKey
 		return err
 	}
 	return fmt.Errorf("attribute %s not found for tag %s", attrKey, tag)
+}
+
+// Writes a key-value attribute directly to the builder, optionally quoting the value.
+func writeAttribute(builder *strings.Builder, key, value string, shouldQuote map[string]bool) {
+	builder.WriteString(key)
+	builder.WriteByte('=')
+
+	shouldQuoteValue, exists := shouldQuote[key]
+	if !exists {
+		shouldQuoteValue = true // default to quoting if not specified
+	}
+
+	if shouldQuoteValue {
+		builder.WriteByte('"')
+		// Escape quotes in the value
+		for i := 0; i < len(value); i++ {
+			if value[i] == '"' {
+				builder.WriteByte('\\')
+			}
+			builder.WriteByte(value[i])
+		}
+		builder.WriteByte('"')
+	} else {
+		builder.WriteString(value)
+	}
 }
 
 // Formats a key-value tag attribute into a string, optionally quoting the value based on the shouldQuote map.
