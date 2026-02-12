@@ -20,6 +20,41 @@ func TestVersionValue(t *testing.T) {
 	assert.Equal(t, version, "3")
 }
 
+func TestVersionIntValue(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	version, err := playlist.VersionIntValue()
+	assert.NoError(t, err)
+	assert.Equal(t, 3, version)
+}
+
+func TestVersionIntValueMissingTag(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/multivariant.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	version, err := playlist.VersionIntValue()
+	assert.Error(t, err)
+	assert.Equal(t, 0, version)
+}
+
+func TestVersionIntValueInvalidValue(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node, found := playlist.VersionTag()
+	assert.True(t, found)
+	assert.NotNil(t, node)
+	node.HLSElement.Attrs["#EXT-X-VERSION"] = "abc"
+
+	version, err := playlist.VersionIntValue()
+	assert.Error(t, err)
+	assert.Equal(t, 0, version)
+}
+
 func TestVersionTag(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -40,6 +75,41 @@ func TestMediaSequenceValue(t *testing.T) {
 	assert.Equal(t, mediaSequence, "364042169")
 }
 
+func TestMediaSequenceIntValue(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	mediaSequence, err := playlist.MediaSequenceIntValue()
+	assert.NoError(t, err)
+	assert.Equal(t, 364042169, mediaSequence)
+}
+
+func TestMediaSequenceIntValueMissingTag(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/multivariant.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	mediaSequence, err := playlist.MediaSequenceIntValue()
+	assert.Error(t, err)
+	assert.Equal(t, 0, mediaSequence)
+}
+
+func TestMediaSequenceIntValueInvalidValue(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/media.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node, found := playlist.MediaSequenceTag()
+	assert.True(t, found)
+	assert.NotNil(t, node)
+	node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"] = "abc"
+
+	mediaSequence, err := playlist.MediaSequenceIntValue()
+	assert.Error(t, err)
+	assert.Equal(t, 0, mediaSequence)
+}
+
 func TestMediaSequenceTag(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)
@@ -58,6 +128,41 @@ func TestDiscontinuitySequenceValue(t *testing.T) {
 
 	discSequence := playlist.DiscontinuitySequenceValue()
 	assert.Equal(t, discSequence, "87498")
+}
+
+func TestDiscontinuitySequenceIntValue(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withDiscontinuity.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	discSequence, err := playlist.DiscontinuitySequenceIntValue()
+	assert.NoError(t, err)
+	assert.Equal(t, 87498, discSequence)
+}
+
+func TestDiscontinuitySequenceIntValueMissingTag(t *testing.T) {
+	file, _ := os.Open("./../mocks/multivariant/multivariant.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	discSequence, err := playlist.DiscontinuitySequenceIntValue()
+	assert.Error(t, err)
+	assert.Equal(t, 0, discSequence)
+}
+
+func TestDiscontinuitySequenceIntValueInvalidValue(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withDiscontinuity.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	node, found := playlist.DiscontinuitySequenceTag()
+	assert.True(t, found)
+	assert.NotNil(t, node)
+	node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"] = "abc"
+
+	discSequence, err := playlist.DiscontinuitySequenceIntValue()
+	assert.Error(t, err)
+	assert.Equal(t, 0, discSequence)
 }
 
 func TestDiscontinuitySequenceTag(t *testing.T) {
