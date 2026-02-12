@@ -67,6 +67,20 @@ func (p *Playlist) VersionValue() string {
 	return node.HLSElement.Attrs["#EXT-X-VERSION"]
 }
 
+// Returns the Version (#EXT-X-VERSION) tag's value as an integer. If the tag is not found or the value cannot be parsed as an integer, returns 0 and an error.
+func (p *Playlist) VersionIntValue() (int, error) {
+	versionStr := p.VersionValue()
+	if versionStr == "" {
+		return 0, errors.New("version tag not found")
+	}
+	var version int
+	_, err := fmt.Sscanf(versionStr, "%d", &version)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse version value: %w", err)
+	}
+	return version, nil
+}
+
 // Returns the Version (#EXT-X-VERSION) tag as a Node if it exists, otherwise returns nil and false
 func (p *Playlist) VersionTag() (*internal.Node, bool) {
 	return p.Find("Version")
@@ -81,6 +95,20 @@ func (p *Playlist) MediaSequenceValue() string {
 	return node.HLSElement.Attrs["#EXT-X-MEDIA-SEQUENCE"]
 }
 
+// Returns the MediaSequence (#EXT-X-MEDIA-SEQUENCE) tag's value as an integer. If the tag is not found or the value cannot be parsed as an integer, returns 0 and an error.
+func (p *Playlist) MediaSequenceIntValue() (int, error) {
+	sequenceStr := p.MediaSequenceValue()
+	if sequenceStr == "" {
+		return 0, errors.New("media sequence tag not found")
+	}
+	var sequence int
+	_, err := fmt.Sscanf(sequenceStr, "%d", &sequence)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse media sequence value: %w", err)
+	}
+	return sequence, nil
+}
+
 // Returns the MediaSequence (#EXT-X-MEDIA-SEQUENCE) tag as a Node if it exists, otherwise returns nil and false
 func (p *Playlist) MediaSequenceTag() (*internal.Node, bool) {
 	return p.Find("MediaSequence")
@@ -93,6 +121,20 @@ func (p *Playlist) DiscontinuitySequenceValue() string {
 		return ""
 	}
 	return node.HLSElement.Attrs["#EXT-X-DISCONTINUITY-SEQUENCE"]
+}
+
+// Returns the DiscontinuitySequence (#EXT-X-DISCONTINUITY-SEQUENCE) tag's value as an integer. If the tag is not found or the value cannot be parsed as an integer, returns 0 and an error.
+func (p *Playlist) DiscontinuitySequenceIntValue() (int, error) {
+	sequenceStr := p.DiscontinuitySequenceValue()
+	if sequenceStr == "" {
+		return 0, errors.New("discontinuity sequence tag not found")
+	}
+	var sequence int
+	_, err := fmt.Sscanf(sequenceStr, "%d", &sequence)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse discontinuity sequence value: %w", err)
+	}
+	return sequence, nil
 }
 
 // Returns the DiscontinuitySequence (#EXT-X-DISCONTINUITY-SEQUENCE) tag as a Node if it exists, otherwise returns nil and false
