@@ -8,7 +8,7 @@ import (
 
 // Parses a resolution string in the format "WIDTHxHEIGHT"
 // returns the width, height, and a boolean indicating success.
-func parseResolution(resolution string) (int, int, bool) {
+func parseResolution(resolution string) (width, height int, ok bool) {
 	if resolution == "" {
 		return 0, 0, false
 	}
@@ -23,7 +23,7 @@ func parseResolution(resolution string) (int, int, bool) {
 		return 0, 0, false
 	}
 
-	height, err := strconv.Atoi(parts[1])
+	height, err = strconv.Atoi(parts[1])
 	if err != nil {
 		return 0, 0, false
 	}
