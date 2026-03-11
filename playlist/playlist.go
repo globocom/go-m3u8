@@ -337,3 +337,25 @@ func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
 
 	p.Remove(adBreak)
 }
+
+// Ensures that the playlist's HLS version is at least the specified minimum version.
+// It returns the Version tag node (which may have been updated, if it exists)
+func (p *Playlist) EnsureHLSVersion(minVersion int) *internal.Node {
+	versionNode, found := p.VersionTag()
+	if !found {
+		return nil
+	}
+
+	versionStr := versionNode.HLSElement.Attrs["#EXT-X-VERSION"]
+	var version int
+	_, err := fmt.Sscanf(versionStr, "%d", &version)
+	if err != nil {
+		return nil
+	}
+
+	if version < minVersion {
+		versionNode.HLSElement.Attrs["#EXT-X-VERSION"] = fmt.Sprintf("%d", minVersion)
+	}
+
+	return versionNode
+}
