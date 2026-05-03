@@ -17,6 +17,7 @@ import (
 const (
 	USPTimestampMapName = "UspTimestampMap"
 	EventCueOutName     = "CueOut"
+	EventCueOutContName = "CueOutCont"
 	EventCueInName      = "CueIn"
 	CommentLineName     = "Comment"
 )
@@ -24,16 +25,21 @@ const (
 var (
 	USPTimestampMapTag = "#USP-X-TIMESTAMP-MAP"
 	EventCueOutTag     = "#EXT-X-CUE-OUT"
+	EventCueOutContTag = "#EXT-X-CUE-OUT-CONT"
 	EventCueInTag      = "#EXT-X-CUE-IN"
 	CommentLineTag     = "# comment"
 
 	USPTimestampMapOrderAttr       = []string{"MPEGTS", "LOCAL"}
 	USPTimestampMapShouldQuoteAttr = map[string]bool{"MPEGTS": false, "LOCAL": false}
+
+	EventCueOutContOrderAttr       = []string{"ElapsedTime", "Duration", "SCTE35"}
+	EventCueOutContShouldQuoteAttr = map[string]bool{"ElapsedTime": false, "Duration": false, "SCTE35": false}
 )
 
 type (
 	USPTimestampMapParser struct{}
 	EventCueOutParser     struct{}
+	EventCueOutContParser struct{}
 	EventCueInParser      struct{}
 	CommentParser         struct{}
 )
@@ -41,6 +47,7 @@ type (
 type (
 	USPTimestampMapEncoder struct{}
 	EventCueOutEncoder     struct{}
+	EventCueOutContEncoder struct{}
 	EventCueInEncoder      struct{}
 	CommentEncoder         struct{}
 )
@@ -80,6 +87,33 @@ func (p EventCueOutParser) Parse(tag string, playlist *pl.Playlist) error {
 	return nil
 }
 
+func (p EventCueOutContParser) Parse(tag string, playlist *pl.Playlist) error {
+	attrs := map[string]string{}
+	parts := strings.SplitN(tag, ":", 2)
+	if len(parts) > 1 && parts[1] != "" {
+		body := parts[1]
+		if strings.Contains(body, "=") {
+			// key=value format: ElapsedTime=5.939,Duration=201.467,SCTE35=...
+			attrs = pl.TagsToMapCaseSensitive(body)
+		} else {
+			// positional format: 8.308/30
+			if pos := strings.SplitN(body, "/", 2); len(pos) == 2 {
+				attrs["ElapsedTime"] = strings.TrimSpace(pos[0])
+				attrs["Duration"] = strings.TrimSpace(pos[1])
+			}
+		}
+	}
+
+	playlist.Insert(&internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  EventCueOutContName,
+			Attrs: attrs,
+		},
+	})
+
+	return nil
+}
+
 func (p EventCueInParser) Parse(tag string, playlist *pl.Playlist) error {
 	playlist.Insert(&internal.Node{
 		HLSElement: &internal.HLSElement{
@@ -112,6 +146,10 @@ func (e USPTimestampMapEncoder) Encode(node *internal.Node, builder *strings.Bui
 
 func (e EventCueOutEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
 	return pl.EncodeSimpleTag(node, builder, EventCueOutTag, EventCueOutTag)
+}
+
+func (e EventCueOutContEncoder) Encode(node *internal.Node, builder *strings.Builder) error {
+	return pl.EncodeTagWithAttributes(builder, EventCueOutContTag, node.HLSElement.Attrs, EventCueOutContOrderAttr, EventCueOutContShouldQuoteAttr)
 }
 
 func (e EventCueInEncoder) Encode(node *internal.Node, builder *strings.Builder) error {

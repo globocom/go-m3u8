@@ -145,6 +145,16 @@ func TagsToMap(line string) map[string]string {
 	return m
 }
 
+// TagsToMapCaseSensitive is like TagsToMap but preserves the original case of attribute names.
+// Use this for tags whose spec defines mixed-case attribute names (e.g. ElapsedTime, Duration).
+func TagsToMapCaseSensitive(line string) map[string]string {
+	m := make(map[string]string)
+	for _, kv := range ParamRegex.FindAllStringSubmatch(line, -1) {
+		m[kv[1]] = strings.Trim(kv[2], "\"")
+	}
+	return m
+}
+
 // Rounds a float64 value to a specified precision.
 func RoundFloat(val float64, precision uint) float64 {
 	ratio := math.Pow(10, float64(precision))
