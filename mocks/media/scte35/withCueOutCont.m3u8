@@ -1,0 +1,20 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:100
+#EXT-X-TARGETDURATION:7
+#EXT-X-CUE-OUT:30
+#EXTINF:4.8, no desc
+segment-100.ts
+#EXT-X-CUE-OUT-CONT:ElapsedTime=4.8,Duration=30,SCTE35=/DA0AAAA+AAg+2UBNAAANvrtoQ==
+#EXTINF:4.8, no desc
+segment-101.ts
+#EXT-X-CUE-OUT-CONT:ElapsedTime=9.6,Duration=30
+#EXTINF:4.8, no desc
+segment-102.ts
+#EXT-X-CUE-OUT-CONT:14.4/30
+#EXTINF:4.8, no desc
+segment-103.ts
+#EXT-X-CUE-OUT-CONT
+#EXTINF:4.8, no desc
+segment-104.ts
+#EXT-X-CUE-IN
