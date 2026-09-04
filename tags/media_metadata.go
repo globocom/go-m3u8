@@ -8,6 +8,7 @@
 package tags
 
 import (
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -23,6 +24,7 @@ const (
 	BreakStatusNotReady   = "segmentsNotReady"
 	BreakStatusComplete   = "complete"
 	DateRangeName         = "DateRange"
+	DateRangeUPIDData     = "SegmentationUPIDData"
 	breakNotReadyLimit    = 20 * time.Millisecond
 )
 
@@ -71,6 +73,10 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 			"StartMediaSequence": mediaSequence,
 			"Status":             status,
 		}
+
+		if upidData, ok := extractSegmentationUPIDData(dateRangeNode.HLSElement.Attrs["SCTE35-OUT"]); ok {
+			dateRangeNode.HLSElement.Details[DateRangeUPIDData] = upidData
+		}
 	}
 
 	playlist.Insert(dateRangeNode)
@@ -118,4 +124,166 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 	}
 
 	return currentMediaSequence, BreakStatusComplete
+}
+
+// Extracts segmentation_upid().Data from the SCTE-35 segmentation descriptor found.
+// Returned value is raw string decoded from UPID bytes.
+func extractSegmentationUPIDData(scte35 string) (string, bool) {
+	payload := strings.TrimSpace(scte35)
+	payload = strings.TrimPrefix(payload, "0x")
+	payload = strings.TrimPrefix(payload, "0X")
+
+	if len(payload) < 6 || len(payload)%2 != 0 {
+		return "", false
+	}
+
+	binaryPayload, err := hex.DecodeString(payload)
+	if err != nil || len(binaryPayload) < 17 {
+		return "", false
+	}
+
+	idx := 0
+	idx++ // table_id
+
+	if idx+2 > len(binaryPayload) {
+		return "", false
+	}
+
+	sectionLength := int(uint16(binaryPayload[idx]&0x0F)<<8 | uint16(binaryPayload[idx+1]))
+	idx += 2
+
+	sectionEnd := idx + sectionLength
+	if sectionEnd > len(binaryPayload) {
+		return "", false
+	}
+
+	if idx+5 > sectionEnd {
+		return "", false
+	}
+
+	idx++    // protocol_version
+	idx += 5 // encrypted_packet + encryption_algorithm + pts_adjustment
+
+	if idx+6 > sectionEnd {
+		return "", false
+	}
+
+	idx++ // cw_index
+
+	// tier (12 bits) + splice_command_length (12 bits)
+	spliceCommandLength := int(uint16(binaryPayload[idx+1]&0x0F)<<8 | uint16(binaryPayload[idx+2]))
+	idx += 3
+
+	if idx >= sectionEnd {
+		return "", false
+	}
+
+	idx++ // splice_command_type
+
+	if idx+spliceCommandLength > sectionEnd {
+		return "", false
+	}
+	idx += spliceCommandLength
+
+	if idx+2 > sectionEnd {
+		return "", false
+	}
+
+	descriptorLoopLength := int(uint16(binaryPayload[idx])<<8 | uint16(binaryPayload[idx+1]))
+	idx += 2
+
+	descriptorEnd := idx + descriptorLoopLength
+	if descriptorEnd > sectionEnd {
+		return "", false
+	}
+
+	for idx+2 <= descriptorEnd {
+		descriptorTag := binaryPayload[idx]
+		descriptorLength := int(binaryPayload[idx+1])
+		idx += 2
+
+		if idx+descriptorLength > descriptorEnd {
+			return "", false
+		}
+
+		if descriptorTag == 0x02 {
+			if upidData, found := parseSegmentationDescriptorUPID(binaryPayload[idx : idx+descriptorLength]); found {
+				return upidData, true
+			}
+		}
+
+		idx += descriptorLength
+	}
+
+	return "", false
+}
+
+func parseSegmentationDescriptorUPID(descriptor []byte) (string, bool) {
+	if len(descriptor) < 11 {
+		return "", false
+	}
+
+	idx := 0
+	idx += 4 // identifier, e.g. CUEI
+	idx += 4 // segmentation_event_id
+
+	segmentationEventCancelIndicator := descriptor[idx]&0x80 != 0
+	idx++
+	if segmentationEventCancelIndicator {
+		return "", false
+	}
+
+	if idx >= len(descriptor) {
+		return "", false
+	}
+
+	flags := descriptor[idx]
+	idx++
+
+	programSegmentationFlag := flags&0x80 != 0
+	segmentationDurationFlag := flags&0x40 != 0
+	deliveryNotRestrictedFlag := flags&0x20 != 0
+
+	if !deliveryNotRestrictedFlag {
+		if idx >= len(descriptor) {
+			return "", false
+		}
+		idx++
+	}
+
+	if !programSegmentationFlag {
+		if idx >= len(descriptor) {
+			return "", false
+		}
+
+		componentCount := int(descriptor[idx])
+		idx++
+
+		componentBytesLength := componentCount * 6
+		if idx+componentBytesLength > len(descriptor) {
+			return "", false
+		}
+		idx += componentBytesLength
+	}
+
+	if segmentationDurationFlag {
+		if idx+5 > len(descriptor) {
+			return "", false
+		}
+		idx += 5
+	}
+
+	if idx+2 > len(descriptor) {
+		return "", false
+	}
+
+	segmentationUPIDLength := int(descriptor[idx+1])
+	idx += 2
+
+	if segmentationUPIDLength <= 0 || idx+segmentationUPIDLength > len(descriptor) {
+		return "", false
+	}
+
+	segmentationUPIDData := descriptor[idx : idx+segmentationUPIDLength]
+	return string(segmentationUPIDData), true
 }

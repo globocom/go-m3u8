@@ -211,6 +211,16 @@ func TestDateRangeParser(t *testing.T) {
 	assert.Equal(t, "2025-01-01T00:00:00Z", node.HLSElement.Attrs["START-DATE"])
 }
 
+func TestDateRangeParser_SCTE35SegmentationUPIDData(t *testing.T) {
+	playlist := "#EXT-X-DATERANGE:ID=\"3221225472-1787681921\",START-DATE=\"2026-08-25T18:18:41.966666Z\",PLANNED-DURATION=120.4,SCTE35-OUT=0xFC303F00000000000000FFF01405C00000007FEFFFDB6680287E00A55820B7190002001A0218435545490000016B7FFF0000A5584408043220505400000047F03520"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find(tags.DateRangeName)
+	assert.True(t, found)
+	assert.Equal(t, "2 PT", node.HLSElement.Details[tags.DateRangeUPIDData])
+}
+
 func TestCueOutParser(t *testing.T) {
 	playlist := "#EXT-X-CUE-OUT:30"
 	p, err := setupPlaylist(playlist)
