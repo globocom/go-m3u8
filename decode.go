@@ -3,7 +3,6 @@ package go_m3u8
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"strings"
 
 	pl "github.com/globocom/go-m3u8/playlist"
@@ -12,7 +11,8 @@ import (
 )
 
 type Source interface {
-	io.ReadCloser
+	Read(p []byte) (n int, err error)
+	Close() error
 }
 
 // Reads an m3u8 playlist from the provided source and returns a Playlist object.
