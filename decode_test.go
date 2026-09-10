@@ -222,6 +222,19 @@ func TestDateRangeParser_SCTE35SegmentationUPIDData(t *testing.T) {
 	assert.Equal(t, "2 PT", node.HLSElement.Details[tags.DateRangeUPIDData])
 }
 
+func TestDateRangeParser_SCTE35EmptySegmentationUPIDData(t *testing.T) {
+	playlist := "#EXT-X-DATERANGE:ID=\"no-upid\",START-DATE=\"2026-08-25T18:18:41.966666Z\",PLANNED-DURATION=120.4,SCTE35-OUT=0xFC3025000000000BB800FFF01405F00001BB7FEFFE06EF5210FE005265C0000101010000E50D79A2"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find(tags.DateRangeName)
+	assert.True(t, found)
+	UPID, ok := node.HLSElement.Details[tags.DateRangeUPIDData]
+	assert.False(t, ok)
+	// expected segmentation_upid.Data is empty since the SCTE-35 does not contain segmentation_upid()
+	assert.Equal(t, "", UPID)
+}
+
 func TestCueOutParser(t *testing.T) {
 	playlist := "#EXT-X-CUE-OUT:30"
 	p, err := setupPlaylist(playlist)
