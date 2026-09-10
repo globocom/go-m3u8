@@ -22,6 +22,7 @@ func ParsePlaylist(src Source) (*pl.Playlist, error) {
 
 	scanner := bufio.NewScanner(src)
 	defer func() {
+		//nolint:typecheck
 		if err := src.Close(); err != nil {
 			log.Error().Str("service", "go-m3u8/decode.go").Err(err).Msg("error scanning playlist file")
 		}
