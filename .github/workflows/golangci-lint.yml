@@ -20,7 +20,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: v2.0
+      - name: Install golangci-lint
+        run: |
+          GOBIN=$(go env GOPATH)/bin
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.2
+
+      - name: Run golangci-lint
+        run: |
+          $(go env GOPATH)/bin/golangci-lint run --timeout=5m ./...
