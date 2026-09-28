@@ -11,13 +11,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Source interface {
-	io.ReadCloser
-}
-
 // Reads an m3u8 playlist from the provided source and returns a Playlist object.
 // It scans each line, identifies HLS elements, and applies the appropriate parser.
-func ParsePlaylist(src Source) (*pl.Playlist, error) {
+func ParsePlaylist(src io.ReadCloser) (*pl.Playlist, error) {
 	playlist := pl.NewPlaylist()
 
 	scanner := bufio.NewScanner(src)
