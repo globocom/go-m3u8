@@ -244,6 +244,66 @@ func TestCueInParser(t *testing.T) {
 	assert.Equal(t, "", node.HLSElement.Attrs["#EXT-X-CUE-IN"])
 }
 
+func TestCueOutContParserNoAttrs(t *testing.T) {
+	playlist := "#EXT-X-CUE-OUT-CONT"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, ok := p.Find(tags.EventCueOutContName)
+	assert.True(t, ok)
+	assert.Empty(t, node.HLSElement.Attrs)
+}
+
+func TestCueOutContParserKeyValue(t *testing.T) {
+	playlist := "#EXT-X-CUE-OUT-CONT:ElapsedTime=5.939,Duration=201.467,SCTE35=/DA0AAAA+AAg+2UBNAAANvrtoQ=="
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, ok := p.Find(tags.EventCueOutContName)
+	assert.True(t, ok)
+	assert.Equal(t, "5.939", node.HLSElement.Attrs["ElapsedTime"])
+	assert.Equal(t, "201.467", node.HLSElement.Attrs["Duration"])
+	assert.Equal(t, "/DA0AAAA+AAg+2UBNAAANvrtoQ==", node.HLSElement.Attrs["SCTE35"])
+}
+
+func TestCueOutContParserWithoutSCTE35(t *testing.T) {
+	playlist := "#EXT-X-CUE-OUT-CONT:ElapsedTime=9.6,Duration=30"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, ok := p.Find(tags.EventCueOutContName)
+	assert.True(t, ok)
+	assert.Equal(t, "9.6", node.HLSElement.Attrs["ElapsedTime"])
+	assert.Equal(t, "30", node.HLSElement.Attrs["Duration"])
+	assert.Empty(t, node.HLSElement.Attrs["SCTE35"])
+}
+
+func TestCueOutContParserPositional(t *testing.T) {
+	playlist := "#EXT-X-CUE-OUT-CONT:8.308/30"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, ok := p.Find(tags.EventCueOutContName)
+	assert.True(t, ok)
+	assert.Equal(t, "8.308", node.HLSElement.Attrs["ElapsedTime"])
+	assert.Equal(t, "30", node.HLSElement.Attrs["Duration"])
+}
+
+func TestCueOutContParserFromFile(t *testing.T) {
+	file, _ := os.Open("mocks/media/scte35/withCueOutCont.m3u8")
+	p, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	nodes := p.CueOutContEvents()
+	assert.Len(t, nodes, 4)
+	assert.Equal(t, "4.8", nodes[0].HLSElement.Attrs["ElapsedTime"])
+	assert.Equal(t, "30", nodes[0].HLSElement.Attrs["Duration"])
+	assert.Equal(t, "/DA0AAAA+AAg+2UBNAAANvrtoQ==", nodes[0].HLSElement.Attrs["SCTE35"])
+	assert.Equal(t, "9.6", nodes[1].HLSElement.Attrs["ElapsedTime"])
+	assert.Equal(t, "14.4", nodes[2].HLSElement.Attrs["ElapsedTime"])
+	assert.Empty(t, nodes[3].HLSElement.Attrs)
+}
+
 func TestDiscontinuityParser(t *testing.T) {
 	playlist := "#EXT-X-DISCONTINUITY"
 	p, err := setupPlaylist(playlist)
