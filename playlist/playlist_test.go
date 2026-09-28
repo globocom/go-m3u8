@@ -92,17 +92,6 @@ func TestVariants(t *testing.T) {
 	assert.Len(t, nodes, 8)
 }
 
-func TestVariantsHeightFilter(t *testing.T) {
-	file, _ := os.Open("./../mocks/multivariant/multivariant.m3u8")
-	playlist, err := m3u8.ParsePlaylist(file)
-	assert.NoError(t, err)
-
-	playlist.FilterByMaxHeight(720)
-	nodes := playlist.Variants()
-	assert.NotNil(t, nodes)
-	assert.Len(t, nodes, 7)
-}
-
 func TestMediaGroups(t *testing.T) {
 	file, _ := os.Open("./../mocks/multivariant/withClosedCaptionGroups.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)

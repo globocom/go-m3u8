@@ -140,6 +140,91 @@ if err != nil {
 
 For complete details on the available methods, please read [the original release notes](https://github.com/globocom/go-m3u8/releases/tag/v0.1.0).
 
+### Manifest Filters
+
+The `Playlist` type provides filter methods for multivariant and media playlists.
+
+Available filters:
+
+- `FilterByMaxHeight(maxHeight int)`
+- `FilterByMinHeight(minHeight int)`
+- `FilterByMaxWidth(maxWidth int)`
+- `FilterByMinWidth(minWidth int)`
+- `FilterByMaxBitrate(maxBitrate int)`
+- `FilterByMinBitrate(minBitrate int)`
+- `FilterByDVRWindow(dvrWindowSeconds float64)`
+
+Notes:
+
+- Height/width/bitrate filters apply to multivariant playlists (`#EXT-X-STREAM-INF` variants).
+- `FilterByDVRWindow` applies to media playlists (`#EXTINF` segments).
+- You can combine filters by calling them in sequence.
+
+#### Example: Filter a Multivariant Playlist
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+
+	go_m3u8 "github.com/globocom/go-m3u8"
+)
+
+func main() {
+	file, _ := os.Open("multivariant.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+	if err != nil {
+		panic(err)
+	}
+
+	// Keep only variants in the desired quality/bitrate range.
+	p.FilterByMinHeight(720)
+	p.FilterByMaxWidth(1280)
+	p.FilterByMinBitrate(700000)
+	p.FilterByMaxBitrate(2000000)
+
+	manifest, err := go_m3u8.EncodePlaylist(p)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(manifest)
+}
+```
+
+#### Example: Filter a Media Playlist by DVR Window
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+
+	go_m3u8 "github.com/globocom/go-m3u8"
+)
+
+func main() {
+	file, _ := os.Open("media.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+	if err != nil {
+		panic(err)
+	}
+
+	// Keep only the most recent 20 seconds of segments.
+	p.FilterByDVRWindow(20)
+
+	manifest, err := go_m3u8.EncodePlaylist(p)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(manifest)
+}
+```
+
 ### Collecting Ad Break Data
 
 Collect information on ad breaks present on the manifest when SCTE-35 ad insertion is used.
