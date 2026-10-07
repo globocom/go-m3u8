@@ -162,7 +162,7 @@ func parseSegmentationUPIDDataFromHex(scte35Hex string) (string, bool) {
 // extractUPIDFromSegmentationDescriptor extracts the UPID value from a SegmentationDescriptor.
 func extractUPIDFromSegmentationDescriptor(segDesc *scte35.SegmentationDescriptor) (string, bool) {
 	for _, upid := range segDesc.SegmentationUPIDs {
-		if len(upid.Value) == 0 {
+		if upid.Value == "" {
 			continue
 		}
 
@@ -182,7 +182,7 @@ func convertUPIDToASCII(upidValue string) (string, bool) {
 	intVal, err := strconv.ParseInt(upidValue, 10, 64)
 	if err != nil {
 		// If unable to parse as integer, return the string directly as fallback
-		return upidValue, len(upidValue) > 0
+		return upidValue, upidValue != ""
 	}
 
 	// Convert the 4 bytes of the integer to ASCII string
@@ -194,5 +194,5 @@ func convertUPIDToASCII(upidValue string) (string, bool) {
 
 	// Remove null bytes and return
 	result := strings.TrimRight(string(bytes), "\x00")
-	return result, len(result) > 0
+	return result, result != ""
 }
