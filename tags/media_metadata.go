@@ -74,7 +74,7 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 			"Status":             status,
 		}
 
-		if upidData, ok := extractSegmentationUPIDData(dateRangeNode.HLSElement.Attrs["SCTE35-OUT"]); ok {
+		if upidData, ok := parseSegmentationUPIDDataFromHex(dateRangeNode.HLSElement.Attrs["SCTE35-OUT"]); ok {
 			dateRangeNode.HLSElement.Details[DateRangeUPIDData] = upidData
 		}
 	}
@@ -128,12 +128,13 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 
 // Extracts segmentation_upid().Data from the SCTE-35 segmentation descriptor found.
 // Returned value is raw string decoded from UPID bytes.
-func extractSegmentationUPIDData(scte35Hex string) (string, bool) {
+func parseSegmentationUPIDDataFromHex(scte35Hex string) (string, bool) {
 	payload := strings.TrimSpace(scte35Hex)
 	payload = strings.TrimPrefix(payload, "0x")
 	payload = strings.TrimPrefix(payload, "0X")
 
-	if len(payload) < 6 || len(payload)%2 != 0 {
+	isInvalidSCTEPayload := len(payload) < 6 || len(payload)%2 != 0
+	if isInvalidSCTEPayload {
 		return "", false
 	}
 
