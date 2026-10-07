@@ -8,12 +8,12 @@
 package tags
 
 import (
-	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Comcast/scte35-go/pkg/scte35"
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/rs/zerolog/log"
@@ -128,8 +128,8 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 
 // Extracts segmentation_upid().Data from the SCTE-35 segmentation descriptor found.
 // Returned value is raw string decoded from UPID bytes.
-func extractSegmentationUPIDData(scte35 string) (string, bool) {
-	payload := strings.TrimSpace(scte35)
+func extractSegmentationUPIDData(scte35Hex string) (string, bool) {
+	payload := strings.TrimSpace(scte35Hex)
 	payload = strings.TrimPrefix(payload, "0x")
 	payload = strings.TrimPrefix(payload, "0X")
 
@@ -137,156 +137,61 @@ func extractSegmentationUPIDData(scte35 string) (string, bool) {
 		return "", false
 	}
 
-	binaryPayload, err := hex.DecodeString(payload)
-	if err != nil || len(binaryPayload) < 17 {
+	// Decode SCTE-35 using scte35-go lib
+	spliceInfo, err := scte35.DecodeHex(payload)
+	if err != nil {
 		return "", false
 	}
 
-	idx := 0
-	idx++ // table_id
-
-	if idx+2 > len(binaryPayload) {
-		return "", false
-	}
-
-	sectionLength := int(uint16(binaryPayload[idx]&0x0F)<<8 | uint16(binaryPayload[idx+1]))
-	idx += 2
-
-	sectionEnd := idx + sectionLength
-	if sectionEnd > len(binaryPayload) {
-		return "", false
-	}
-
-	if idx+5 > sectionEnd {
-		return "", false
-	}
-
-	idx++    // protocol_version
-	idx += 5 // encrypted_packet + encryption_algorithm + pts_adjustment
-
-	if idx+6 > sectionEnd {
-		return "", false
-	}
-
-	idx++ // cw_index
-
-	// tier (12 bits) + splice_command_length (12 bits)
-	if idx+2 >= len(binaryPayload) {
-		return "", false
-	}
-	spliceCommandLength := int(uint16(binaryPayload[idx+1]&0x0F)<<8 | uint16(binaryPayload[idx+2]))
-	idx += 3
-
-	if idx >= sectionEnd {
-		return "", false
-	}
-
-	idx++ // splice_command_type
-
-	if idx+spliceCommandLength > sectionEnd {
-		return "", false
-	}
-	idx += spliceCommandLength
-
-	if idx+2 > sectionEnd {
-		return "", false
-	}
-
-	descriptorLoopLength := int(uint16(binaryPayload[idx])<<8 | uint16(binaryPayload[idx+1]))
-	idx += 2
-
-	descriptorEnd := idx + descriptorLoopLength
-	if descriptorEnd > sectionEnd {
-		return "", false
-	}
-
-	for idx+2 <= descriptorEnd {
-		descriptorTag := binaryPayload[idx]
-		descriptorLength := int(binaryPayload[idx+1])
-		idx += 2
-
-		if idx+descriptorLength > descriptorEnd {
-			return "", false
+	// Search for SegmentationDescriptor and extract the UPID
+	for _, desc := range spliceInfo.SpliceDescriptors {
+		segDesc, ok := desc.(*scte35.SegmentationDescriptor)
+		if !ok {
+			continue
 		}
 
-		if descriptorTag == 0x02 {
-			if upidData, found := parseSegmentationDescriptorUPID(binaryPayload[idx : idx+descriptorLength]); found {
-				return upidData, true
-			}
+		if upidValue, found := extractUPIDFromSegmentationDescriptor(segDesc); found {
+			return upidValue, true
 		}
-
-		idx += descriptorLength
 	}
 
 	return "", false
 }
 
-func parseSegmentationDescriptorUPID(descriptor []byte) (string, bool) {
-	if len(descriptor) < 11 {
-		return "", false
-	}
-
-	idx := 0
-	idx += 4 // identifier, e.g. CUEI
-	idx += 4 // segmentation_event_id
-
-	segmentationEventCancelIndicator := descriptor[idx]&0x80 != 0
-	idx++
-	if segmentationEventCancelIndicator {
-		return "", false
-	}
-
-	if idx >= len(descriptor) {
-		return "", false
-	}
-
-	flags := descriptor[idx]
-	idx++
-
-	programSegmentationFlag := flags&0x80 != 0
-	segmentationDurationFlag := flags&0x40 != 0
-	deliveryNotRestrictedFlag := flags&0x20 != 0
-
-	if !deliveryNotRestrictedFlag {
-		if idx >= len(descriptor) {
-			return "", false
-		}
-		idx++
-	}
-
-	if !programSegmentationFlag {
-		if idx >= len(descriptor) {
-			return "", false
+// extractUPIDFromSegmentationDescriptor extracts the UPID value from a SegmentationDescriptor.
+func extractUPIDFromSegmentationDescriptor(segDesc *scte35.SegmentationDescriptor) (string, bool) {
+	for _, upid := range segDesc.SegmentationUPIDs {
+		if len(upid.Value) == 0 {
+			continue
 		}
 
-		componentCount := int(descriptor[idx])
-		idx++
-
-		componentBytesLength := componentCount * 6
-		if idx+componentBytesLength > len(descriptor) {
-			return "", false
+		if asciiValue, found := convertUPIDToASCII(upid.Value); found {
+			return asciiValue, true
 		}
-		idx += componentBytesLength
 	}
 
-	if segmentationDurationFlag {
-		if idx+5 > len(descriptor) {
-			return "", false
-		}
-		idx += 5
+	return "", false
+}
+
+// convertUPIDToASCII converts the UPID numeric string to ASCII string.
+// scte35-go returns UPID.Value as a numeric string (e.g., "840978516") which represents
+// an integer containing the original ASCII bytes. This function extracts those bytes.
+func convertUPIDToASCII(upidValue string) (string, bool) {
+	// Try to parse the numeric string as int64
+	intVal, err := strconv.ParseInt(upidValue, 10, 64)
+	if err != nil {
+		// If unable to parse as integer, return the string directly as fallback
+		return upidValue, len(upidValue) > 0
 	}
 
-	if idx+2 > len(descriptor) {
-		return "", false
-	}
+	// Convert the 4 bytes of the integer to ASCII string
+	bytes := make([]byte, 4)
+	bytes[0] = byte((intVal >> 24) & 0xFF)
+	bytes[1] = byte((intVal >> 16) & 0xFF)
+	bytes[2] = byte((intVal >> 8) & 0xFF)
+	bytes[3] = byte(intVal & 0xFF)
 
-	segmentationUPIDLength := int(descriptor[idx+1])
-	idx += 2
-
-	if segmentationUPIDLength <= 0 || idx+segmentationUPIDLength > len(descriptor) {
-		return "", false
-	}
-
-	segmentationUPIDData := descriptor[idx : idx+segmentationUPIDLength]
-	return string(segmentationUPIDData), true
+	// Remove null bytes and return
+	result := strings.TrimRight(string(bytes), "\x00")
+	return result, len(result) > 0
 }
