@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Comcast/scte35-go/pkg/scte35"
 	"github.com/globocom/go-m3u8/internal"
 	pl "github.com/globocom/go-m3u8/playlist"
 	"github.com/rs/zerolog/log"
@@ -74,7 +73,7 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 			"Status":             status,
 		}
 
-		if upidData, ok := parseSegmentationUPIDDataFromHex(dateRangeNode.HLSElement.Attrs["SCTE35-OUT"]); ok {
+		if upidData, ok := ExtractUPIDFromSCTE35Hex(dateRangeNode.HLSElement.Attrs["SCTE35-OUT"]); ok {
 			dateRangeNode.HLSElement.Details[DateRangeUPIDData] = upidData
 		}
 	}
@@ -124,75 +123,4 @@ func getAdBreakDetails(playlist *pl.Playlist, dateRangeNode *internal.Node) (val
 	}
 
 	return currentMediaSequence, BreakStatusComplete
-}
-
-// Extracts segmentation_upid().Data from the SCTE-35 segmentation descriptor found.
-// Returned value is raw string decoded from UPID bytes.
-func parseSegmentationUPIDDataFromHex(scte35Hex string) (string, bool) {
-	payload := strings.TrimSpace(scte35Hex)
-	payload = strings.TrimPrefix(payload, "0x")
-	payload = strings.TrimPrefix(payload, "0X")
-
-	isInvalidSCTEPayload := len(payload) < 6 || len(payload)%2 != 0
-	if isInvalidSCTEPayload {
-		return "", false
-	}
-
-	// Decode SCTE-35 using scte35-go lib
-	spliceInfo, err := scte35.DecodeHex(payload)
-	if err != nil {
-		return "", false
-	}
-
-	// Search for SegmentationDescriptor and extract the UPID
-	for _, desc := range spliceInfo.SpliceDescriptors {
-		segDesc, ok := desc.(*scte35.SegmentationDescriptor)
-		if !ok {
-			continue
-		}
-
-		if upidValue, found := extractUPIDFromSegmentationDescriptor(segDesc); found {
-			return upidValue, true
-		}
-	}
-
-	return "", false
-}
-
-// extractUPIDFromSegmentationDescriptor extracts the UPID value from a SegmentationDescriptor.
-func extractUPIDFromSegmentationDescriptor(segDesc *scte35.SegmentationDescriptor) (string, bool) {
-	for _, upid := range segDesc.SegmentationUPIDs {
-		if upid.Value == "" {
-			continue
-		}
-
-		if asciiValue, found := convertUPIDToASCII(upid.Value); found {
-			return asciiValue, true
-		}
-	}
-
-	return "", false
-}
-
-// convertUPIDToASCII converts the UPID numeric string to ASCII string.
-// scte35-go returns UPID.Value as a numeric string (e.g., "840978516") which represents
-// an integer containing the original ASCII bytes. This function extracts those bytes.
-func convertUPIDToASCII(upidValue string) (string, bool) {
-	// Try to parse the numeric string as int64
-	intVal, err := strconv.ParseInt(upidValue, 10, 64)
-	if err != nil {
-		// If unable to parse as integer, return the string directly as fallback
-		return upidValue, upidValue != ""
-	}
-
-	// Convert the 4 bytes of the integer to ASCII string
-	bytes := make([]byte, 4)
-	bytes[0] = byte((intVal >> 24) & 0xFF)
-	bytes[1] = byte((intVal >> 16) & 0xFF)
-	bytes[2] = byte((intVal >> 8) & 0xFF)
-	bytes[3] = byte(intVal & 0xFF)
-
-	// Remove null bytes and return
-	result := strings.TrimRight(string(bytes), "\x00")
-	return result, result != ""
 }

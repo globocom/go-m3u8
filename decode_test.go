@@ -235,6 +235,17 @@ func TestDateRangeParser_SCTE35EmptySegmentationUPIDData(t *testing.T) {
 	assert.Equal(t, "", UPID)
 }
 
+func TestDateRangeParser_SCTE35SegmentationUPIDData_LongValue(t *testing.T) {
+	playlist := "#EXT-X-DATERANGE:ID=\"test-long-upid\",START-DATE=\"2026-09-30T18:58:11.999999Z\",PLANNED-DURATION=10,SCTE35-OUT=0xFC304A000000000BB800FFF01405C00000007FEFFE3E2E4620FE0036EE804414000000250223435545490000049B7FFF000036EE800C0F205245443230323630393135383520100101428611E9"
+	p, err := setupPlaylist(playlist)
+	assert.NoError(t, err)
+
+	node, found := p.Find(tags.DateRangeName)
+	assert.True(t, found)
+	// Expected: " RED2026091585 " (15 bytes with leading and trailing spaces preserved)
+	assert.Equal(t, " RED2026091585 ", node.HLSElement.Details[tags.DateRangeUPIDData])
+}
+
 func TestCueOutParser(t *testing.T) {
 	playlist := "#EXT-X-CUE-OUT:30"
 	p, err := setupPlaylist(playlist)
