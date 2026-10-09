@@ -170,6 +170,19 @@ func TestCueInEvents(t *testing.T) {
 	assert.Equal(t, nodes[0].HLSElement.Attrs["#EXT-X-CUE-IN"], "")
 }
 
+func TestCueOutContEvents(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/scte35/withCueOutCont.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	nodes := playlist.CueOutContEvents()
+	assert.NotNil(t, nodes)
+	assert.Len(t, nodes, 4)
+	assert.Equal(t, "4.8", nodes[0].HLSElement.Attrs["ElapsedTime"])
+	assert.Equal(t, "30", nodes[0].HLSElement.Attrs["Duration"])
+	assert.Equal(t, "/DA0AAAA+AAg+2UBNAAANvrtoQ==", nodes[0].HLSElement.Attrs["SCTE35"])
+}
+
 func TestBreaks(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	playlist, err := m3u8.ParsePlaylist(file)

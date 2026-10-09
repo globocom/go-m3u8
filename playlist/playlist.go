@@ -140,6 +140,11 @@ func (p *Playlist) CueOutEvents() []*internal.Node {
 	return p.FindAll("CueOut")
 }
 
+// Returns all CueOutCont (#EXT-X-CUE-OUT-CONT) nodes in the playlist
+func (p *Playlist) CueOutContEvents() []*internal.Node {
+	return p.FindAll("CueOutCont")
+}
+
 // Returns all CueIn (#EXT-X-CUE-IN) nodes in the playlist
 func (p *Playlist) CueInEvents() []*internal.Node {
 	return p.FindAll("CueIn")

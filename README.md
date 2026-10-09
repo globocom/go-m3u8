@@ -8,7 +8,6 @@ go-m3u8
 </div>
 </h1>
 
-
 ### ⚠️ Work in Progress!
 
 _This project is currently in pre-release and is subject to changes._
@@ -39,19 +38,22 @@ Some available operations are:
 
 ### HLS Elements
 
-To guarantee scalibility, our library considers a data structure for the HLS elements that follows the [RFC documentation](https://tools.ietf.org/html/rfc8216). 
+To guarantee scalibility, our library considers a data structure for the HLS elements that follows the [RFC documentation](https://tools.ietf.org/html/rfc8216).
 
 The [**tags**](/tags) package implements the currently supported [Playlist Tags](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4):
 
 1. **basic -** Basic Tags (Section 4.4.1).
+
 - `#EXTM3U`
 - `#EXT-X-VERSION`
 
 2. **exclusive -** Media or Multivariant Playlist Tags (Section 4.4.2).
+
 - `#EXT-X-INDEPENDENT-SEGMENTS`
 - `#EXT-X-DEFINE`
 
 3. **media -** Media Playlist, Metadata and Segment Tags (Sections 4.4.3 to 4.4.5).
+
 - `#EXT-X-DATERANGE`
 - `#EXT-X-TARGETDURATION`
 - `#EXT-X-MEDIA-SEQUENCE`
@@ -65,13 +67,16 @@ The [**tags**](/tags) package implements the currently supported [Playlist Tags]
 - `#EXT-X-ENDLIST`
 
 4. **multivariant -** Multivariant Playlist Tags (Section 4.4.6).
+
 - `#EXT-X-STREAM-INF`
 - `#EXT-X-MEDIA`
 - `#EXT-X-I-FRAME-STREAM-INF`
 - `#EXT-X-SESSION-KEY`
 
 5. **others -** The tags in this section are "non-official" and are not listed in the RFC, e.g. tags added to the manifest by the live stream packaging service.
+
 - `#EXT-X-CUE-OUT`
+- `#EXT-X-CUE-OUT-CONT`
 - `#EXT-X-CUE-IN`
 - Packager specific tags.
 - In-manifest comments (begin with `#` and are NOT tags).
@@ -100,6 +105,7 @@ The [**testlocal**](/testlocal/) folder contains instructions on how to setup an
 The `ParsePlaylist` method receives a `io.ReadCloser` object as argument and returns a `Playlist` object.
 
 You may decode a manifest that is in string format:
+
 ```go
 manifest := `#EXTM3U
 #EXT-X-VERSION:3
@@ -116,6 +122,7 @@ if err != nil {
 ```
 
 Or read the manifest file directly:
+
 ```go
 file, _ := os.Open("multivariant.m3u8")
 
@@ -136,7 +143,7 @@ if err != nil {
 }
 ```
 
-## Usage 
+## Usage
 
 For complete details on the available methods, please read [the original release notes](https://github.com/globocom/go-m3u8/releases/tag/v0.1.0).
 
@@ -278,6 +285,42 @@ func main() {
 }
 ```
 
+### Reading CUE-OUT-CONT Markers
+
+Read `#EXT-X-CUE-OUT-CONT` markers from segments inside an ad break.
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+
+	go_m3u8 "github.com/globocom/go-m3u8"
+)
+
+func main() {
+	file, _ := os.Open("playlist.m3u8")
+	p, err := go_m3u8.ParsePlaylist(file)
+	if err != nil {
+		panic(err)
+	}
+
+	// Find all CUE-OUT-CONT markers in the playlist
+	contMarkers := p.CueOutContEvents()
+
+	for _, node := range contMarkers {
+		// Each marker carries elapsed time and total break duration
+		fmt.Printf(
+			"ElapsedTime=%s Duration=%s SCTE35=%s\n",
+			node.HLSElement.Attrs["ElapsedTime"],
+			node.HLSElement.Attrs["Duration"],
+			node.HLSElement.Attrs["SCTE35"],
+		)
+	}
+}
+```
+
 ### Adding Discontinuity Information
 
 Insert discontinuity tags when SCTE-35 ad break markers are present.
@@ -346,7 +389,7 @@ func main() {
 
 	// Find all encryption key tags
 	keyNodes := p.EncryptionTags()
-	
+
 	for _, keyNode := range keyNodes {
 		// Update the key URI with new key server
 		if keyNode.HLSElement.Attrs != nil {

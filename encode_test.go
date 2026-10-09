@@ -295,6 +295,91 @@ func TestCueOutEncoder(t *testing.T) {
 	assert.Equal(t, "#EXT-X-CUE-OUT:30\n", p)
 }
 
+func TestCueOutContEncoderNoAttrs(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name:  "CueOutCont",
+			Attrs: map[string]string{},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "#EXT-X-CUE-OUT-CONT\n", p)
+}
+
+func TestCueOutContEncoderWithElapsedTimeAndDuration(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "CueOutCont",
+			Attrs: map[string]string{
+				"ElapsedTime": "5.939",
+				"Duration":    "201.467",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, "#EXT-X-CUE-OUT-CONT:ElapsedTime=5.939,Duration=201.467\n", p)
+}
+
+func TestCueOutContEncoderWithSCTE35(t *testing.T) {
+	node := &internal.Node{
+		HLSElement: &internal.HLSElement{
+			Name: "CueOutCont",
+			Attrs: map[string]string{
+				"ElapsedTime": "5.939",
+				"Duration":    "201.467",
+				"SCTE35":      "/DA0AAAA+AAg+2UBNAAANvrtoQ==",
+			},
+		},
+	}
+	playlist := &pl.Playlist{
+		DoublyLinkedList: &internal.DoublyLinkedList{
+			Head: node,
+			Tail: node,
+		},
+	}
+
+	p, err := m3u8.EncodePlaylist(playlist)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, "#EXT-X-CUE-OUT-CONT:ElapsedTime=5.939,Duration=201.467,SCTE35=/DA0AAAA+AAg+2UBNAAANvrtoQ==\n", p)
+}
+
+func TestCueOutContRoundTrip(t *testing.T) {
+	cases := []string{
+		"#EXT-X-CUE-OUT-CONT",
+		"#EXT-X-CUE-OUT-CONT:ElapsedTime=4.8,Duration=30",
+		"#EXT-X-CUE-OUT-CONT:ElapsedTime=5.939,Duration=201.467,SCTE35=/DA0AAAA+AAg+2UBNAAANvrtoQ==",
+	}
+	for _, input := range cases {
+		playlist, err := setupPlaylist(input)
+		assert.NoError(t, err)
+
+		result, err := m3u8.EncodePlaylist(playlist)
+		assert.NoError(t, err)
+		assert.Equal(t, input+"\n", result)
+	}
+}
+
 func TestCueInEncoder(t *testing.T) {
 	node := &internal.Node{
 		HLSElement: &internal.HLSElement{
