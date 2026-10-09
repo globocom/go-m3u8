@@ -23,6 +23,8 @@ const (
 	BreakStatusNotReady   = "segmentsNotReady"
 	BreakStatusComplete   = "complete"
 	DateRangeName         = "DateRange"
+	DateRangeUPIDData     = "SegmentationUPIDData"
+	SCTEOutHLSTag         = "SCTE35-OUT"
 	breakNotReadyLimit    = 20 * time.Millisecond
 )
 
@@ -70,6 +72,10 @@ func (p DateRangeParser) Parse(tag string, playlist *pl.Playlist) error {
 		dateRangeNode.HLSElement.Details = map[string]string{
 			"StartMediaSequence": mediaSequence,
 			"Status":             status,
+		}
+
+		if upidData, ok := ExtractUPIDFromSCTE35Hex(dateRangeNode.HLSElement.Attrs[SCTEOutHLSTag]); ok {
+			dateRangeNode.HLSElement.Details[DateRangeUPIDData] = upidData
 		}
 	}
 
