@@ -52,6 +52,7 @@ func (p VersionParser) Parse(tag string, playlist *pl.Playlist) error {
 				Attrs: map[string]string{VersionTag: strings.TrimSpace(parts[1])},
 			},
 		})
+
 		return nil
 	}
 	return fmt.Errorf("invalid version tag: %s", tag)
