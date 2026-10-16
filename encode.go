@@ -15,6 +15,7 @@ func EncodePlaylist(playlist *pl.Playlist) (string, error) {
 	}
 
 	var builder strings.Builder
+	builder.Grow(estimateEncodedSize(playlist))
 	current := playlist.Head
 	for current != nil {
 		encoder, exists := tags.Encoders[current.HLSElement.Name]
@@ -27,4 +28,18 @@ func EncodePlaylist(playlist *pl.Playlist) (string, error) {
 		current = current.Next
 	}
 	return builder.String(), nil
+}
+
+// Estimates the encoded playlist size so the builder is allocated once, instead of growing (and copying) repeatedly.
+// Each node takes roughly its URI plus a tag line; tags with many attributes (e.g. #EXT-X-STREAM-INF) take more.
+func estimateEncodedSize(playlist *pl.Playlist) int {
+	const tagLineSize, attrSize = 32, 16
+	size := 0
+	for current := playlist.Head; current != nil; current = current.Next {
+		size += len(current.HLSElement.URI) + tagLineSize
+		if attrs := len(current.HLSElement.Attrs); attrs > 2 {
+			size += attrs * attrSize
+		}
+	}
+	return size
 }

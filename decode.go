@@ -1,7 +1,6 @@
 package go_m3u8
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"strings"
@@ -16,15 +15,24 @@ import (
 func ParsePlaylist(src io.ReadCloser) (*pl.Playlist, error) {
 	playlist := pl.NewPlaylist()
 
-	scanner := bufio.NewScanner(src)
 	defer func() {
 		if err := src.Close(); err != nil {
 			log.Error().Str("service", "go-m3u8/decode.go").Err(err).Msg("error scanning playlist file")
 		}
 	}()
 
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+	// Reads the whole source once: every line (and so every URI and tag value stored in the playlist)
+	// is a substring of this single string, instead of one allocation per line.
+	var content strings.Builder
+	if _, err := io.Copy(&content, src); err != nil {
+		return nil, fmt.Errorf("failed to read playlist: %w", err)
+	}
+
+	remaining := content.String()
+	for remaining != "" {
+		var rawLine string
+		rawLine, remaining, _ = strings.Cut(remaining, "\n")
+		line := strings.TrimSpace(rawLine)
 		linePrefix := extractPrefix(line)
 		parser, exists := tags.Parsers[linePrefix]
 		if exists {
@@ -36,9 +44,6 @@ func ParsePlaylist(src io.ReadCloser) (*pl.Playlist, error) {
 				return nil, fmt.Errorf("error handling multi-line HLS element %q: %w", line, err)
 			}
 		}
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("failed to parse playlist at line: %q, error: %w", scanner.Text(), err)
 	}
 
 	return playlist, nil
