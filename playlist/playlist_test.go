@@ -450,3 +450,18 @@ func TestRemoveInvalidBreakTagsForDuplicatedBreaks(t *testing.T) {
 	updatedPDTs := playlist.ProgramDateTimeTags()
 	assert.Len(t, updatedPDTs, 3)
 }
+
+func TestRemoveProgramStartDuplicatedBreak(t *testing.T) {
+	expectedAfter, err := os.ReadFile("./../mocks/media/withProgramStartDuplicatedBreakTrimmed.m3u8")
+	assert.NoError(t, err)
+
+	file, _ := os.Open("./../mocks/media/withProgramStartDuplicatedBreak.m3u8")
+	playlist, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	playlist.TrimInvalidBreaks()
+
+	after, err := m3u8.EncodePlaylist(playlist)
+	assert.NoError(t, err)
+	assert.Equal(t, string(expectedAfter), after)
+}

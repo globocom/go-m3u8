@@ -1,6 +1,6 @@
 # Handling Invalid Ad Breaks in the Playlist
 
-This document describes how the parser handles invalid ad breaks in HLS playlists, using the methods `TrimInvalidBreaks`, `removeInvalidBreakTags`, and `removeDuplicateBreakTags`.
+This document describes how the parser handles invalid ad breaks in HLS playlists, using the methods `TrimInvalidBreaks`, `removeInvalidBreakTags`, `removeDuplicateBreakTags`, and `removeProgramStartDaterange`.
 
 ## What are Invalid Ad Breaks?
 
@@ -14,7 +14,7 @@ By [RFC](https://datatracker.ietf.org/doc/html/rfc8216), the PLANNED-DURATION at
 
 ## Example of an Invalid Ad Break
 
-The playlists mocks `/mocks/media/withInvalidBreaks.m3u8` and `/mocks/media/withDuplicatedBreaks.m3u8` have examples of playlist with invalid breaks.
+The playlists mocks `/mocks/media/withInvalidBreaks.m3u8`, `/mocks/media/withDuplicatedBreaks.m3u8` and `/mocks/media/withProgramStartDuplicatedBreak.m3u8` have examples of playlist with invalid breaks.
 
 ## How Parser Removes Invalid Ad Breaks
 
@@ -25,7 +25,8 @@ This method iterates over all ad breaks and checks:
 - If `START-DATE` cannot be parsed as RFC3339Nano, the break is removed.
 - If `StartMediaSequence` is not a valid integer, the break is removed.
 - If `PLANNED-DURATION` is zero, invalid, or greater than 600 seconds (10 minutes), the break is removed.
-- If there are duplicate ad breaks (same `START-DATE` and `PLANNED-DURATION`), the duplicate is removed.
+- If the ad break is preceded by the `## splice_insert(Program Start)` comment and has the same `START-DATE` and `SCTE35-OUT` as the previous ad break, it is removed with `removeProgramStartDaterange`. `PLANNED-DURATION` is not compared, since it may differ between both breaks.
+- Otherwise, if there are duplicate ad breaks (same `START-DATE` and `PLANNED-DURATION`), the duplicate is removed with `removeDuplicateBreakTags`. In this case, the `## splice_insert(Program Start)` comment does not appear before the duplicate ad break.
 
 We need to remove all tags that is related to the ad break, so `CUE-OUT`, `CUE-IN`, `PROGRAM-DATE-TIME` tags and related comments are removed together with the `DATERANGE` tag.
 
@@ -48,6 +49,39 @@ When duplicate ad breaks are found, the parser removes just the tags that is rel
 - `CueIn` tags inside the duplicate ad break.
 - Specific comments like `## splice_insert(auto_return)` immediately before the duplicate ad break.
 - The duplicate ad break itself.
+
+### 4. `removeProgramStartDaterange` Method
+
+Some playlists signal the same ad break twice: one `DATERANGE` preceded by `## splice_insert(auto_return)` and another preceded by `## splice_insert(Program Start)`, both sharing a single `CUE-IN`. In this case, the `CUE-IN` belongs to the remaining break and must be kept, so the parser removes only:
+
+- The `## splice_insert(Program Start)` comment.
+- The Program Start `DATERANGE` tag.
+- The `CueOut` tag immediately after it.
+
+```m3u8
+## splice_insert(auto_return)
+#EXT-X-DATERANGE:ID="3221225474-1794316738",START-DATE="2026-11-10T13:18:58.966666Z",PLANNED-DURATION=40,SCTE35-OUT=0xFC30...
+#EXT-X-CUE-OUT:40
+## splice_insert(Program Start)
+#EXT-X-DATERANGE:ID="4035-1794316738",START-DATE="2026-11-10T13:18:58.966666Z",PLANNED-DURATION=40,SCTE35-OUT=0xFC30...
+#EXT-X-CUE-OUT:40
+#EXT-X-PROGRAM-DATE-TIME:2026-11-10T13:18:58.966666Z
+...
+## Auto Return Mode
+#EXT-X-CUE-IN
+```
+
+After running `TrimInvalidBreaks`:
+
+```m3u8
+## splice_insert(auto_return)
+#EXT-X-DATERANGE:ID="3221225474-1794316738",START-DATE="2026-11-10T13:18:58.966666Z",PLANNED-DURATION=40,SCTE35-OUT=0xFC30...
+#EXT-X-CUE-OUT:40
+#EXT-X-PROGRAM-DATE-TIME:2026-11-10T13:18:58.966666Z
+...
+## Auto Return Mode
+#EXT-X-CUE-IN
+```
 
 ## Example
 
@@ -81,3 +115,4 @@ For more details, see the methods in `playlist.go`:
 - `TrimInvalidBreaks`
 - `removeInvalidBreakTags`
 - `removeDuplicateBreakTags`
+- `removeProgramStartDaterange`

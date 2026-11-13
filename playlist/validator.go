@@ -64,6 +64,28 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 	return sameStartDate && sameDuration
 }
 
+// Checks if the given ad break is a Program Start duplicate of the previous ad break,
+// i.e. it is preceded by the "## splice_insert(Program Start)" comment and has the same
+// START-DATE and SCTE35-OUT as the previous ad break.
+func IsDuplicatedProgramStartBreak(adBreak, previousAdBreak *internal.Node) bool {
+	if !isProgramStartBreak(adBreak) {
+		return false
+	}
+
+	sameSCTE35Out := adBreak.HLSElement.Attrs[scte35OutAttr] == previousAdBreak.HLSElement.Attrs[scte35OutAttr]
+
+	// We consider the start date equal if it is within one second of difference.
+	startDate, err1 := time.Parse(time.RFC3339Nano, adBreak.HLSElement.Attrs["START-DATE"])
+	startDatePrevious, err2 := time.Parse(time.RFC3339Nano, previousAdBreak.HLSElement.Attrs["START-DATE"])
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	sameStartDate := startDate.Sub(startDatePrevious) < offset
+
+	return sameStartDate && sameSCTE35Out
+}
+
 // Checks if the given cue out node belongs to the ad break with the given media sequence
 func (p *Playlist) IsCueOutFromBreak(breakMediaSequence int, cueOutNode *internal.Node) bool {
 	nextSegment := p.FindNextSegment(cueOutNode)
