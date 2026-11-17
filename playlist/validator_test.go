@@ -119,6 +119,18 @@ func TestIsDuplicatedBreak(t *testing.T) {
 	assert.True(t, isDuplicate)
 }
 
+func TestIsDuplicatedProgramStartBreak(t *testing.T) {
+	file, _ := os.Open("./../mocks/media/withProgramStartDuplicatedBreak.m3u8")
+	pl, err := m3u8.ParsePlaylist(file)
+	assert.NoError(t, err)
+
+	adBreaks := pl.Breaks()
+	assert.Len(t, adBreaks, 2)
+
+	assert.True(t, playlist.IsDuplicatedProgramStartBreak(adBreaks[1], adBreaks[0]))
+	assert.False(t, playlist.IsDuplicatedBreak(adBreaks[1], adBreaks[0]))
+}
+
 func TestIsCueOutFromBreak(t *testing.T) {
 	file, _ := os.Open("./../mocks/media/media.m3u8")
 	pl, err := m3u8.ParsePlaylist(file)
