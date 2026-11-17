@@ -376,9 +376,7 @@ func (p *Playlist) removeProgramStartDaterange(adBreak *internal.Node) {
 		p.Remove(adBreak.Next)
 	}
 
-	if isProgramStartBreak(adBreak) {
-		p.Remove(adBreak.Prev)
-	}
+	p.Remove(adBreak.Prev)
 
 	p.Remove(adBreak)
 }
