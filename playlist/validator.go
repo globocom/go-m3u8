@@ -68,7 +68,7 @@ func IsDuplicatedBreak(adBreak, previousAdBreak *internal.Node) bool {
 // i.e. it is preceded by the "## splice_insert(Program Start)" comment and has the same
 // START-DATE and SCTE35-OUT as the previous ad break.
 func IsDuplicatedProgramStartBreak(adBreak, previousAdBreak *internal.Node) bool {
-	if !isProgramStartBreak(adBreak) {
+	if !isProgramStartSpliceInsert(adBreak) {
 		return false
 	}
 

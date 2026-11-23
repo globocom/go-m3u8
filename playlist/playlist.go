@@ -365,7 +365,7 @@ func (p *Playlist) removeDuplicateBreakTags(adBreak *internal.Node) {
 }
 
 // Returns true if the given ad break is preceded by the "## splice_insert(Program Start)" comment
-func isProgramStartBreak(adBreak *internal.Node) bool {
+func isProgramStartSpliceInsert(adBreak *internal.Node) bool {
 	return adBreak.Prev != nil && adBreak.Prev.HLSElement.Name == commentNode && strings.Contains(adBreak.Prev.HLSElement.Attrs[commentAttr], programStartComment)
 }
 
