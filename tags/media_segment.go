@@ -73,16 +73,8 @@ type (
 )
 
 func (p ExtInfParser) Parse(tag string, playlist *pl.Playlist) error {
-	parts := strings.Split(tag, ":")
-	if len(parts) > 1 {
-		var duration, title string
-
-		attrs := strings.Split(parts[1], ",")
-		duration = attrs[0]
-
-		if len(attrs) > 1 {
-			title = attrs[1]
-		}
+	if _, value, found := strings.Cut(tag, ":"); found {
+		duration, title, _ := strings.Cut(value, ",")
 
 		playlist.CurrentSegment = pl.GetExtInfData(duration, title, playlist.MediaSequence, playlist.SegmentsCounter, playlist.DVR, playlist.ProgramDateTime)
 
