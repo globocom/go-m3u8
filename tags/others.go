@@ -47,7 +47,7 @@ type (
 
 func (p USPTimestampMapParser) Parse(tag string, playlist *pl.Playlist) error {
 	parts := strings.SplitN(tag, ":", 2)
-	if len(parts) > 0 {
+	if len(parts) > 1 {
 		params := pl.TagsToMap(parts[1])
 		playlist.Insert(&internal.Node{
 			HLSElement: &internal.HLSElement{

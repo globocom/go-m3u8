@@ -133,6 +133,12 @@ func TestUspTimestampMapParser(t *testing.T) {
 	assert.Equal(t, "2025-01-01T12:34:56Z", node.HLSElement.Attrs["LOCAL"])
 }
 
+func TestUspTimestampMapParserMissingSeparator(t *testing.T) {
+	p, err := setupPlaylist("#EXTM3U\n#USP-X-TIMESTAMP-MAP\n")
+	assert.Error(t, err)
+	assert.Nil(t, p)
+}
+
 func TestProgramDateTimeParser(t *testing.T) {
 	playlist := "#EXT-X-PROGRAM-DATE-TIME:2025-01-01T12:34:56Z"
 	p, err := setupPlaylist(playlist)
